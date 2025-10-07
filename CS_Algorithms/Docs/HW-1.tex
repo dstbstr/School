@@ -1,0 +1,189 @@
+\documentclass{article}
+\usepackage{mathtools}
+\usepackage{listings}
+\lstset{language=Java,
+    numbers=left,
+    basicstyle=\ttfamily,
+    showstringspaces=false
+}
+    
+\begin{document}
+\title{CS320 Homework 1}
+\author{Dustin Randall}
+\maketitle
+\section{Problem 1}
+\begin{em}
+Describe the similarities and differences between data structures and algorithms.
+\end{em}
+Algorithms and data structures are fundamentally linked concepts, and play very different roles.
+A data structure is some representation of the state of a system, while an algorithm uses that state to produce another state.
+Said another way, algorithms take data structures as input, and produce data structures as output.
+Using an analogy from language, data structures are nouns, and algorithms are verbs.
+
+\section{Problem 2}
+\begin{em}
+Show: \(\medspace 5000n^2 + n \log n = O(n^2)\) \\
+\end{em}
+Prove \(\exists \medspace c > 0, n_0 > 0 \) such that \(0 \le f(n) \le c g(n) \) where \(n \ge n_0\) \\
+\(5000n^2 + n \log n \le c n^2\) \\
+\(5000 + \frac{\log n}{n} \le c\) \\
+Given that \(\frac{\log n}{n}\) tends toward 0 as n increases, let us prove at least one valid \(c\) and \(n_0\) \\
+let 
+\(\begin{cases}
+    n_0 & = 100, \\
+    c & = 10~000
+\end{cases}\)    
+\begin{align}
+    5000 + \frac{\log 100}{100} & \le 10~000 \\
+    5000 + \frac{2}{100} & \le 10~000 \\
+    5000 + 0.02 & \le 10~000 \\
+    5000.02 & \le 10~000
+\end{align}
+
+\section{Problem 3}
+\begin{em}
+Show: \(\medspace 5000n^2 + n \log n = o(n^3)\) \\
+\end{em}
+Prove for every positive constant \(c > 0\), \(\exists \medspace n_0 > 0 \) such that \(0 \le f(n) < cg(n) \) where \(n \ge n_0\) \\
+\begin{align}
+    5000n^2 + n \log n & < c n^3 \\
+    \frac{5000}{n} + \frac{\log n}{n^2} & < c
+\end{align}
+
+Given that \(\frac{5000}{n}\) and \(\frac{\log n}{n^2}\) both tend toward 0 as n increases, the entire left side tends toward 0.
+Thus for any positive \(c\) we can find an \(n_0\) such that the equation will hold true.
+
+\section{Problem 4}
+\begin{em}
+Show: \(\medspace 5000n^2 + n \log n = \Omega(n^2)\) \\
+\end{em}
+Prove \(\exists \medspace c > 0, n_0 > 0 \) such that \(0 \le c g(n) \le f(n) \) where \(n \ge n_0\) \\
+\begin{align}
+    c n^2 & \le 5000n^2 + n \log n \\
+    c & \le 5000 + \frac{\log n}{n}
+\end{align}
+Given that \(\frac{\log n}{n}\) tends toward 0 as n increases, let us prove at least one valid \(c \text{ and } n_0\) \\
+let
+\(\begin{cases}
+    n_0 & = 10, \\
+    c & = 1~000
+\end{cases}\)
+\begin{align}
+    1~000 & \le 5000 + \frac{\log 10}{10} \\
+    1~000 & \le 5000 + \frac{1}{10} \\
+    1~000 & \le 5000 + 0.1 \\
+\end{align}
+
+\section{Problem 5}
+\begin{em}
+Show: \(\medspace 5000n^2 + n \log n = \omega(n)\) \\
+\end{em}
+Prove for every positive constant \(c > 0\), \(\exists \medspace n_0 > 0 \) such that \(0 \le g(n) < f(n) \) where \(n \ge n_0\) \\
+\begin{align}
+    c n & < 5000n^2 + n \log n \\
+    c & < 5000n + \log n
+\end{align}
+Given that \(5000n\) tends toward infinity as n increases, we can find an \(n_0\) such that the equation will hold true for any positive \(c\).
+
+
+\section{Problem 6}
+\begin{em}
+Given f(n) is a positive increasing function, prove: \(\medspace f(n) = \Theta(f(2n))\) \\
+\end{em}
+Given that \(f(n)\) is positive and increasing, we can say that \(f(2n) > f(n)\).
+In the inequality \(c1 f(2n) \le f(n) \le c2 f(2n)\), we know that the right side is true for all \(c2 \ge 1\).
+This leaves us to prove the left side.
+\begin{align}
+    c1 f(2n) & \le f(n) \\
+    c1 & \le \frac{f(n)}{f(2n)}
+\end{align}
+In order for this to be true, \(\frac{f(n)}{f(2n)}\) must have a lower bound greater than 0.
+If we try something like \(f(n) = n\) we can show \(\frac{n}{2n} = \frac{1}{2}\) which has a lower bound greater than 0.
+However, if we use \(f(n) = 2^n\) we can see that \(\frac{2^n}{2^{2n}} = \frac{2^n}{({2^n})^2} = \frac{1}{2^n}\).
+This approaches 0 as n increases, thus there is no constant guaranteed to be less than the lower bound.
+Said more intuitively, given that \(\Theta(f(n))\) is dependent on the largest term, if \(n\) is in the exponent, then doubling \(n\) will increase the growth rate of \(f(n)\).
+Another counter-example is \(f(n) = n!\).
+\begin{align}
+    c1 & \le \frac{n!}{(2n)!} \\
+    c1 & \le \frac{(n)(n-1)(n-2)\ldots}{(2n)(2n-1)\ldots(n)(n-1)(n-2)\ldots} \\
+    c1 & \le \frac{1}{(2n)(2n-1)\ldots(n+1)}
+\end{align}
+This series also approaches 0 as n increases.
+
+\section{Problem 7}
+\begin{em}
+Evaluate a merge sort with subsets of size 4 instead of 2.
+\end{em}
+\subsection{Pseudocode}
+\lstinputlisting[
+    firstline=30,
+    lastline=49
+]{../Code/Sorts.java}
+\subsection{Evaluate \(\Theta\)}
+In the non-trivial case, the WideMerge function breaks the array into 4 pieces, which suggests that the time complexity of each of these steps is \(\log_4(n)\).
+There are 4 of these calls, which should account for \(4\log_4(n)\) of the time complexity.
+The Combine function now travels over the first half of the array, then the second half of the array, then the entire array.
+This means that the Combine function is now \(3n\). \\
+Dropping the leading constants, this gives us a time complexity of \(\Theta(n \log n)\). \\
+Even if we were able to optimize the code, and call the Combine function only once, it would not change the overall time complexity, and may instead increase the running time because of all of the conditional statements.
+\subsection{Compare to traditional merge sort}
+Both algorithms have the same time complexity: \(\Theta(n \log n)\).
+\subsection{Could this algorithm be faster in practice?}
+I don't think that this algorithm could be faster in practice.
+This algorithm essentially unrolls 1 iteration of recursion.
+That said, it may still be beneficial to use this approach is the number of stack frames is limited.
+\subsection{What happens if we use subsets of size \(n\)?}
+If every member of the array is a subset of size 1, then we'll only use 1 stack frame, but we're essentially using a new algorithm.
+We would have \(\frac{(n)(n+1)}{2}\) comparisons, which is \(\Theta(n^2)\).
+\subsection{Why does the text use subset of size 2?}
+I believe that using a subset of size 2 is the simplest, most straight-forward approach to showing merge sort, and divide-and-conquer.
+Subsets of larger sizes will eventually reach a base case of size 2, so further divides may not improve the performance.
+
+\section{Problem 8}
+\begin{em}
+Learn and describe 3 divide-and-conquer algorithms.
+\end{em}
+\subsection{QuickHull}
+\subsubsection{The problem statement}
+Given a set of points in a 2D plane, find a polygon which encloses all of the points, with minimal area.
+\subsubsection{The idea}
+This algorithm works similarly to quicksort.
+It sorts all of the points by the x coordinate, as the first and last points are guaranteed to be part of the result.
+From there, a line is drawn between the two points, and 2 triangles are made.
+Any points which are inside of the triangle can be discarded, and the remaining points are divided into two new sets.
+This is repeated recursively until the hull is complete.
+\subsubsection{Time complexity}
+The time complexity is similar to quicksort. The worst case is \(O(n^2)\), and I believe the average case is \(O(n \log n)\).
+\subsubsection{Worst-case condition}
+This algorithm's degenerate case is when all points are on the hull, and none can be discarded.
+\subsubsection{Sources}
+\begin{itemize}
+    \item https://www.gorillasun.de/blog/quickhull-algorithm-for-convex-hulls/
+    \item https://en.wikipedia.org/wiki/Quickhull
+\end{itemize}
+\subsection{Voronoi Diagram}
+\subsubsection{The problem statement}
+Given a set of points in a 2D plane, divide the plane into regions where each region contains all of the points which are closest to the given point.
+\subsubsection{The idea}
+This algorithm works by dividing the set of points in half, and recursively finding the Voronoi diagram for each half.
+The halves are then merged together.
+\subsubsection{Time complexity}
+The time complexity for the divide and conquer implementation is \(n \log n\).
+This is bounded by sorting the points in \(n \log n\) time, and merging which can be either \(O(n)\) or \(O(\log n)\).
+\subsubsection{Worst-case condition}
+Given that the input is bounded by the sort step, the worst-case condition is the same as the worst-case for the sorting algorithm.
+\subsubsection{Sources}
+\begin{itemize}
+    \item http://personal.kent.edu/~rmuhamma/Compgeometry/MyCG/Voronoi/DivConqVor/divConqVor.htm
+\end{itemize}
+\subsection{Binary Search}
+\subsubsection{The problem statement}
+\subsubsection{The idea}
+\subsubsection{Time complexity}
+\subsubsection{Worst-case condition}
+\subsubsection{Sources}
+\begin{itemize}
+    \item 
+\end{itemize}
+
+\end{document}
