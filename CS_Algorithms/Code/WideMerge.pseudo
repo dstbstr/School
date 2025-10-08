@@ -1,0 +1,20 @@
+WideMerge(arr, start, end)
+    len = end - start + 1
+    if(len < 2) return
+    if(len < 4)
+        Merge(arr, start, end)
+        return
+    groupSize = len / 4
+    mid1 = start + groupSize
+    mid2 = mid1 + groupSize
+    mid3 = mid2 + groupSize
+    WideMerge(arr, start, mid1)
+    WideMerge(arr, mid1, mid2)
+    Combine(arr, start, mid2)
+
+    WideMerge(arr, mid2, mid3)
+    WideMerge(arr, mid3, end)
+    Combine(arr, mid2, end)
+
+    Combine(arr, start, end)
+

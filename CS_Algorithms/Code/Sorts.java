@@ -17,77 +17,63 @@ public class Sorts {
 
     
     public static <T extends Comparable<T> > void Merge(T[] array) {
-        if(array.length < 2) return;
-        int mid = array.length / 2; // 1
-        T[] left = Arrays.copyOfRange(array, 0, mid); // n / 2
-        T[] right = Arrays.copyOfRange(array, mid, array.length); // n / 2
-        Merge(left); // log(n)
-        Merge(right); // log(n)
-        Combine(left, right, array); // n
+        if(array == null || array.length < 2) return;
+        Merge(array, 0, array.length);
     }
 
-    /*
-    WideMerge(array):
-        if length(array) < 2: return
-        if length(array) < 4: NormalMerge(array); return
-        dist = length(array) / 4
+    public static <T extends Comparable<T> > void Merge(T[] array, int start, int end) {
+        if(end - start < 2) return;
+        int n = (end - start) / 2;
+        int mid = start + n;
+        Merge(array, start, mid);
+        Merge(array, mid, end);
+        Combine(array, start, mid, end);
+    }
 
-        first = array[0:dist]
-        second = array[dist+1:2*dist]
-        result1 = array[0:2*dist]
-        WideMerge(first)
-        WideMerge(second)
-        Combine(first, second, result1)
-
-        third = array[2*dist+1:3*dist]
-        fourth = array[3*dist+1:length(array)]
-        result2 = array[2*dist+1:length(array)]
-        WideMerge(third)
-        WideMerge(fourth)
-        Combine(third, fourth, result2)
-
-        Combine(result1, result2, array)
-     */
-    public static <T extends Comparable<T> > void WideMerge(T[] array) {
-        if(array.length < 2) return;
-        if(array.length < 4) {
-            Merge(array);
+     public static <T extends Comparable<T> > void WideMerge(T[] array) {
+        if(array == null || array.length < 2) return;
+        WideMerge(array, 0, array.length);
+     }
+    public static <T extends Comparable<T> > void WideMerge(T[] array, int start, int end) {
+        int n = end - start + 1;
+        if(n < 2) return;
+        if(n < 4) {
+            Merge(array, start, end + 1);
             return;
         }
-        int a = array.length / 4;
-        int b = a * 2;
-        int c = a * 3;
-        T[] first = Arrays.copyOfRange(array, 0, a);
-        T[] second = Arrays.copyOfRange(array, a, b);
-        T[] r1 = Arrays.copyOfRange(array, 0, b);
-        WideMerge(first);
-        WideMerge(second);
-        Combine(first, second, r1);
+        int q = (end - start) / 4;
+        int m1 = start + q;
+        int m2 = m1 + q;
+        int m3 = m2 + q;
 
-        T[] third = Arrays.copyOfRange(array, b, c);
-        T[] fourth = Arrays.copyOfRange(array, c, array.length);
-        T[] r2 = Arrays.copyOfRange(array, b, array.length);
-        WideMerge(third);
-        WideMerge(fourth);
-        Combine(third, fourth, r2);
+        WideMerge(array, start, m1);
+        WideMerge(array, m1, m2);
+        Combine(array, start, m1, m2);
 
-        Combine(r1, r2, array);
+        WideMerge(array, m2, m3);
+        WideMerge(array, m3, end);
+        Combine(array, m2, m3, end);
+
+        Combine(array, start, m2, end);
     }
 
-    private static <T extends Comparable<T> > void Combine(T[] lhs, T[] rhs, T[] out) {
-        int i = 0, j = 0, k = 0;
-        while(i < lhs.length && j < rhs.length) {
-            if(lhs[i].compareTo(rhs[j]) <= 0) {
-                out[k++] = lhs[i++];
+    private static <T extends Comparable<T> > void Combine(T[] array, int start, int mid, int end) {
+        if(start >= mid || mid >= end) return;
+        T[] left = Arrays.copyOfRange(array, start, mid);
+        T[] right = Arrays.copyOfRange(array, mid, end);
+        int i = 0, j = 0, k = start;
+        while(i < left.length && j < right.length) {
+            if(left[i].compareTo(right[j]) <= 0) {
+                array[k++] = left[i++];
             } else {
-                out[k++] = rhs[j++];
+                array[k++] = right[j++];
             }
         }
-        while(i < lhs.length) {
-            out[k++] = lhs[i++];
+        while(i < left.length) {
+            array[k++] = left[i++];
         }
-        while(j < rhs.length) {
-            out[k++] = rhs[j++];
+        while(j < right.length) {
+            array[k++] = right[j++];
         }
     }
 }

@@ -115,17 +115,25 @@ This series also approaches 0 as n increases.
 Evaluate a merge sort with subsets of size 4 instead of 2.
 \end{em}
 \subsection{Pseudocode}
-\lstinputlisting[
-    firstline=30,
-    lastline=49
-]{../Code/Sorts.java}
+\lstinputlisting{../Code/WideMerge.pseudo}
 \subsection{Evaluate \(\Theta\)}
-In the non-trivial case, the WideMerge function breaks the array into 4 pieces, which suggests that the time complexity of each of these steps is \(\log_4(n)\).
-There are 4 of these calls, which should account for \(4\log_4(n)\) of the time complexity.
-The Combine function now travels over the first half of the array, then the second half of the array, then the entire array.
-This means that the Combine function is now \(3n\). \\
-Dropping the leading constants, this gives us a time complexity of \(\Theta(n \log n)\). \\
-Even if we were able to optimize the code, and call the Combine function only once, it would not change the overall time complexity, and may instead increase the running time because of all of the conditional statements.
+WideMerge = \(T(n)\) \\
+Combine = \(\Theta(n)\) \\
+WideMerge calls itself 4 times, each with a quarter of the array: \(T(\frac{n}{4})\) \\
+WideMerge calls Combine three times, twice with \(\frac{n}{2}\) and once with \(n\): \(c \cdot 2n\) \\
+This give the recurrence equation: \\
+\(T(n) = 4T(\frac{n}{4}) + c \cdot 2n\) \\
+We know in the base case that \(T(1) = 1\), a constant time operation. \\
+Using the branching tree approach: \\
+\begin{align}
+    T(n) & = 4T(\frac{n}{4}) + c \cdot 2n \\
+    T(\frac{n}{4}) & = 4T(\frac{n}{16}) + c \cdot \frac{n}{2} \\
+    T(\frac{n}{16}) & = 4T(\frac{n}{64}) + c \cdot \frac{n}{8} \\
+    \vdots \\
+    T(1) & = 1
+\end{align}
+We know that each row of the tree has a cost of \(c \cdot 2n\) times the number of rows which is \(\log_4 n\). \\
+After dropping the leading constants, this provides us with the time complexity of \(\Theta(n \log n)\).
 \subsection{Compare to traditional merge sort}
 Both algorithms have the same time complexity: \(\Theta(n \log n)\).
 \subsection{Could this algorithm be faster in practice?}
@@ -133,8 +141,8 @@ I don't think that this algorithm could be faster in practice.
 This algorithm essentially unrolls 1 iteration of recursion.
 That said, it may still be beneficial to use this approach is the number of stack frames is limited.
 \subsection{What happens if we use subsets of size \(n\)?}
-If every member of the array is a subset of size 1, then we'll only use 1 stack frame, but we're essentially using a new algorithm.
-We would have \(\frac{(n)(n+1)}{2}\) comparisons, which is \(\Theta(n^2)\).
+Using a subset of size \(n\) effectively performs the same algorithm without recursion. \\
+Instead of using stack space to keep track of all the starts, middles, and ends, those become local variables.
 \subsection{Why does the text use subset of size 2?}
 I believe that using a subset of size 2 is the simplest, most straight-forward approach to showing merge sort, and divide-and-conquer.
 Subsets of larger sizes will eventually reach a base case of size 2, so further divides may not improve the performance.
@@ -176,14 +184,19 @@ Given that the input is bounded by the sort step, the worst-case condition is th
 \begin{itemize}
     \item http://personal.kent.edu/~rmuhamma/Compgeometry/MyCG/Voronoi/DivConqVor/divConqVor.htm
 \end{itemize}
-\subsection{Binary Search}
+\subsection{Quick Sort}
 \subsubsection{The problem statement}
+Given an array of elements, sort the elements in non-decreasing order.
 \subsubsection{The idea}
+This algorithm works by partitioning the array into two halves around a selected pivot element. \\
+Essentially \(arr = [\text{elements} < \text{pivot}] + [\text{pivot}] + [\text{elements} \ge \text{pivot}]\) \\
 \subsubsection{Time complexity}
+The worst case time complexity is \(O(\n^2)\), the best case is \(O(n \log n)\)
 \subsubsection{Worst-case condition}
+The worst case occurs when the pivot strategy always selects the smallest or largest element, as the partitions will only shrink by 1 element per iteration.
 \subsubsection{Sources}
 \begin{itemize}
-    \item 
+    \item https://www.csestack.org/quicksort/
 \end{itemize}
 
 \end{document}
