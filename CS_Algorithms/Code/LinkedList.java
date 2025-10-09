@@ -1,5 +1,3 @@
-package Code;
-
 public class LinkedList {
     public class Node {
         int Value;
