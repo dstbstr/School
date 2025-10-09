@@ -11,192 +11,179 @@
 \title{CS320 Homework 1}
 \author{Dustin Randall}
 \maketitle
-\section{Problem 1}
-\begin{em}
-Describe the similarities and differences between data structures and algorithms.
-\end{em}
-Algorithms and data structures are fundamentally linked concepts, and play very different roles.
-A data structure is some representation of the state of a system, while an algorithm uses that state to produce another state.
-Said another way, algorithms take data structures as input, and produce data structures as output.
-Using an analogy from language, data structures are nouns, and algorithms are verbs.
 
-\section{Problem 2}
-\begin{em}
-Show: \(\medspace 5000n^2 + n \log n = O(n^2)\) \\
-\end{em}
-Prove \(\exists \medspace c > 0, n_0 > 0 \) such that \(0 \le f(n) \le c g(n) \) where \(n \ge n_0\) \\
-\(5000n^2 + n \log n \le c n^2\) \\
-\(5000 + \frac{\log n}{n} \le c\) \\
-Given that \(\frac{\log n}{n}\) tends toward 0 as n increases, let us prove at least one valid \(c\) and \(n_0\) \\
-let 
-\(\begin{cases}
-    n_0 & = 100, \\
-    c & = 10~000
-\end{cases}\)    
-\begin{align}
-    5000 + \frac{\log 100}{100} & \le 10~000 \\
-    5000 + \frac{2}{100} & \le 10~000 \\
-    5000 + 0.02 & \le 10~000 \\
-    5000.02 & \le 10~000
-\end{align}
+\section{Problem 1: Describe the similarities and differences between data structures and algorithms.}
+    Algorithms and data structures are fundamentally linked concepts, and play very different roles.
+    A data structure represents the state of a system, while an algorithm uses state or states to produce another state.
+    Said another way, algorithms take data structures as input, and produce data structures as output.
+    Using an analogy from language, data structures are nouns, and algorithms are verbs.
 
-\section{Problem 3}
-\begin{em}
-Show: \(\medspace 5000n^2 + n \log n = o(n^3)\) \\
-\end{em}
-Prove for every positive constant \(c > 0\), \(\exists \medspace n_0 > 0 \) such that \(0 \le f(n) < cg(n) \) where \(n \ge n_0\) \\
-\begin{align}
-    5000n^2 + n \log n & < c n^3 \\
-    \frac{5000}{n} + \frac{\log n}{n^2} & < c
-\end{align}
+\section{Problem 2: Show that \(5000n^2 + n \log n = O(n^2)\)}
+    Prove \(\exists \medspace c > 0, n_0 > 0 \) such that \(0 \le f(n) \le c g(n) \) where \(n \ge n_0\) \\
+    \begin{align}
+        5000n^2 + n \log n & \le c n^2 \\
+        5000 + \frac{\log n}{n} & \le c
+    \end{align}
+    Given that \(\frac{\log n}{n}\) tends toward 0 as n increases, we know that the left side of the equation tends towards 5000. \\
+    Let us prove at least one valid \(c\) and \(n_0\) \\
+    let 
+    \(\begin{cases}
+        n_0 & = 100, \\
+        c & = 10~000
+    \end{cases}\)    
+    \begin{align}
+        5000 + \frac{\log 100}{100} & \le 10~000 \\
+        5000 + \frac{2}{100} & \le 10~000 \\
+        5000 + 0.02 & \le 10~000 \\
+        5000.02 & \le 10~000
+    \end{align}
 
-Given that \(\frac{5000}{n}\) and \(\frac{\log n}{n^2}\) both tend toward 0 as n increases, the entire left side tends toward 0.
-Thus for any positive \(c\) we can find an \(n_0\) such that the equation will hold true.
+\section{Problem 3: Show: \(\medspace 5000n^2 + n \log n = o(n^3)\)}
+    Prove for every positive constant \(c > 0\), \(\exists \medspace n_0 > 0 \) such that \(0 \le f(n) < cg(n) \) where \(n \ge n_0\) \\
+    \begin{align}
+        5000n^2 + n \log n & < c n^3 \\
+        \frac{5000}{n} + \frac{\log n}{n^2} & < c
+    \end{align}
 
-\section{Problem 4}
-\begin{em}
-Show: \(\medspace 5000n^2 + n \log n = \Omega(n^2)\) \\
-\end{em}
-Prove \(\exists \medspace c > 0, n_0 > 0 \) such that \(0 \le c g(n) \le f(n) \) where \(n \ge n_0\) \\
-\begin{align}
-    c n^2 & \le 5000n^2 + n \log n \\
-    c & \le 5000 + \frac{\log n}{n}
-\end{align}
-Given that \(\frac{\log n}{n}\) tends toward 0 as n increases, let us prove at least one valid \(c \text{ and } n_0\) \\
-let
-\(\begin{cases}
-    n_0 & = 10, \\
-    c & = 1~000
-\end{cases}\)
-\begin{align}
-    1~000 & \le 5000 + \frac{\log 10}{10} \\
-    1~000 & \le 5000 + \frac{1}{10} \\
-    1~000 & \le 5000 + 0.1 \\
-\end{align}
+    Given that \(\frac{5000}{n}\) and \(\frac{\log n}{n^2}\) both tend toward 0 as n increases, the entire left side tends toward 0.
+    Thus, for any positive \(c\) we can find an \(n_0\) such that the equation will hold true.
 
-\section{Problem 5}
-\begin{em}
-Show: \(\medspace 5000n^2 + n \log n = \omega(n)\) \\
-\end{em}
-Prove for every positive constant \(c > 0\), \(\exists \medspace n_0 > 0 \) such that \(0 \le g(n) < f(n) \) where \(n \ge n_0\) \\
-\begin{align}
-    c n & < 5000n^2 + n \log n \\
-    c & < 5000n + \log n
-\end{align}
-Given that \(5000n\) tends toward infinity as n increases, we can find an \(n_0\) such that the equation will hold true for any positive \(c\).
+\section{Problem 4: Show: \(\medspace 5000n^2 + n \log n = \Omega(n^2)\)}
+    Prove \(\exists \medspace c > 0, n_0 > 0 \) such that \(0 \le c g(n) \le f(n) \) where \(n \ge n_0\) \\
+    \begin{align}
+        c n^2 & \le 5000n^2 + n \log n \\
+        c & \le 5000 + \frac{\log n}{n}
+    \end{align}
+    Given that \(\frac{\log n}{n}\) tends toward 0 as n increases, let us prove at least one valid \(c \text{ and } n_0\) \\
+    let
+    \(\begin{cases}
+        n_0 & = 10, \\
+        c & = 1~000
+    \end{cases}\)
+    \begin{align}
+        1~000 & \le 5000 + \frac{\log 10}{10} \\
+        1~000 & \le 5000 + \frac{1}{10} \\
+        1~000 & \le 5000 + 0.1 \\
+    \end{align}
 
+\section{Problem 5: Show: \(\medspace 5000n^2 + n \log n = \omega(n)\)}
+    Prove for every positive constant \(c > 0\), \(\exists \medspace n_0 > 0 \) such that \(0 \le g(n) < f(n) \) where \(n \ge n_0\) \\
+    \begin{align}
+        c n & < 5000n^2 + n \log n \\
+        c & < 5000n + \log n
+    \end{align}
+    Given that \(5000n\) tends toward infinity as n increases, we can find an \(n_0\) such that the equation will hold true for any positive \(c\).
 
-\section{Problem 6}
-\begin{em}
-Given f(n) is a positive increasing function, prove: \(\medspace f(n) = \Theta(f(2n))\) \\
-\end{em}
-Given that \(f(n)\) is positive and increasing, we can say that \(f(2n) > f(n)\).
-In the inequality \(c1 f(2n) \le f(n) \le c2 f(2n)\), we know that the right side is true for all \(c2 \ge 1\).
-This leaves us to prove the left side.
-\begin{align}
-    c1 f(2n) & \le f(n) \\
-    c1 & \le \frac{f(n)}{f(2n)}
-\end{align}
-In order for this to be true, \(\frac{f(n)}{f(2n)}\) must have a lower bound greater than 0.
-If we try something like \(f(n) = n\) we can show \(\frac{n}{2n} = \frac{1}{2}\) which has a lower bound greater than 0.
-However, if we use \(f(n) = 2^n\) we can see that \(\frac{2^n}{2^{2n}} = \frac{2^n}{({2^n})^2} = \frac{1}{2^n}\).
-This approaches 0 as n increases, thus there is no constant guaranteed to be less than the lower bound.
-Said more intuitively, given that \(\Theta(f(n))\) is dependent on the largest term, if \(n\) is in the exponent, then doubling \(n\) will increase the growth rate of \(f(n)\).
-Another counter-example is \(f(n) = n!\).
-\begin{align}
-    c1 & \le \frac{n!}{(2n)!} \\
-    c1 & \le \frac{(n)(n-1)(n-2)\ldots}{(2n)(2n-1)\ldots(n)(n-1)(n-2)\ldots} \\
-    c1 & \le \frac{1}{(2n)(2n-1)\ldots(n+1)}
-\end{align}
-This series also approaches 0 as n increases.
+\section{Problem 6: Given f(n) is a positive increasing function, prove or contradict: \(\medspace f(n) = \Theta(f(2n))\)}
+    Given that \(f(n)\) is positive and increasing, we can say that \(f(2n) > f(n)\).
+    In the inequality \(c1 f(2n) \le f(n) \le c2 f(2n)\), we know that the right side is true for all \(c2 \ge 1\).
+    This leaves us to prove the left side.
+    \begin{align}
+        c1 f(2n) & \le f(n) \\
+        c1 & \le \frac{f(n)}{f(2n)}
+    \end{align}
+    In order for this to be true, \(\frac{f(n)}{f(2n)}\) must have a lower bound greater than 0.
+    If we try something like \(f(n) = n\) we can show \(\frac{n}{2n} = \frac{1}{2}\) which has a lower bound greater than 0.
+    However, if we use \(f(n) = 2^n\) we can see that \(\frac{2^n}{2^{2n}} = \frac{2^n}{({2^n})^2} = \frac{1}{2^n}\).
+    This approaches 0 as n increases, thus there is no constant guaranteed to be less than the lower bound.
+    Said more intuitively, given that \(\Theta(f(n))\) is dependent on the largest term, if \(n\) is in the exponent, then doubling \(n\) will increase the growth rate of \(f(n)\).
+    Another counter-example is \(f(n) = n!\).
+    \begin{align}
+        c1 & \le \frac{n!}{(2n)!} \\
+        c1 & \le \frac{(n)(n-1)(n-2)\ldots}{(2n)(2n-1)\ldots(n)(n-1)(n-2)\ldots} \\
+        c1 & \le \frac{1}{(2n)(2n-1)\ldots(n+1)}
+    \end{align}
+    This series also approaches 0 as n increases.
 
-\section{Problem 7}
-\begin{em}
-Evaluate a merge sort with subsets of size 4 instead of 2.
-\end{em}
-\subsection{Pseudocode}
-\lstinputlisting{../Code/WideMerge.pseudo}
-\subsection{Evaluate \(\Theta\)}
-WideMerge = \(T(n)\) \\
-Combine = \(\Theta(n)\) \\
-WideMerge calls itself 4 times, each with a quarter of the array: \(T(\frac{n}{4})\) \\
-WideMerge calls Combine three times, twice with \(\frac{n}{2}\) and once with \(n\): \(c \cdot 2n\) \\
-This give the recurrence equation: \\
-\(T(n) = 4T(\frac{n}{4}) + c \cdot 2n\) \\
-We know in the base case that \(T(1) = 1\), a constant time operation. \\
-Using the branching tree approach: \\
-\begin{align}
-    T(n) & = 4T(\frac{n}{4}) + c \cdot 2n \\
-    T(\frac{n}{4}) & = 4T(\frac{n}{16}) + c \cdot \frac{n}{2} \\
-    T(\frac{n}{16}) & = 4T(\frac{n}{64}) + c \cdot \frac{n}{8} \\
-    \vdots \\
-    T(1) & = 1
-\end{align}
-We know that each row of the tree has a cost of \(c \cdot 2n\) times the number of rows which is \(\log_4 n\). \\
-After dropping the leading constants, this provides us with the time complexity of \(\Theta(n \log n)\).
-\subsection{Compare to traditional merge sort}
-Both algorithms have the same time complexity: \(\Theta(n \log n)\).
-\subsection{Could this algorithm be faster in practice?}
-I don't think that this algorithm could be faster in practice.
-This algorithm essentially unrolls 1 iteration of recursion.
-That said, it may still be beneficial to use this approach is the number of stack frames is limited.
-\subsection{What happens if we use subsets of size \(n\)?}
-Using a subset of size \(n\) effectively performs the same algorithm without recursion. \\
-Instead of using stack space to keep track of all the starts, middles, and ends, those become local variables.
-\subsection{Why does the text use subset of size 2?}
-I believe that using a subset of size 2 is the simplest, most straight-forward approach to showing merge sort, and divide-and-conquer.
-Subsets of larger sizes will eventually reach a base case of size 2, so further divides may not improve the performance.
+\section{Problem 7: Evaluate a merge sort with subsets of size 4 instead of 2.}
+    \subsection{Pseudocode}
+        \lstinputlisting{../Code/WideMerge.pseudo}
+    \subsection{Evaluate \(\Theta\)}
+        WideMerge = \(T(n)\) \\
+        Combine = \(\Theta(n)\) \\
+        WideMerge calls itself 4 times, each with a quarter of the array: \(T(\frac{n}{4})\) \\
+        WideMerge calls Combine three times, twice with \(\frac{n}{2}\) and once with \(n\): \(c \cdot 2n\) \\
+        This give the recurrence equation: \\
+        \(T(n) = 4T(\frac{n}{4}) + c \cdot 2n\) \\
+        We know in the base case that \(T(1) = 1\), a constant time operation. \\
+        Using the branching tree approach: \\
+        \begin{align}
+            T(n) & = 4T(\frac{n}{4}) + c \cdot 2n \\
+            T(\frac{n}{4}) & = 4T(\frac{n}{16}) + c \cdot \frac{n}{2} \\
+            T(\frac{n}{16}) & = 4T(\frac{n}{64}) + c \cdot \frac{n}{8} \\
+            \vdots \\
+            T(1) & = 1
+        \end{align}
+        We know that each row of the tree has a cost of \(c \cdot 2n\) times the number of rows which is \(\log_4 n\). \\
+        After dropping the leading constants, this provides us with the time complexity of \(\Theta(n \log n)\).
+        There may be a way to reduce the number of Combine operations for 3 to 1 with additional conditional checks,
+        but that would not change the overall time complexity.
+    \subsection{Is the runtime asymptotically faster than traditional merge sort?}
+        Both algorithms have the same time complexity: \(\Theta(n \log n)\).
+        While the constants may be different, the very definition of \(\Theta\) means that two functions with the same \(\Theta\) have the exact same asymptotic growth rate.
+    \subsection{Could this algorithm be faster in practice?}
+        There may be input sets which this algorithm performs better on, such as when the input is so large that a \(\log_2\) approach leads to a stack overflow.
+        Given that the Combine function is where the majority of the time is spent, reducing it from 3 calls to 1 may result in an improvement as well, especially if written in a branchless way.
+    \subsection{Can a subset size of 1 be asymptotically faster than traditional merge sort?}
+        Using a subset of size \(n\) effectively performs the same algorithm without recursion. \\
+        Instead of using stack space to keep track of all the starts, middles, and ends, those become local variables.
+        Because of this, the time complexity still cannot be faster than \(\Theta(n \log n)\), but it can certainly be slower.
+        As another justification, if someone had discovered a sorting algorithm faster than \(\Theta(n \log n)\) it would render nearly every other sort obsolete.
+    \subsection{Why does the text use subset of size 2?}
+        I believe that using a subset size of 2 best illustrates the algorithm, with the fewest lines of code.
+        All things begin equal, simple is better, and given that \(\Theta\) of any type of merge sort are equal,
+        the simplest implementation is the best.
 
-\section{Problem 8}
-\begin{em}
-Learn and describe 3 divide-and-conquer algorithms.
-\end{em}
-\subsection{QuickHull}
-\subsubsection{The problem statement}
-Given a set of points in a 2D plane, find a polygon which encloses all of the points, with minimal area.
-\subsubsection{The idea}
-This algorithm works similarly to quicksort.
-It sorts all of the points by the x coordinate, as the first and last points are guaranteed to be part of the result.
-From there, a line is drawn between the two points, and 2 triangles are made.
-Any points which are inside of the triangle can be discarded, and the remaining points are divided into two new sets.
-This is repeated recursively until the hull is complete.
-\subsubsection{Time complexity}
-The time complexity is similar to quicksort. The worst case is \(O(n^2)\), and I believe the average case is \(O(n \log n)\).
-\subsubsection{Worst-case condition}
-This algorithm's degenerate case is when all points are on the hull, and none can be discarded.
-\subsubsection{Sources}
-\begin{itemize}
-    \item https://www.gorillasun.de/blog/quickhull-algorithm-for-convex-hulls/
-    \item https://en.wikipedia.org/wiki/Quickhull
-\end{itemize}
-\subsection{Voronoi Diagram}
-\subsubsection{The problem statement}
-Given a set of points in a 2D plane, divide the plane into regions where each region contains all of the points which are closest to the given point.
-\subsubsection{The idea}
-This algorithm works by dividing the set of points in half, and recursively finding the Voronoi diagram for each half.
-The halves are then merged together.
-\subsubsection{Time complexity}
-The time complexity for the divide and conquer implementation is \(n \log n\).
-This is bounded by sorting the points in \(n \log n\) time, and merging which can be either \(O(n)\) or \(O(\log n)\).
-\subsubsection{Worst-case condition}
-Given that the input is bounded by the sort step, the worst-case condition is the same as the worst-case for the sorting algorithm.
-\subsubsection{Sources}
-\begin{itemize}
-    \item http://personal.kent.edu/~rmuhamma/Compgeometry/MyCG/Voronoi/DivConqVor/divConqVor.htm
-\end{itemize}
-\subsection{Quick Sort}
-\subsubsection{The problem statement}
-Given an array of elements, sort the elements in non-decreasing order.
-\subsubsection{The idea}
-This algorithm works by partitioning the array into two halves around a selected pivot element. \\
-Essentially \(arr = [\text{elements} < \text{pivot}] + [\text{pivot}] + [\text{elements} \ge \text{pivot}]\) \\
-\subsubsection{Time complexity}
-The worst case time complexity is \(O(n^2)\), the best case is \(O(n \log n)\)
-\subsubsection{Worst-case condition}
-The worst case occurs when the pivot strategy always selects the smallest or largest element, as the partitions will only shrink by 1 element per iteration.
-\subsubsection{Sources}
-\begin{itemize}
-    \item https://www.csestack.org/quicksort/
-\end{itemize}
+\section{Problem 8: Learn and describe 3 divide-and-conquer algorithms.}
+    \subsection{Quick Sort}
+        \subsubsection{The problem statement}
+            Given an array of elements, sort the elements in non-decreasing order.
+        \subsubsection{The idea}
+            This algorithm works by partitioning the array into two chunks around a selected pivot element.
+            Essentially \(arr = [\text{elements} < \text{pivot}] + [\text{pivot}] + [\text{elements} \ge \text{pivot}]\) \\
+            Much of the efficiency of this algorithm comes from defining a good pivot strategy.
+        \subsubsection{Time complexity}
+            The worst case time complexity is \(O(n^2)\), the best case is \(O(n \log n)\)
+        \subsubsection{Worst-case condition}
+            The worst case occurs when the pivot strategy always selects the smallest or largest element, as the partitions will only shrink by 1 element per iteration.
+            For example, if the array is all duplicated elements.
+        \subsubsection{Sources}
+            \begin{itemize}
+                \item https://www.csestack.org/quicksort/
+            \end{itemize}
+    \subsection{QuickHull}
+        \subsubsection{The problem statement}
+            Given a set of points in a 2D plane, find a polygon which encloses all the points, with minimal area.
+        \subsubsection{The idea}
+            This algorithm works similarly to Quick Sort.
+            It sorts all the points by the x coordinate, as the first and last points are guaranteed to be part of the result.
+            From there, a line is drawn between the two points, and 2 triangles are made. 
+            The third part of each triangle is the furthest point from the 2 points in the line.
+            Any points inside the triangle can be discarded, and the remaining points are divided into two new sets.
+            This is repeated recursively until the hull is complete.
+        \subsubsection{Time complexity}
+            The time complexity is similar to Quick Sort. The worst case is \(O(n^2)\), and I believe the average case is \(O(n \log n)\).
+        \subsubsection{Worst-case condition}
+            This algorithm's degenerate case is when all points are on the hull, and none can be discarded.
+        \subsubsection{Sources}
+            \begin{itemize}
+                \item https://www.gorillasun.de/blog/quickhull-algorithm-for-convex-hulls/
+                \item https://en.wikipedia.org/wiki/Quickhull
+            \end{itemize}
+    \subsection{Voronoi Diagram}
+        \subsubsection{The problem statement}
+            Given a set of points in a 2D plane, divide the plane into regions where each region contains all the points which are closest to the given point.
+        \subsubsection{The idea}
+            This algorithm works by dividing the set of points in half, and recursively finding the Voronoi diagram for each half.
+            The halves are then merged together using the perpendicular bisector of each of the edges between left and right halves.
+        \subsubsection{Time complexity}
+            The time complexity for the divide and conquer implementation is \(n \log n\).
+            This is bounded by sorting the points in \(n \log n\) time, and merging which can be either \(O(n)\) or \(O(\log n)\).
+        \subsubsection{Worst-case condition}
+            Given that the input is bounded by the sort step, the worst-case condition is the same as the worst-case for the sorting algorithm.
+        \subsubsection{Sources}
+            \begin{itemize}
+                \item http://personal.kent.edu/~rmuhamma/Compgeometry/MyCG/Voronoi/DivConqVor/divConqVor.htm
+            \end{itemize}
 
 \end{document}
