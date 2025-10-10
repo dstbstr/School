@@ -48,9 +48,23 @@ public class OS_Finding {
             if (target < 0 || target >= array.length) {
                 return null;
             }
-            return String.valueOf(array[target]);
+            return String.valueOf(RandomizedSelect(0, array.length - 1, target));
         }
 
+        int RandomizedSelect(int p, int r, int i) {
+            if(p == r) {
+                return array[p];
+            }
+            int q = randPartition(p, r);
+            int k = q - p + 1;
+            if(i == k) {
+                return array[q];
+            } else if(i < k) {
+                return RandomizedSelect(p, q - 1, i);
+            } else {
+                return RandomizedSelect(q+1, r, i-k);
+            }
+        }
         private int randPartition(int left, int right) {
             Random rand = new Random();
             int pivot = rand.nextInt(left, right + 1);

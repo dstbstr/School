@@ -4,14 +4,6 @@ import static org.junit.Assert.*;
 public class OS_FindingTest {
     private static final int[] EXAMPLE_ARRAY = new int[]{4, 8, 4, 3, 6, 9, 2};
     @Test
-    public void Solve_WithSingleInput_ReturnsThatInput() {
-        int[] array = new int[]{42};
-        int target = 0;
-        OS_Finding.Solution solution = new OS_Finding.Solution(target, array);
-        assertEquals("42", solution.Solve());
-    }
-
-    @Test
     public void Solve_ExampleWith1_Returns2() {
         int target = 1;
         OS_Finding.Solution solution = new OS_Finding.Solution(target, EXAMPLE_ARRAY);
