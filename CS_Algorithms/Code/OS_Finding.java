@@ -3,21 +3,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class OS_Finding {
-    public static int main(String[] args) {
-        if(args.length != 2) {
-            System.out.println("Expected 2 arguments, but received " + args.length);
-            return 1;
-        }
-        
-        int target;
-        int[] array;
-        try {
-            target = Integer.parseInt(args[1]);
-        } catch (Exception e) {
-            System.out.println("Invalid target value: " + args[1]);
-            return 2;
-        }
-        try (FileInputStream fis = new FileInputStream(args[0])) {
+    private static final Random rand = new Random();
+
+    private static int[] readNumbers(String filename) {
+        try (FileInputStream fis = new FileInputStream(filename)) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(fis, StandardCharsets.UTF_8));
             List<Integer> list = new ArrayList<>();
             String line;
@@ -27,68 +16,62 @@ public class OS_Finding {
                     list.add(Integer.valueOf(line));
                 }
             }
-            array = list.stream().mapToInt(i -> i).toArray();
+            return list.stream().mapToInt(i -> i).toArray();
         } catch (IOException ex) {
-            System.out.println("Failed to read file: " + args[0]);
-            return 3;
+            throw new RuntimeException("Failed to read file: " + filename);
         }
-
-        Solution solution = new Solution(target, array);
-        System.out.println(solution.Solve());
-        return 0;
     }
-    static class Solution {
-        private final int target;
-        private final int[] array;
-        public Solution(int target, int[] array) {
-            this.target = target;
-            this.array = array;
-        }
-        public String Solve() {
-            if (target < 0 || target >= array.length) {
-                return null;
-            }
-            return String.valueOf(RandomizedSelect(0, array.length - 1, target));
-        }
 
-        int RandomizedSelect(int p, int r, int i) {
-            if(p == r) {
-                return array[p];
-            }
-            int q = randPartition(p, r);
-            int k = q - p + 1;
-            if(i == k) {
-                return array[q];
-            } else if(i < k) {
-                return RandomizedSelect(p, q - 1, i);
-            } else {
-                return RandomizedSelect(q+1, r, i-k);
-            }
+    public static void main(String[] args) {
+        if(args.length != 2) {
+            throw new IllegalArgumentException("Expected 2 arguments, but received " + args.length);
         }
-        private int randPartition(int left, int right) {
-            Random rand = new Random();
-            int pivot = rand.nextInt(left, right + 1);
-            swap(pivot, right);
-            return partition(left, right);
+        
+        int[] array = readNumbers(args[0]);
+        int target = Integer.parseInt(args[1]);
+        
+        System.out.println(Solve(array, target));
+    }
+    public static String Solve(int[] array, int target) {
+        if(target < 1 || target > array.length) {
+            return "null";
         }
-        private int partition(int left, int right) {
-            int pivot = array[right];
-            int index = left;
-            for(int i = left; i < right; i++) {
-                if(array[i] <= pivot) {
-                    swap(i, index);
-                    index++;
-                }
-            }
-            swap(index, right);
-            return index;
-        }
+        return String.valueOf(Recurse(array, 0, array.length - 1, target));
+    }
 
-        private void swap(int i, int j) {
-            int temp = array[i];
-            array[i] = array[j];
-            array[j] = temp;
+    private static int Recurse(int[] array, int left, int right, int target) {
+        if(left == right) {
+            return array[left];
         }
+        int pivotIndex = Partition(array, left, right);
+        int count = pivotIndex - left + 1;
+        if(target == count) {
+            return array[pivotIndex];
+        } else if(target < count) {
+            return Recurse(array, left, pivotIndex - 1, target);
+        } else {
+            return Recurse(array, pivotIndex + 1, right, target - count);
+        }
+    }
+    private static int Partition(int[] array, int left, int right) {
+        int partitionSize = rand.nextInt(left, right + 1);
+        Swap(array, partitionSize, right);
+        int pivot = array[right];
+        int index = left;
+        for(int i = left; i < right; i++) {
+            if(array[i] <= pivot) {
+                Swap(array, i, index);
+                index++;
+            }
+        }
+        Swap(array, index, right);
+        return index;
+    }
+
+    private static void Swap(int[] array, int i, int j) {
+        int temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
     }
 }
 
