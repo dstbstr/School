@@ -1,0 +1,63 @@
+\documentclass{article}
+\usepackage{mathtools}
+\usepackage{listings}
+\lstset{language=Java,
+    numbers=left,
+    basicstyle=\ttfamily,
+    showstringspaces=false
+}
+    
+\begin{document}
+\title{CS320 Homework 2}
+\author{Dustin Randall}
+\maketitle
+
+\section{Use at least 3 levels of a recursion tree to solve \(T(n) = 4T(\frac{n}{2}) + n^2\).}
+We'll start by expanding the first few levels of the recursive tree.
+\begin{align*}
+    T(n) &= 4T(\frac{n}{2}) + n^2 \\
+    T(\frac{n}{2}) &= 4T(\frac{n}{4}) + (\frac{n}{2})^2 \\
+    T(\frac{n}{4}) &= 4T(\frac{n}{8}) + (\frac{n}{4})^2 \\
+    T(\frac{n}{8}) &= 4T(\frac{n}{16}) + (\frac{n}{8})^2 \\
+    \vdots \\
+    T(1) &= 1
+\end{align*}
+
+Using these expansions, let's substitute back into the original equation:
+\begin{align*}
+    T(n) &= 4T(\frac{n}{2}) + n^2 \\
+         &= 4T(\frac{n}{4}) + (\frac{n}{2})^2 + 4T(\frac{n}{4}) + (\frac{n}{2})^2 + 4T(\frac{n}{4}) + (\frac{n}{2})^2 + 4T(\frac{n}{4}) + (\frac{n}{2})^2 + n^2 \\
+         &= 4T(\frac{n}{4}) + 4T(\frac{n}{4}) + 4T(\frac{n}{4}) + 4T(\frac{n}{4}) + 4(\frac{n}{2})^2 + n^2 \\
+         &= 4T(\frac{n}{4}) + 4T(\frac{n}{4}) + 4T(\frac{n}{4}) + 4T(\frac{n}{4}) + 4(\frac{n}{2})^2 + n^2 \\
+         &= 16T(\frac{n}{4}) + 4(\frac{n^2}{4}) + n^2 \\
+         &= 16T(\frac{n}{4}) + n^2 + n^2
+\end{align*}
+Continuing with one more expansion
+\begin{align*}
+    T(n) &= 16T(\frac{n}{4}) + n^2 + n^2 \\
+         &= 4T(\frac{n}{8}) + (\frac{n}{4})^2 + \dots \text(16 times) + n^2 + n^2 \\
+         &= 4T(\frac{n}{8}) + \dots \text(16 times) + 16(\frac{n}{4})^2 + 2n^2 \\
+         &= 64T(\frac{n}{8}) + 16(\frac{n^2}{16}) + 2n^2 \\
+         &= 64T(\frac{n}{8}) + n^2 + 2n^2 \\
+         &= 64T(\frac{n}{8}) + 3n^2
+\end{align*}
+While we could expand another level, we can see a pattern emerging, and the next level would work out to \\
+\(128T(\frac{n}{16}) + 4n^2\) \\
+From here, we can see that each level adds another \(n^2\) to the total, and we know that T(1) = 1.
+Given that each level divides n by 2, we know that there are \(\log_2(n) + 1\) levels.
+So the runtime ends up being \(\log_2(n)n^2\) or more simply \(n^2 \log(n)\).
+
+\section{Use inductive proof to show \(T(n) = 5T(\frac{n}{4}) + n^2 = O(n^2)\).}
+
+\section{Solve the following using the Master Theorem.}
+    \subsection{\(T(n) = 25T(\frac{n}{5}) + n^2 + \log(n)\)}
+    \subsection{\(T(n) = 25T(\frac{n}{5}) + 2n^3 + n \log(n)\)}
+    \subsection{\(T(n) = 25T(\frac{n}{5}) + 3n^4 - 3n^2\)}
+    \subsection{\(T(n) = 125T(\frac{n}{5}) + 4n^2 + 5n \log(n)\)}
+    \subsection{\(T(n) = 125T(\frac{n}{5}) + 5n^3 + 2n^2\)}
+
+\section{Given the root node of a BST, convert into a double linked list where left is the previous, and right is the next.}
+
+\section{Compare and contrast hash tables and binary search trees.}
+
+\end{document}
