@@ -57,7 +57,42 @@ So the runtime ends up being \(\log_2(n)n^2\) or more simply \(n^2 \log(n)\).
     \subsection{\(T(n) = 125T(\frac{n}{5}) + 5n^3 + 2n^2\)}
 
 \section{Given the root node of a BST, convert into a double linked list where left is the previous, and right is the next.}
+The general approach to this problem is to do an in-order traversal of the tree.
+After visiting a node, it's prev pointer needs to be the right-most node of the left subtree.
+Similarly, the node's next pointer needs to be the left-most node of the right subtree.
+Doing this recursively means I will need to return both the left and right most nodes.
+\begin{lstlisting}
+BeginEnd Link(Node root) {
+  if(root == null) return null;
+  Node begin = root;
+  Node end = root;
+  if(root.Left != null) {
+    BeginEnd left = Link(root.Left);
 
+    //update the left most of this subtree
+    begin = left.Begin; 
+
+    //set the prev pointer for root
+    root.Left = left.End; 
+
+    //set next pointer for the right-most element of left subtree
+    left.End.Right = root; 
+  }
+  if(root.Right != null) {
+    BeginEnd right = Link(root.Right);
+
+    //update the right most of this subtree
+    end = right.End;
+
+    //set the next pointer for root
+    root.Right = right.Begin;
+
+    //set prev pointer for the left-most element of right subtree
+    right.Begin.Left = root;
+  }
+  return new BeginEnd(begin, end);
+}
+\end{lstlisting}
 \section{Compare and contrast hash tables and binary search trees.}
 
 \end{document}
