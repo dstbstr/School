@@ -48,6 +48,32 @@ Given that each level divides n by 2, we know that there are \(\log_2(n) + 1\) l
 So the runtime ends up being \(\log_2(n)n^2\) or more simply \(n^2 \log(n)\).
 
 \section{Use inductive proof to show \(T(n) = 5T(\frac{n}{4}) + n^2 = O(n^2)\).}
+Let's first expand what \(O(n^2)\) means.
+There exists some constant \(c > 0\) and \(n_0 > 0\) such that for all \(n \geq n_0\), \(T(n) \leq cn^2\).
+So we need to find values for \(c\) and \(n_0\) where we can satisfy the inequality. \\
+Base Case: \\
+Let \(n_0 = 4\) and \(c = 100\)
+\begin{align*}
+    T(4) & \leq cn^2 \\
+    5(\frac{4}{4}) + 4^2 &\leq 100(4^2) \\
+    5(1) + 16 &\leq 100(16)\\
+    21 &\leq 1600 
+\end{align*}
+
+We now have the assumption that \(T(k) \leq ck^2\) for all \(k \geq n_0\).
+We need to show that \(T(k+1) \leq c(k+1)^2\).
+\begin{align*}
+    T(k+1) &= 5T(\frac{k+1}{4}) + (k+1)^2 \\
+           &\leq 5c(\frac{k+1}{4})^2 + (k+1)^2 \\
+              &= 5c(\frac{(k+1)^2}{16}) + (k+1)^2 \\
+              &= 5*100(\frac{(k+1)^2}{16}) + (k+1)^2 \\
+              &= \frac{500}{16}(k+1)^2 + (k+1)^2 \\
+              &= \frac{516}{16}(k+1)^2 \\
+              &= 32.25(k+1)^2 \\
+            32.25(k+1)^2 &\leq 100(k+1)^2
+\end{align*}
+Because we have demonstrated that our base case holds, and that our inductive step holds
+we have proven that \(T(n) = 5T(\frac{n}{4}) + n^2 = O(n^2)\).
 
 \section{Solve the following using the Master Theorem.}
     \subsection{\(T(n) = 25T(\frac{n}{5}) + n^2 + \log(n)\)}
