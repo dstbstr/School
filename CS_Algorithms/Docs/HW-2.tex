@@ -93,6 +93,9 @@ BeginEnd Link(Node root) {
   return new BeginEnd(begin, end);
 }
 \end{lstlisting}
+The time complexity of this algorithm must be at least \(O(n)\) because each element must be touched at least once.
+There are no loops in the code, and so the time complexity can be described with the recurrence \(T(n) = 2T(\frac{n}{2}) + \Theta(c)\).
+
 \section{Compare and contrast hash tables and binary search trees.}
 
 \end{document}
