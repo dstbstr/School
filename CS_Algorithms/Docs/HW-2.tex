@@ -77,7 +77,36 @@ we have proven that \(T(n) = 5T(\frac{n}{4}) + n^2 = O(n^2)\).
 
 \section{Solve the following using the Master Theorem.}
     \subsection{\(T(n) = 25T(\frac{n}{5}) + n^2 + \log(n)\)}
+      \begin{align*}
+        a = 25 \\
+        b = 5 \\
+        \log_b{a} = \log_5{25} = 2 \\
+        f(n) = n^2 + \log(n) = O(n^{\log_5{25}}) = O(n^2) \\
+        \text{Case 2} \\
+        T(n) = \Theta(n^2 \log(n))
+      \end{align*}
     \subsection{\(T(n) = 25T(\frac{n}{5}) + 2n^3 + n \log(n)\)}
+      \begin{align*}
+        a = 25 \\
+        b = 5 \\
+        \log_b{a} = \log_5{25} = 2 \\
+        f(n) = 2n^3 + n \log(n) = \Omega(n^2 + \epsilon) \\
+        \text{Case 3} \\
+        af(\frac{n}{b}) & \leq cf(n) \\
+        25(2(\frac{n}{5})^3 + \frac{n}{5} \log(\frac{n}{5})) & \leq c(2n^3 + n \log(n)) \\
+        25(2\frac{n^3}{125} + \frac{n}{5} \log(n) - \frac{n}{5} \log(5)) & \leq c(2n^3 + n \log(n)) \\
+        50\frac{n^3}{125} + 5n \log(n) - 5n \log(5) & \leq c(2n^3 + n \log(n)) \\
+        \frac{2}{5}n^3 + 5n(\log(n) - \log(5)) & \leq c(2n^3 + n \log(n)) \\
+        \frac{2}{5}n^3 + 5n\log(\frac{n}{5}) & \leq c(2n^3 + n \log(n)) \\
+        \text{let n = 100} \\
+        \frac{2}{5}(100)^3 + 5(100)\log(\frac{100}{5}) & \leq c(2(100)^3 + 100 \log(100)) \\
+        400000 + 500 \log(20) & \leq c(2000000 + 100 \log(100)) \\
+        \text{let c = 0.9} \\
+        400000 + 500 \log(20) & \leq 0.9(2000000 + 100 \log(100)) \\
+        400500\log(20) & \leq 1800090 \log(100) \\
+        \text{Given that conditions 1 and 2 are met} \\
+        T(n) = \Theta(n^3)
+      \end{align*}
     \subsection{\(T(n) = 25T(\frac{n}{5}) + 3n^4 - 3n^2\)}
     \subsection{\(T(n) = 125T(\frac{n}{5}) + 4n^2 + 5n \log(n)\)}
     \subsection{\(T(n) = 125T(\frac{n}{5}) + 5n^3 + 2n^2\)}
@@ -120,7 +149,15 @@ BeginEnd Link(Node root) {
 }
 \end{lstlisting}
 The time complexity of this algorithm must be at least \(O(n)\) because each element must be touched at least once.
-There are no loops in the code, and so the time complexity can be described with the recurrence \(T(n) = 2T(\frac{n}{2}) + \Theta(c)\).
+There are no loops in the code, and so the time complexity can be described with the recurrence \(T(n) = 2T(\frac{n}{2}) + \Theta(c)\) or simply \(T(n) = 2T(\frac{n}{2})\)
+Using the Master Theorem, this falls into case 1, where 
+\begin{align*}
+    a = 2 \\
+    b = 2 \\
+    f(n) = O(n^{\log_2{2}} - \epsilon) = O(n^{1 - 1}) = O(1) \\
+    n > O(1)
+    \T(n) = \Theta(n)
+\end{align*}
 
 \section{Compare and contrast hash tables and binary search trees.}
 
