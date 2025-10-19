@@ -1,0 +1,114 @@
+\documentclass{article}
+\usepackage{mathtools}
+\usepackage{float}
+\begin{document}
+\section{Complexity}
+
+\begin{table}[H]
+    \begin{tabular}{|c|c|}
+    \hline
+        \textbf{Function Set} & \textbf{Meaning} \\
+    \hline
+        \(\Theta\) & == \\
+    \hline
+        \(O\) & \(\leq\) \\
+    \hline
+        \(\Omega\) & \(\geq\) \\
+    \hline
+        \(o\) & \(<\) \\
+    \hline
+        \(\omega\) & \(>\) \\
+    \hline
+    \end{tabular}
+\end{table}
+
+\(\Theta(n): \exists \medspace c_1 > 0, c_2 > 0, n_0 > 0 \text{ such that } c_1g(n) \leq f(n) \leq c_2g(n) \text{ for all } n \geq n_0\) \\
+\(O(n): \exists \medspace c > 0, n_0 > 0 \text{ such that } 0 <= f(n) <= cg(n) \text{ for all } n \geq n_0 \) \\
+\(\Omega(n): \exists \medspace c > 0, n_0 > 0 \text{ such that } 0 <= cg(n) <= f(n) \text{ for all } n \geq n_0 \) \\
+\(o(n): \forall \medspace c > 0, \exists \medspace n_0 > 0 \text{ such that } 0 <= f(n) < cg(n) \) \\
+\(\omega(n): \forall \medspace c > 0, \exists \medspace n_0 > 0 \text{ such that } 0 <= cg(n) < f(n) \) \\
+
+\subsection{Example}
+Generally work on the left and right side separately.
+\begin{align*}
+    f(n) &= 2n^2 + 4n - 3 \\
+    c_1(n^2) &\leq 2n^2 + 4n - 3 \leq c_2(n^2) \\
+    c_1 &\leq 2 + \frac{4}{n} - \frac{3}{n^2} \leq c_2 \text { // Divide everything by } n^2 \\
+    \text{Let } n_0 = 4, c_1 = 1, c_2 = 10 \\
+    1 &\leq 2 + 1 - \frac{3}{16} \leq 16 \text{ // } f(n) \text{ tends towards 2 as n increases} \\
+\end{align*}
+
+\section{Recurrence}
+\subsection{Tree Method}
+For each T term in the recurrence, expand it with it's next iteration. i.e. \(T(n) = 2T(n/2) + n\) the next row is \(T(n/2) = 2T(n/4) + n/2\)
+We can also assume the base case where \(T(1) = 1\)
+
+\subsection{Induction Method}
+Need to prove the base case and the inductive step separately.
+Let \(T(n) = 5T(\frac{n}{4}) + n^2\)
+We will prove that \(T(n) = O(n^2)\) using induction.
+Hint: choosing \(n_0\) to equal the denominator makes the math easier.
+Let \(n_0 = 4\) and \(c = 100\) \\
+\(T(4): 5T(\frac{4}{4}) + 4^2 \leq 100(4^2) => 5 + 16 \leq 1600\) \\
+If we assume that \(T(k) \leq ck^2\) for all \(k \geq n_0\) we need to show that \(T(k+1) \leq c(k+1)^2\)
+\begin{align*}
+    T(k+1) &= 5T(\frac{k+1}{4}) + (k+1)^2 \\
+           &\leq 5c(\frac{k+1}{4})^2 + (k+1)^2 \text{ // by assumption} \\
+              &= 5*100(\frac{(k+1)^2}{16}) + (k+1)^2 \text{ // square top and bottom} \\
+              &= \frac{500}{16}(k+1)^2 + \frac{16}{16}(k+1)^2 \text{ // distribute the 500} \\
+              &= 32.25(k+1)^2 \\
+            32.25(k+1)^2 &\leq 100(k+1)^2
+\end{align*}
+
+\subsection{Master Theorem}
+The Master Theorem requires the form \(T(n) = aT(\frac{n}{b}) + f(n)\) where \(a \geq 1 \text{ and } b \geq 1 \text{ and both a and b are constants}\) \\
+Case 3 also requires that \(af(\frac{n}{b}) \leq cf(n) \text{ for some } c < 1 \text{ and sufficiently large n}\)
+\begin{table}[H]
+    \begin{tabular}{|c|c|c|}
+    \hline
+        \textbf{Simple} & \textbf{Technical} & \textbf{Conclusion} \\
+    \hline
+        \(T(n) > f(n)\) & \(f(n) = O(n^{\log_b{a} - \epsilon})\) for some \(\epsilon > 0\) & \(T(n) = \Theta(n^{\log_b{a}})\) \\
+    \hline
+        \(T(n) == f(n)\) & \(f(n) = \Theta(n^{\log_b{a}})\) & \(T(n) = \Theta(n^{\log_b{a}} \log n)\) \\
+    \hline
+        \(T(n) < f(n)\) & \(f(n) = \Omega(n^{\log_b{a} + \epsilon})\) for some \(\epsilon > 0\) & \(T(n) = \Theta(f(n))\) \\
+    \hline
+    \end{tabular}
+\end{table}
+
+\section{Math rules}
+\subsection{Log rules}
+\begin{table}[H]
+    \begin{tabular}{|c|c|}
+    \hline
+        \textbf{From} & \textbf{To} \\
+    \hline
+        \(\log_b{(xy)}\) & \(\log_b{(x)} + \log_b{(y)}\) \\
+    \hline
+        \(\log_b{(\frac{x}{y})}\) & \(\log_b{(x)} - \log_b{(y)}\) \\
+    \hline
+        \(\log_b{(x^k)}\) & \(k \log_b{(x)}\) \\
+    \hline
+    \end{tabular}
+\end{table}
+\subsection{Square rules}
+\begin{table}[H]
+    \begin{tabular}{|c|c|}
+    \hline
+        \textbf{From} & \textbf{To} \\
+    \hline
+        \(\sqrt{xy}\) & \(\sqrt{x} \cdot \sqrt{y}\) \\
+    \hline
+        \(\sqrt{\frac{x}{y}}\) & \(\frac{\sqrt{x}}{\sqrt{y}}\) \\
+    \hline
+        \(\sqrt{x^k}\) & \(x^{\frac{k}{2}}\) \\
+    \hline
+        \(x^{ab}\) & \((x^a)^b\) \\
+    \hline
+        \(x^{a+b}\) & \(x^a \cdot x^b\) \\
+    \hline
+    \end{tabular}
+\end{table}
+
+\end{document}
