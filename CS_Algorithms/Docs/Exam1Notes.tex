@@ -1,32 +1,27 @@
 \documentclass{article}
 \usepackage{mathtools}
 \usepackage{float}
+\usepackage[margin=2cm]{geometry}
 \begin{document}
 \section{Complexity}
 
 \begin{table}[H]
-    \begin{tabular}{|c|c|}
+    \begin{tabular}{|c|c|c|}
     \hline
-        \textbf{Function Set} & \textbf{Meaning} \\
+        \textbf{Function Set} & \textbf{Meaning} & Formula\\
     \hline
-        \(\Theta\) & == \\
+        \(\Theta\) & \(==\) & \(\exists \medspace c_1 > 0, c_2 > 0, n_0 > 0 \text{ such that } c_1g(n) \leq f(n) \leq c_2g(n) \text{ for all } n \geq n_0\) \\
     \hline
-        \(O\) & \(\leq\) \\
+        \(O\) & \(\leq\) & \(\exists \medspace c > 0, n_0 > 0 \text{ such that } 0 <= f(n) <= cg(n) \text{ for all } n \geq n_0 \) \\
     \hline
-        \(\Omega\) & \(\geq\) \\
+        \(\Omega\) & \(\geq\) & \(\exists \medspace c > 0, n_0 > 0 \text{ such that } 0 <= cg(n) <= f(n) \text{ for all } n \geq n_0 \) \\
     \hline
-        \(o\) & \(<\) \\
+        \(o\) & \(<\) & \(\forall \medspace c > 0, \exists \medspace n_0 > 0 \text{ such that } 0 <= f(n) < cg(n) \) \\
     \hline
-        \(\omega\) & \(>\) \\
+        \(\omega\) & \(>\) & \(\forall \medspace c > 0, \exists \medspace n_0 > 0 \text{ such that } 0 <= cg(n) < f(n) \) \\
     \hline
     \end{tabular}
 \end{table}
-
-\(\Theta(n): \exists \medspace c_1 > 0, c_2 > 0, n_0 > 0 \text{ such that } c_1g(n) \leq f(n) \leq c_2g(n) \text{ for all } n \geq n_0\) \\
-\(O(n): \exists \medspace c > 0, n_0 > 0 \text{ such that } 0 <= f(n) <= cg(n) \text{ for all } n \geq n_0 \) \\
-\(\Omega(n): \exists \medspace c > 0, n_0 > 0 \text{ such that } 0 <= cg(n) <= f(n) \text{ for all } n \geq n_0 \) \\
-\(o(n): \forall \medspace c > 0, \exists \medspace n_0 > 0 \text{ such that } 0 <= f(n) < cg(n) \) \\
-\(\omega(n): \forall \medspace c > 0, \exists \medspace n_0 > 0 \text{ such that } 0 <= cg(n) < f(n) \) \\
 
 \subsection{Example}
 Generally work on the left and right side separately.
@@ -78,7 +73,6 @@ Case 3 also requires that \(af(\frac{n}{b}) \leq cf(n) \text{ for some } c < 1 \
 \end{table}
 
 \section{Math rules}
-\subsection{Log rules}
 \begin{table}[H]
     \begin{tabular}{|c|c|}
     \hline
@@ -90,14 +84,6 @@ Case 3 also requires that \(af(\frac{n}{b}) \leq cf(n) \text{ for some } c < 1 \
     \hline
         \(\log_b{(x^k)}\) & \(k \log_b{(x)}\) \\
     \hline
-    \end{tabular}
-\end{table}
-\subsection{Square rules}
-\begin{table}[H]
-    \begin{tabular}{|c|c|}
-    \hline
-        \textbf{From} & \textbf{To} \\
-    \hline
         \(\sqrt{xy}\) & \(\sqrt{x} \cdot \sqrt{y}\) \\
     \hline
         \(\sqrt{\frac{x}{y}}\) & \(\frac{\sqrt{x}}{\sqrt{y}}\) \\
@@ -107,6 +93,8 @@ Case 3 also requires that \(af(\frac{n}{b}) \leq cf(n) \text{ for some } c < 1 \
         \(x^{ab}\) & \((x^a)^b\) \\
     \hline
         \(x^{a+b}\) & \(x^a \cdot x^b\) \\
+    \hline
+        \((\frac{a}{b})^2\) & \(\frac{a^2}{b^2}\) \\
     \hline
     \end{tabular}
 \end{table}
