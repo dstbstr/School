@@ -2,6 +2,8 @@
 \usepackage{mathtools}
 \usepackage{float}
 \usepackage[margin=2cm]{geometry}
+\usepackage{listings}
+
 \begin{document}
 \section{Complexity}
 
@@ -71,6 +73,28 @@ Case 3 also requires that \(af(\frac{n}{b}) \leq cf(n) \text{ for some } c < 1 \
     \hline
     \end{tabular}
 \end{table}
+
+\section{RBT}
+\subsection{Insert}
+\begin{lstlisting}
+Tree.Insert(z)
+z.Color = red
+while(z.Parent && z.Parent.Color == red)
+    if(z.Uncle.Color == red) 
+        z.Parent.Color = black; z.Uncle.Color = black; z.Grandparent.Color = red; 
+        z = z.Grandparent;
+    else if(z == z.Parent.Right && z.Parent == z.Grandparent.Left) 
+        RotateLeft(z.Parent); z = z.Left;
+    else if(z == z.Parent.Left && z.Parent == z.Grandparent.Right) 
+        RotateRight(z.Parent); z = z.Right;
+    else if(z == z.Parent.Left && z.Parent == z.Grandparent.Left) 
+        z.Parent.Color = black; z.Grandparent.Color = red; 
+        RotateRight(z.Grandparent);
+    else if(z == z.Parent.Right && z.Parent == z.Grandparent.Right) 
+        z.Parent.Color = black; z.Grandparent.Color = red; 
+        RotateLeft(z.Grandparent);
+Tree.Root.Color = black;
+\end{lstlisting}
 
 \section{Math rules}
 \begin{table}[H]
