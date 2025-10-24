@@ -1,10 +1,12 @@
 \documentclass{article}
 \usepackage{mathtools}
 \usepackage{float}
-\usepackage[margin=2cm]{geometry}
+\usepackage[margin=1cm]{geometry}
 \usepackage{listings}
+\usepackage{qtree}
 
 \begin{document}
+Dustin Randall \\
 \section{Complexity}
 
 \begin{table}[H]
@@ -74,51 +76,73 @@ Case 3 also requires that \(af(\frac{n}{b}) \leq cf(n) \text{ for some } c < 1 \
     \end{tabular}
 \end{table}
 
-\section{RBT}
-\subsection{Insert}
+\section{BST}
+\subsection{Delete}
 \begin{lstlisting}
-Tree.Insert(z)
-z.Color = red
-while(z.Parent && z.Parent.Color == red)
-    if(z.Uncle.Color == red) 
-        z.Parent.Color = black; z.Uncle.Color = black; z.Grandparent.Color = red; 
-        z = z.Grandparent;
-    else if(z == z.Parent.Right && z.Parent == z.Grandparent.Left) 
-        RotateLeft(z.Parent); z = z.Left;
-    else if(z == z.Parent.Left && z.Parent == z.Grandparent.Right) 
-        RotateRight(z.Parent); z = z.Right;
-    else if(z == z.Parent.Left && z.Parent == z.Grandparent.Left) 
-        z.Parent.Color = black; z.Grandparent.Color = red; 
-        RotateRight(z.Grandparent);
-    else if(z == z.Parent.Right && z.Parent == z.Grandparent.Right) 
-        z.Parent.Color = black; z.Grandparent.Color = red; 
-        RotateLeft(z.Grandparent);
-Tree.Root.Color = black;
+Delete(node, key)
+    if (node == null) return node
+    if (key < node.key) node.left = Delete(node.left, key)
+    else if (key > node.key) node.right = Delete(node.right, key)
+    else
+        // Node with only one child or no child
+        if (node.left == null) return node.right
+        else if (node.right == null) return node.left
+        // Node with two children: Get the inorder successor (smallest in the right subtree)
+
+        temp = MinValueNode(node.right)
+        node.key = temp.key
+        node.right = Delete(node.right, temp.key)
+    return node
+\end{lstlisting}
+\subsection{Rotation}
+\begin{lstlisting}
+RotateRight(node)
+    newRoot = node.left
+    node.left = newRoot.right
+    newRoot.right = node
+    return newRoot
 \end{lstlisting}
 
-\section{Math rules}
+\subsection{Traversals}
+ \Tree [.A 
+    [.B 
+        [.C ] [.D ] 
+    ].B 
+    [.E 
+        [.F ] [.G ] 
+    ].E 
+].A \\
+Pre-order: A B C D E F G \\
+In-order: C B D A E F G \\
+Post-order: C D B F G E A \\
+
+\section{Math Rules}
 \begin{table}[H]
-    \begin{tabular}{|c|c|}
+    \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
     \hline
-        \textbf{From} & \textbf{To} \\
+        \textbf{From} & 
+        \(\log_b{(xy)}\) & 
+        \(\log_b{(\frac{x}{y})}\) &
+        \(\log_b{(x^k)}\) &
+        \(\sqrt{xy}\) &
+        \(\sqrt{\frac{x}{y}}\) &
+        \(\sqrt{x^k}\) &
+        \(x^{ab}\) &
+        \(x^{a+b}\) &
+        \((\frac{a}{b})^2\)
+        \\
     \hline
-        \(\log_b{(xy)}\) & \(\log_b{(x)} + \log_b{(y)}\) \\
-    \hline
-        \(\log_b{(\frac{x}{y})}\) & \(\log_b{(x)} - \log_b{(y)}\) \\
-    \hline
-        \(\log_b{(x^k)}\) & \(k \log_b{(x)}\) \\
-    \hline
-        \(\sqrt{xy}\) & \(\sqrt{x} \cdot \sqrt{y}\) \\
-    \hline
-        \(\sqrt{\frac{x}{y}}\) & \(\frac{\sqrt{x}}{\sqrt{y}}\) \\
-    \hline
-        \(\sqrt{x^k}\) & \(x^{\frac{k}{2}}\) \\
-    \hline
-        \(x^{ab}\) & \((x^a)^b\) \\
-    \hline
-        \(x^{a+b}\) & \(x^a \cdot x^b\) \\
-    \hline
-        \((\frac{a}{b})^2\) & \(\frac{a^2}{b^2}\) \\
+        \textbf{To} & 
+        \(\log_b{(x)} + \log_b{(y)}\) &
+        \(\log_b{(x)} - \log_b{(y)}\) &
+        \(k \log_b{(x)}\) &
+        \(\sqrt{x} \cdot \sqrt{y}\) & 
+        \(\frac{\sqrt{x}}{\sqrt{y}}\) &
+        \(x^{\frac{k}{2}}\) &
+        \((x^a)^b\) &
+        \(x^a \cdot x^b\) &
+        \(\frac{a^2}{b^2}\)
+        \\
     \hline
     \end{tabular}
 \end{table}
