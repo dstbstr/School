@@ -34,10 +34,12 @@ Start with normal BST insert, new node is red.
 Start with normal BST delete
 \begin{lstlisting}
     z = node to delete
-    y = (z.Left is null || z.Right is null) ? z : Successor(z)
-    x = z.Left ? z.Left : z.Right
-    w = sibling(x)
+    y = (z.Left && z.Right) ? Successor(z) : z
+    x = y.Left ? y.Left : y.Right // node is y's place after delete
+    y.Color = z.Color;
+    if(oldY.Color == R) return;
     while(p(x) && x.Color == B) {
+        w = sibling(x)
         if(w.Color == R) swapColors(p(x), w); Rotate p(x) away from w
         else if(w.Left.Color == B && w.Right.Color == B) w.Color = R; x = p(x)
         else if(x.Near.Color == R && x.Far.Color == B) 

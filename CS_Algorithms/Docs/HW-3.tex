@@ -133,11 +133,116 @@
 \end{tikzpicture} \\
 
 \subsection*{Delete 2}
+\begin{tikzpicture}[level/.style={sibling distance=20mm/#1}]
+    \node[black]{11}
+        child {node[red]{5}
+            child {node[black]{1}
+                child {[fill] circle (2pt)}
+                child {[fill] circle (2pt)}
+            }
+            child {node[black]{7}
+                child {[fill] circle (2pt)}
+                child {node[red]{8}
+                    child {[fill] circle (2pt)}
+                    child {[fill] circle (2pt)}
+                }
+            }
+        }
+        child {node[black]{14}
+            child {[fill] circle (2pt)}
+            child {node[red]{15}
+                child {[fill] circle (2pt)}
+                child {[fill] circle (2pt)}
+            }
+        };
+\end{tikzpicture} \\
+
 \subsection*{Delete 5}
+\begin{tikzpicture}[level/.style={sibling distance=20mm/#1}]
+    \node[black]{11}
+        child {node[red]{7}
+            child {node[black]{1}
+                child {[fill] circle (2pt)}
+                child {[fill] circle (2pt)}
+            }
+            child {node[black]{8}
+                child {[fill] circle (2pt)}
+                child {[fill] circle (2pt)}
+            }
+        }
+        child {node[black]{14}
+            child {[fill] circle (2pt)}
+            child {node[red]{15}
+                child {[fill] circle (2pt)}
+                child {[fill] circle (2pt)}
+            }
+        };
+\end{tikzpicture} \\
+
 \subsection*{Delete 1}
+\begin{tikzpicture}[level/.style={sibling distance=20mm/#1}]
+    \node[black]{11}
+        child {node[black]{7}
+            child {[fill] circle (2pt)}
+            child {node[red]{8}
+                child {[fill] circle (2pt)}
+                child {[fill] circle (2pt)}
+            }
+        }
+        child {node[black]{14}
+            child {[fill] circle (2pt)}
+            child {node[red]{15}
+                child {[fill] circle (2pt)}
+                child {[fill] circle (2pt)}
+            }
+        };
+\end{tikzpicture} \\
+
 \subsection*{Delete 14}
+\begin{tikzpicture}[level/.style={sibling distance=20mm/#1}]
+    \node[black]{11}
+        child {node[black]{7}
+            child {[fill] circle (2pt)}
+            child {node[red]{8}
+                child {[fill] circle (2pt)}
+                child {[fill] circle (2pt)}
+            }
+        }
+        child {node[black]{15}
+            child {[fill] circle (2pt)}
+            child {[fill] circle (2pt)}
+        };
+\end{tikzpicture} \\
+
 \subsection*{Delete 11}
+\begin{tikzpicture}[level/.style={sibling distance=20mm/#1}]
+    \node[black]{8}
+        child {node[black]{7}
+            child {[fill] circle (2pt)}
+            child {[fill] circle (2pt)}
+        }
+        child {node[black]{15}
+            child {[fill] circle (2pt)}
+            child {[fill] circle (2pt)}
+        };
+\end{tikzpicture} \\
+
 \subsection*{Delete 15}
+\begin{tikzpicture}[level/.style={sibling distance=20mm/#1}]
+    \node[black]{8}
+        child {node[red]{7}
+            child {[fill] circle (2pt)}
+            child {[fill] circle (2pt)}
+        }
+        child {[fill] circle (2pt)};
+\end{tikzpicture} \\
+
 \subsection*{Delete 7}
+\begin{tikzpicture}[level/.style={sibling distance=20mm/#1}]
+    \node[black]{8}
+        child {[fill] circle (2pt)}
+        child {[fill] circle (2pt)};
+\end{tikzpicture} \\
+
 \subsection*{Delete 8}
 \end{document}
