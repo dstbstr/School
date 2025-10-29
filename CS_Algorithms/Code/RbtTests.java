@@ -49,9 +49,11 @@ public class RbtTests {
         tree.Insert(vals);
 
         for(int val : vals) {
-            Rbt other = tree.Clone();
-            other.Delete(val);
-            assertTrue(other.IsValidRbt());
+            tree.Delete(val);
+            assertTrue(tree.IsValidRbt());
+            // Rbt other = tree.Clone();
+            // other.Delete(val);
+            // assertTrue(other.IsValidRbt());
         }
     }
 }

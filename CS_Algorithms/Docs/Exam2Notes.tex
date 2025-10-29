@@ -1,0 +1,50 @@
+\documentclass{article}
+\usepackage{mathtools}
+\usepackage{float}
+\usepackage[margin=1cm]{geometry}
+\usepackage{listings}
+\usepackage{qtree}
+
+\begin{document}
+Dustin Randall \\
+
+\section{RBT}
+\subsection{Invariants}
+\begin{itemize}
+    \item Root node is black
+    \item Red nodes have black parent
+    \item All paths to leaf nodes contain same number of black nodes
+\end{itemize}
+\subsection{Insert}
+Start with normal BST insert, new node is red.
+\begin{lstlisting}
+    while(z.parent && z.parent.Color == R) {
+        if(u(z).Color == R) p(z).Color = B; u(z).Color = B; p(p(z)).Color = R; z = p(p(z));
+        else if(p(p(z)) is ZigZag)
+            Rotate Parent away from z
+            z = old sibling
+        else
+            swap(p(p(z)).Color, p(z).Color)
+            Rotate Grandparent away from z
+    }
+    root.Color = B;
+\end{lstlisting}
+
+\subsection{Delete}
+Start with normal BST delete
+\begin{lstlisting}
+    z = node to delete
+    y = (z.Left is null || z.Right is null) ? z : Successor(z)
+    x = z.Left ? z.Left : z.Right
+    w = sibling(x)
+    while(p(x) && x.Color == B) {
+        if(w.Color == R) swapColors(p(x), w); Rotate p(x) away from w
+        else if(w.Left.Color == B && w.Right.Color == B) w.Color = R; x = p(x)
+        else if(x.Near.Color == R && x.Far.Color == B) 
+            Rotate w away from x; swapColors(w, x.Near)
+        else if(x.Far.Color == R) swapColors(p(x), w); Rotate p(x) toward x; x = root
+    }
+    x.Color = B;
+\end{lstlisting}
+
+\end{document}

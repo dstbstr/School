@@ -1,5 +1,17 @@
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class Rbt {
     public enum Color {Red, Black}
+    private enum Dir{Left, Right}
+    private enum ZigZag {
+        LeftLeft,
+        LeftRight,
+        RightRight,
+        RightLeft
+    }
+
     public class Node {
         public Node(int value, Color color) {
             this.Value = value;
@@ -62,6 +74,19 @@ public class Rbt {
         if(node.Color == Color.Black) blackCount++;
         return ValidateRecursive(node.Left, blackCount) && ValidateRecursive(node.Right, blackCount);
     }
+
+    public List<Node> ToList() {
+        List<Node> result = new ArrayList<>();
+        ToListRec(root, result);
+        return result;
+    }
+
+    private void ToListRec(Node node, List<Node> list) {
+        if(node == null) return;
+        ToListRec(node.Left, list);
+        list.add(node);
+        ToListRec(node.Right, list);
+    }
     /// INSERT
 
     private Node BasicInsert(int val) {
@@ -92,14 +117,6 @@ public class Rbt {
             }
         }
         return newNode;
-    }
-
-
-    private enum ZigZag {
-        LeftLeft,
-        LeftRight,
-        RightRight,
-        RightLeft
     }
 
     private ZigZag GetZigZag(Node node) {
@@ -161,12 +178,167 @@ public class Rbt {
     }
     
     /// DELETE
-
     public void Delete(int val) {
-        Node x = BasicDelete(val);
-        if(x != null) {
-            DeleteFixup(x);
+        Node node = Find(val);
+        Node sibling;
+        Node near;
+        Node far;
+        Dir dir;
+
+        if(node == null) return;
+        Node parent = node.Parent;
+        if(parent == null) {
+            Node newRoot = Successor(node);
+            if(newRoot == null) {
+                root = null;
+                return;
+            }
+
+            root = newRoot;
+            newRoot.Parent = null;
+            newRoot.Color = Color.Black;
+            newRoot.Left = node.Left;
+            newRoot.Right = node.Right;
+            node = root.Right;
+            parent = root;
+            dir = Dir.Right;
+            sibling = parent.Left;
+            near = sibling == null ? null : sibling.Right;
+            far = sibling == null ? null : sibling.Left;
+        } else {
+            dir = Direction(node);
+            if(dir == Dir.Left) {
+                parent.Left = null;
+                sibling = parent.Right;
+                near = sibling == null ? null : sibling.Left;
+                far = sibling == null ? null : sibling.Right;
+            } else {
+                parent.Right = null;
+                sibling = parent.Left;
+                near = sibling == null ? null : sibling.Right;
+                far = sibling == null ? null : sibling.Left;
+            }
         }
+
+        while(node.Parent != null && node.Color == Color.Black) {
+            if(sibling.Color == Color.Red) {
+                //DeleteRule1(node);
+                //sibling = Sibling(node);
+                Rotate(parent, dir);
+                parent.Color = Color.Red;
+                sibling.Color = Color.Black;
+                sibling = near;
+                near = dir == Dir.Left ? sibling.Left : sibling.Right;
+                far = dir == Dir.Left ? sibling.Right : sibling.Left;
+            } else {
+                if((near == null || near.Color == Color.Black) && (far == null || far.Color == Color.Black)) {
+                    sibling.Color = Color.Red;
+                    node = node.Parent;
+                    // node = DeleteRule2(sibling);
+                    sibling = Sibling(node);
+                    near = NearNephew(node);
+                    far = FarNephew(node);
+                } else if(near != null && near.Color == Color.Red && (far == null || far.Color == Color.Black)) {
+                    DeleteRule3(near);
+                    sibling = Sibling(node);
+                    near = NearNephew(node);
+                    far = FarNephew(node);
+                } else {
+                    node = DeleteRule4(far);
+                }
+            }
+        }
+        if(node != null) {
+            node.Color = Color.Black;
+        }
+    }
+    /*
+void remove(Tree* tree, Node* node) {
+	Node* parent = node->parent;
+
+	Node* sibling;
+	Node* close_nephew;
+	Node* distant_nephew;
+
+	Direction dir = direction(node);
+
+	parent->child[dir] = NULL;
+	goto start_balance;
+
+	do {
+		dir = direction(node);
+start_balance:
+		sibling = parent->child[1 - dir];
+		distant_nephew = sibling->child[1 - dir];
+		close_nephew = sibling->child[dir];
+		if (sibling->color == RED) {
+			// Case #3
+			rotate_subtree(tree, parent, dir);
+			parent->color = RED;
+			sibling->color = BLACK;
+			sibling = close_nephew;
+
+			distant_nephew = sibling->child[1 - dir];
+			if (distant_nephew && distant_nephew->color == RED) {
+				goto case_6;
+            }
+			close_nephew = sibling->child[dir];
+			if (close_nephew && close_nephew->color == RED) {
+				goto case_5;
+            }
+
+			// Case #4
+			sibling->color = RED;
+			parent->color = BLACK;
+			return;
+		}
+
+		if (distant_nephew && distant_nephew->color == RED) {
+			goto case_6;
+        }
+
+		if (close_nephew && close_nephew->color == RED) {
+			goto case_5;
+        }
+
+		if (!parent) {
+		    // Case #1
+            return;
+        }
+
+		if (parent->color == RED) {
+			// Case #4
+			sibling->color = RED;
+			parent->color = BLACK;
+			return;
+		}
+
+		// Case #2
+		sibling->color = RED;
+		node = parent;
+
+	} while (parent = node->parent);
+
+case_5:
+
+	rotate_subtree(tree, sibling, 1 - dir);
+	sibling->color = RED;
+	close_nephew->color = BLACK;
+	distant_nephew = sibling;
+	sibling = close_nephew;
+
+case_6:
+
+	rotate_subtree(tree, parent, dir);
+	sibling->color = parent->color;
+	parent->color = BLACK;
+	distant_nephew->color = BLACK;
+	return;
+}
+     */
+    public void Delete2(int val) {
+        Node x = BasicDelete(val);
+        DeleteFixup(x);
     }
 
     private Node BasicDelete(int val) {
@@ -246,7 +418,9 @@ public class Rbt {
         return root;
     }
 
-
+    private Dir Direction(Node node) {
+        return node == node.Parent.Left ? Dir.Left : Dir.Right;
+    }
 
     private Node Uncle(Node node) {
         if(node.Parent == null || node.Parent.Parent == null) return null;
@@ -291,6 +465,13 @@ public class Rbt {
         }
     }
 
+    private void Rotate(Node node, Dir dir) {
+        if(dir == Dir.Left) {
+            RotateLeft(node);
+        } else {
+            RotateRight(node);
+        }
+    }
     private void RotateLeft(Node root) {
         Node right = root.Right;
         root.Right = right.Left;
