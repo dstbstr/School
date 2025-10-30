@@ -3,19 +3,18 @@
 \usepackage{float}
 \usepackage[margin=1cm]{geometry}
 \usepackage{listings}
-\usepackage{qtree}
 
 \begin{document}
 Dustin Randall \\
 
 \section{RBT}
-\subsection{Invariants}
+\subsection*{Invariants}
 \begin{itemize}
     \item Root node is black
     \item Red nodes have black parent
     \item All paths to leaf nodes contain same number of black nodes
 \end{itemize}
-\subsection{Insert}
+\subsection*{Insert}
 Start with normal BST insert, new node is red.
 \begin{lstlisting}
     while(z.parent && z.parent.Color == R) {
@@ -24,13 +23,13 @@ Start with normal BST insert, new node is red.
             Rotate Parent away from z
             z = old sibling
         else
-            swap(p(p(z)).Color, p(z).Color)
+            swapColors(p(p(z)), p(z))
             Rotate Grandparent away from z
     }
     root.Color = B;
 \end{lstlisting}
 
-\subsection{Delete}
+\subsection*{Delete}
 Start with normal BST delete
 \begin{lstlisting}
     z = node to delete
@@ -49,4 +48,46 @@ Start with normal BST delete
     x.Color = B;
 \end{lstlisting}
 
+\section{B-Tree}
+\subsection*{Invariants}
+\begin{itemize}
+    \item All leaf nodes are at same depth
+    \item Each node has between \(t-1\) and \(2t-1\) keys (except root)
+\end{itemize}
+\subsection*{Insert}
+If current node is full, Split.
+Split: Promote the middle key to the parent node, left and right half become new nodes.
+Always insert into a leaf node.
+
+\subsection*{Delete}
+Delete(node, key) requires node.Count >= t
+use Merge to ensure this
+Borrow means move the borrowed key up, and the current node down
+\begin{lstlisting}
+if(node is leaf) remove key if found
+else {
+    n = node.Find(key);
+    if(n == key) {
+        if(n.Left.Count >= t) {
+            pred = Max(n.Left);
+            n = pred;
+            Delete(n.Left, pred);
+        } else if(n.Right.Count >= t) {
+            succ = Min(n.Right);
+            n = succ;
+            Delete(n.Right, succ);
+        } else {
+            n.Left = Merge(n.Left, n.Right, n);
+            Delete(n.Left, key);
+        }
+    } else {
+        if(n.Child.Count < t) {
+            if(Left(n).Count >= t) BorrowFromLeft(n);
+            else if(Right(n).Count >= t) BorrowFromRight(n);
+            else Merge(Left(n), Right(n), n);
+            Delete(n.Child, key);
+        }
+    }
+}
+\end{lstlisting}
 \end{document}

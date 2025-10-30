@@ -6,8 +6,7 @@
 
 \tikzset{
     black/.style={circle,draw=black,thick, minimum size=1.5em, inner sep=0},
-    red/.style={circle,draw=red,thick, minimum size=1.5em, inner sep=0, fill=red!70},
-    nil/.style={circle,fill=black, minimum size=0.5em, inner sep=0}
+    red/.style={circle,draw=red,thick, minimum size=1.5em, inner sep=0, fill=red!70}
 }
 \begin{document}
 \title{CS320 Homework 3}
@@ -245,4 +244,295 @@
 \end{tikzpicture} \\
 
 \subsection*{Delete 8}
+
+\section{Trace the one-pass construction of a B-Tree with t=2 with the following nodes: S, G, W, H, O, U, M, A, C, X, P}
+
+\subsection*{Insert S}
+\begin{tikzpicture}[level/.style={sibling distance=25mm/#1}]
+    \node[rectangle, draw]{S};
+\end{tikzpicture}
+
+\subsection*{Insert G}
+\begin{tikzpicture}[level/.style={sibling distance=25mm/#1}]
+    \node[rectangle, draw]{G S};
+\end{tikzpicture}
+
+\subsection*{Insert W}
+\begin{tikzpicture}[level/.style={sibling distance=25mm/#1}]
+    \node[rectangle, draw]{G S W};
+\end{tikzpicture}
+
+\subsection*{Insert H}
+\begin{tikzpicture}[level/.style={sibling distance=25mm/#1}]
+    \node[rectangle, draw]{S}
+        child {node[rectangle, draw]{G H}}
+        child {node[rectangle, draw]{W}};
+\end{tikzpicture}
+
+\subsection*{Insert O}
+\begin{tikzpicture}[level/.style={sibling distance=25mm/#1}]
+    \node[rectangle, draw]{S}
+        child {node[rectangle, draw]{G H O}}
+        child {node[rectangle, draw]{W}};
+\end{tikzpicture}
+
+\subsection*{Insert U}
+\begin{tikzpicture}[level/.style={sibling distance=25mm/#1}]
+    \node[rectangle, draw]{S}
+        child {node[rectangle, draw]{G H O}}
+        child {node[rectangle, draw]{U W}};
+\end{tikzpicture}
+
+\subsection*{Insert M}
+\begin{tikzpicture}[level/.style={sibling distance=40mm/#1}]
+    \node[rectangle, draw]{H S}
+        child {node[rectangle, draw]{G}}
+        child {node[rectangle, draw]{M O}}
+        child {node[rectangle, draw]{U W}};
+\end{tikzpicture}
+
+\subsection*{Insert A}
+\begin{tikzpicture}[level/.style={sibling distance=40mm/#1}]
+    \node[rectangle, draw]{H S}
+        child {node[rectangle, draw]{A G}}
+        child {node[rectangle, draw]{M O}}
+        child {node[rectangle, draw]{U W}};
+\end{tikzpicture}
+
+\subsection*{Insert C}
+\begin{tikzpicture}[level/.style={sibling distance=40mm/#1}]
+    \node[rectangle, draw]{H S}
+        child {node[rectangle, draw]{A C G}}
+        child {node[rectangle, draw]{M O}}
+        child {node[rectangle, draw]{U W}};
+\end{tikzpicture}
+
+\subsection*{Insert X}
+\begin{tikzpicture}[level/.style={sibling distance=40mm/#1}]
+    \node[rectangle, draw]{H S}
+        child {node[rectangle, draw]{A C G}}
+        child {node[rectangle, draw]{M O}}
+        child {node[rectangle, draw]{U W X}};
+\end{tikzpicture}
+
+\subsection*{Insert P}
+\begin{tikzpicture}[level/.style={sibling distance=40mm/#1}]
+    \node[rectangle, draw]{H S}
+        child {node[rectangle, draw]{A C G}}
+        child {node[rectangle, draw]{M O P}}
+        child {node[rectangle, draw]{U W X}};
+\end{tikzpicture}
+
+\section{Delete the following nodes in order from the initial B-Tree: T, G, F, O}
+\begin{tikzpicture}[level/.style={sibling distance=50mm/#1}]
+    \node[rectangle, draw]{N}
+        child {node[rectangle, draw]{E G}
+            child {node[rectangle, draw]{B C}}
+            child {node[rectangle, draw]{F}}
+            child {node[rectangle, draw]{H K}}
+        }
+        child {node[rectangle, draw]{T}
+            child {node[rectangle, draw]{O S}}
+            child {node[rectangle, draw]{X Y Z}}
+        };
+\end{tikzpicture}
+
+\subsection*{Delete T}
+\subsubsection*{Borrow G from Left Child}
+\begin{tikzpicture}[level/.style={sibling distance=50mm/#1}]
+    \node[rectangle, draw]{G}
+        child {node[rectangle, draw]{E}
+            child {node[rectangle, draw]{B C}}
+            child {node[rectangle, draw]{F}}
+        }
+        child {node[rectangle, draw]{N T}
+            child {node[rectangle, draw]{H K}}
+            child {node[rectangle, draw]{O S}}
+            child {node[rectangle, draw]{X Y Z}}
+        };
+\end{tikzpicture} \\
+\subsubsection*{Swap Predecessor S with T}
+\begin{tikzpicture}[level/.style={sibling distance=50mm/#1}]
+    \node[rectangle, draw]{G}
+        child {node[rectangle, draw]{E}
+            child {node[rectangle, draw]{B C}}
+            child {node[rectangle, draw]{F}}
+        }
+        child {node[rectangle, draw]{N S}
+            child {node[rectangle, draw]{H K}}
+            child {node[rectangle, draw]{O S}}
+            child {node[rectangle, draw]{X Y Z}}
+        };
+\end{tikzpicture} \\
+\subsubsection*{Delete S from Leaf}
+\begin{tikzpicture}[level/.style={sibling distance=50mm/#1}]
+    \node[rectangle, draw]{G}
+        child {node[rectangle, draw]{E}
+            child {node[rectangle, draw]{B C}}
+            child {node[rectangle, draw]{F}}
+        }
+        child {node[rectangle, draw]{N S}
+            child {node[rectangle, draw]{H K}}
+            child {node[rectangle, draw]{O}}
+            child {node[rectangle, draw]{X Y Z}}
+        };
+\end{tikzpicture}
+
+\subsection*{Delete G}
+\subsubsection*{Borrow N from Right Child}
+\begin{tikzpicture}[level/.style={sibling distance=50mm/#1}]
+    \node[rectangle, draw]{N}
+        child {node[rectangle, draw]{EG}
+            child {node[rectangle, draw]{B C}}
+            child {node[rectangle, draw]{F}}
+            child {node[rectangle, draw]{H K}}
+        }
+        child {node[rectangle, draw]{S}
+            child {node[rectangle, draw]{O}}
+            child {node[rectangle, draw]{X Y Z}}
+        };
+\end{tikzpicture}
+
+\subsubsection*{Swap G with Successor H}
+\begin{tikzpicture}[level/.style={sibling distance=50mm/#1}]
+    \node[rectangle, draw]{N}
+        child {node[rectangle, draw]{EH}
+            child {node[rectangle, draw]{B C}}
+            child {node[rectangle, draw]{F}}
+            child {node[rectangle, draw]{H K}}
+        }
+        child {node[rectangle, draw]{S}
+            child {node[rectangle, draw]{O}}
+            child {node[rectangle, draw]{X Y Z}}
+        };
+\end{tikzpicture}
+
+\subsubsection*{Delete H from Leaf}
+\begin{tikzpicture}[level/.style={sibling distance=50mm/#1}]
+    \node[rectangle, draw]{N}
+        child {node[rectangle, draw]{EH}
+            child {node[rectangle, draw]{B C}}
+            child {node[rectangle, draw]{F}}
+            child {node[rectangle, draw]{K}}
+        }
+        child {node[rectangle, draw]{S}
+            child {node[rectangle, draw]{O}}
+            child {node[rectangle, draw]{X Y Z}}
+        };
+\end{tikzpicture}
+
+\subsection*{Delete F}
+\subsubsection{Borrow C from Left Sibling}
+\begin{tikzpicture}[level/.style={sibling distance=50mm/#1}]
+    \node[rectangle, draw]{N}
+        child {node[rectangle, draw]{CH}
+            child {node[rectangle, draw]{B}}
+            child {node[rectangle, draw]{E F}}
+            child {node[rectangle, draw]{K}}
+        }
+        child {node[rectangle, draw]{S}
+            child {node[rectangle, draw]{O}}
+            child {node[rectangle, draw]{X Y Z}}
+        };
+\end{tikzpicture}
+
+\subsubsection*{Delete F from Leaf}
+\begin{tikzpicture}[level/.style={sibling distance=50mm/#1}]
+    \node[rectangle, draw]{N}
+        child {node[rectangle, draw]{CH}
+            child {node[rectangle, draw]{B}}
+            child {node[rectangle, draw]{E}}
+            child {node[rectangle, draw]{K}}
+        }
+        child {node[rectangle, draw]{S}
+            child {node[rectangle, draw]{O}}
+            child {node[rectangle, draw]{X Y Z}}
+        };
+\end{tikzpicture}
+
+\subsection*{Delete O}
+\subsubsection*{Borrow H from Left Sibling}
+\begin{tikzpicture}[level/.style={sibling distance=50mm/#1}]
+    \node[rectangle, draw]{H}
+        child {node[rectangle, draw]{C}
+            child {node[rectangle, draw]{B}}
+            child {node[rectangle, draw]{E}}
+        }
+        child {node[rectangle, draw]{NS}
+            child {node[rectangle, draw]{K}}
+            child {node[rectangle, draw]{O}}
+            child {node[rectangle, draw]{X Y Z}}
+        };
+\end{tikzpicture}
+
+\subsubsection*{Borrow X from Right Sibling}
+\begin{tikzpicture}[level/.style={sibling distance=50mm/#1}]
+    \node[rectangle, draw]{H}
+        child {node[rectangle, draw]{C}
+            child {node[rectangle, draw]{B}}
+            child {node[rectangle, draw]{E}}
+        }
+        child {node[rectangle, draw]{NX}
+            child {node[rectangle, draw]{K}}
+            child {node[rectangle, draw]{O S}}
+            child {node[rectangle, draw]{Y Z}}
+        };
+\end{tikzpicture}
+
+\subsubsection*{Delete O from Leaf}
+\begin{tikzpicture}[level/.style={sibling distance=50mm/#1}]
+    \node[rectangle, draw]{H}
+        child {node[rectangle, draw]{C}
+            child {node[rectangle, draw]{B}}
+            child {node[rectangle, draw]{E}}
+        }
+        child {node[rectangle, draw]{NX}
+            child {node[rectangle, draw]{K}}
+            child {node[rectangle, draw]{S}}
+            child {node[rectangle, draw]{Y Z}}
+        };
+\end{tikzpicture}
+
+\section{Explain BTreeMin and BTreeSuccessor}
+\subsection*{BTreeMin}
+Given a node, traverse down the left-most child until there are no more children.
+Once there, return the index of the smallest element in that node, along with a pointer to the node.
+\subsection*{BTreeSuccessor}
+If the node has children return the BTreeMin of the node.Right
+Otherwise, while we're the right most child of our parent, get the next parent.
+Finally after finding a non-right-most parent, return the key after our node.
+If we run out of parents, return null.
+
+\subsection*{Pseudocode}
+\begin{lstlisting}
+(Node, Index) BTreeMin(root) {
+    while(root.Children.Count > 0) {
+        root = root.Children[0]; // DISK_READ
+    }
+    // assuming keys are in order
+    return (root, 0);
+    // alternatively, return (root, min(root.Keys))
+}
+
+(successor_node, j) BTreeSuccessor(node, i) {
+    if(node.Children.Count > 0) {
+        // there must be keys.Count + 1 children
+        return BTreeMin(node.Children[i + 1]);
+    }
+    //in a leaf node, and successor is in this node
+    if(i + 1 < node.Keys.Count) {
+        return (node, i + 1);
+    } else {
+        Node parent = node.Parent; // DISK_READ
+        pIndex = parent.FindIndex(node);
+        while(pIndex == parent.Keys.Count) {
+            node = parent;
+            parent = node.Parent; // DISK_READ
+            if(parent == null) return null;
+            pIndex = parent.FindIndex(node);
+        }
+        return (parent, pIndex);
+    }
+}
+\end{lstlisting}
 \end{document}
