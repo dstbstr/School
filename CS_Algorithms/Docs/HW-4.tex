@@ -9,11 +9,58 @@
 \author{Dustin Randall}
 \maketitle
 
-\section{Give pseudocode for max-heap-delete and analyze its time complexity.}
+\section{Give pseudocode for max-heap-delete(A, i) and analyze its time complexity.}
+\begin{lstlisting}
+MaxHeapDelete(A, i)
+    if i < 1 or i > A.length
+        throw "Invalid Index"
+    A[i] = A[A.Length] // replace with the last element
+    A.Length--; // reduce heap size
+
+    if(A[i] > A[Parent(i)])
+        IncreaseKey(A, i, A[i])  // O(log n)
+    else
+        MaxHeapify(A, i) // O(log n)
+\end{lstlisting}
+To delete a node from a max-heap by index, we replace it with the last node.
+The node we replaced could be smaller or larger than the last node, so we need to fix the heap.
+If it's larger than its parent, we sift up using IncreaseKey, otherwise we sift down using MaxHeapify.
+Both operations take \(O(\log n)\) time, and we'll only use one of them, so the time cost is \(O(\log n)\).
 
 \section{Give an $O(n log_k)$ time algorithm to merge k sorted lists. Give pseudocode and how it will use mergesort for a k-way sort.}
+My idea to merge k sorted lists using a min-heap is to construct a min-heap of size k, where the first element of each list is inserted into the initial array.
+The initial array is then heapified, and we know that the minimum element is the root.
+We then extract the root element and write it to the output array.
+Because we don't want to do another n comparisons, we need to capture some additional context in each element of the heap.
+Storing a tuple of (value, list index, element index) allows us to insert the next node without additional comparisons.
+The heap then needs to be re-heapified, an operation of \(O(\log k)\) time.
+Because each of the n elements is inserted into the heap once, the total time cost is \(O(n \log k)\).
+This can be used in a k-way mergesort to reduce the memory cost of merging k lists.
+This allows fewer recursive stack frames to be used for merge sort, as each frame divides the remaining lists by k instead of 2.
+\begin{lstlisting}
+struct Node { 
+    int value, listIndex, elementIndex;
+    operator < (Node a, Node b) return a.value < b.value
+}
+MergeLists(Lists, n) 
+    Output = new Array[n]
+    MinHeap = new MinHeap<Node>(Lists.size + 1)
+    for (i = 0 .. Lists.size - 1)
+        MinHeap.Insert((Lists[i][0], i, 0))
+    for(i = 0 .. n)
+        smallest = MinHeap.Pop()
+        source = Lists[smallest.listIndex]
+        next = smallest.elementIndex + 1
+        Output[i] = smallest.value
 
+        if(next < source.size)
+            MinHeap.Insert(source[next], smallest.listIndex, next)
+    return Output
+
+\end{lstlisting}
 \section{Maximize the number of nodes where no node's direct parent is included.}
+I start with the observation that the majority of nodes are near the bottom of the tree (there are way more students than professors, more professors than deans, etc.).
+This suggests that a greedy strategy starting from the bottom and working up will yield the best results.
 
 \section{Describe the strategy for maximizing the number of tasks scheduled without conflicts.}
 
