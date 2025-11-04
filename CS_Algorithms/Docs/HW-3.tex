@@ -350,7 +350,8 @@
             child {node[rectangle, draw]{O S}}
             child {node[rectangle, draw]{X Y Z}}
         };
-\end{tikzpicture} \\
+\end{tikzpicture}
+
 \subsubsection*{Swap Predecessor S with T}
 \begin{tikzpicture}[level/.style={sibling distance=50mm/#1}]
     \node[rectangle, draw]{G}
@@ -363,7 +364,8 @@
             child {node[rectangle, draw]{O S}}
             child {node[rectangle, draw]{X Y Z}}
         };
-\end{tikzpicture} \\
+\end{tikzpicture}
+
 \subsubsection*{Delete S from Leaf}
 \begin{tikzpicture}[level/.style={sibling distance=50mm/#1}]
     \node[rectangle, draw]{G}
@@ -379,35 +381,36 @@
 \end{tikzpicture}
 
 \subsection*{Delete G}
-\subsubsection*{Borrow N from Right Child}
-\begin{tikzpicture}[level/.style={sibling distance=50mm/#1}]
-    \node[rectangle, draw]{N}
-        child {node[rectangle, draw]{EG}
-            child {node[rectangle, draw]{B C}}
-            child {node[rectangle, draw]{F}}
-            child {node[rectangle, draw]{H K}}
-        }
-        child {node[rectangle, draw]{S}
-            child {node[rectangle, draw]{O}}
-            child {node[rectangle, draw]{X Y Z}}
-        };
-\end{tikzpicture}
-
 \subsubsection*{Swap G with Successor H}
 \begin{tikzpicture}[level/.style={sibling distance=50mm/#1}]
-    \node[rectangle, draw]{N}
-        child {node[rectangle, draw]{EH}
+    \node[rectangle, draw]{H}
+        child {node[rectangle, draw]{E}
             child {node[rectangle, draw]{B C}}
             child {node[rectangle, draw]{F}}
-            child {node[rectangle, draw]{H K}}
         }
-        child {node[rectangle, draw]{S}
+        child {node[rectangle, draw]{N S}
+            child {node[rectangle, draw]{H K}}
             child {node[rectangle, draw]{O}}
             child {node[rectangle, draw]{X Y Z}}
         };
 \end{tikzpicture}
 
 \subsubsection*{Delete H from Leaf}
+\begin{tikzpicture}[level/.style={sibling distance=50mm/#1}]
+    \node[rectangle, draw]{H}
+        child {node[rectangle, draw]{E}
+            child {node[rectangle, draw]{B C}}
+            child {node[rectangle, draw]{F}}
+        }
+        child {node[rectangle, draw]{N S}
+            child {node[rectangle, draw]{K}}
+            child {node[rectangle, draw]{O}}
+            child {node[rectangle, draw]{X Y Z}}
+        };
+\end{tikzpicture}
+
+\subsection*{Delete F}
+\subsubsection{Borrow N from Right Sibling}
 \begin{tikzpicture}[level/.style={sibling distance=50mm/#1}]
     \node[rectangle, draw]{N}
         child {node[rectangle, draw]{EH}
@@ -421,11 +424,10 @@
         };
 \end{tikzpicture}
 
-\subsection*{Delete F}
 \subsubsection{Borrow C from Left Sibling}
 \begin{tikzpicture}[level/.style={sibling distance=50mm/#1}]
     \node[rectangle, draw]{N}
-        child {node[rectangle, draw]{CH}
+        child {node[rectangle, draw]{C H}
             child {node[rectangle, draw]{B}}
             child {node[rectangle, draw]{E F}}
             child {node[rectangle, draw]{K}}
@@ -436,10 +438,10 @@
         };
 \end{tikzpicture}
 
-\subsubsection*{Delete F from Leaf}
+\subsubsection{Remove F from Leaf}
 \begin{tikzpicture}[level/.style={sibling distance=50mm/#1}]
     \node[rectangle, draw]{N}
-        child {node[rectangle, draw]{CH}
+        child {node[rectangle, draw]{C H}
             child {node[rectangle, draw]{B}}
             child {node[rectangle, draw]{E}}
             child {node[rectangle, draw]{K}}
@@ -450,55 +452,56 @@
         };
 \end{tikzpicture}
 
-\subsection*{Delete O}
-\subsubsection*{Borrow H from Left Sibling}
+\subsection{Delete O}
+\subsubsection{Borrow H from Left Sibling}
 \begin{tikzpicture}[level/.style={sibling distance=50mm/#1}]
     \node[rectangle, draw]{H}
         child {node[rectangle, draw]{C}
             child {node[rectangle, draw]{B}}
             child {node[rectangle, draw]{E}}
         }
-        child {node[rectangle, draw]{NS}
+        child {node[rectangle, draw]{N S}
             child {node[rectangle, draw]{K}}
             child {node[rectangle, draw]{O}}
             child {node[rectangle, draw]{X Y Z}}
         };
 \end{tikzpicture}
 
-\subsubsection*{Borrow X from Right Sibling}
+\subsubsection{Borrow X from Right Sibling}
 \begin{tikzpicture}[level/.style={sibling distance=50mm/#1}]
     \node[rectangle, draw]{H}
         child {node[rectangle, draw]{C}
             child {node[rectangle, draw]{B}}
             child {node[rectangle, draw]{E}}
         }
-        child {node[rectangle, draw]{NX}
+        child {node[rectangle, draw]{N X}
             child {node[rectangle, draw]{K}}
             child {node[rectangle, draw]{O S}}
             child {node[rectangle, draw]{Y Z}}
         };
 \end{tikzpicture}
 
-\subsubsection*{Delete O from Leaf}
+\subsubsection{Delete O From Leaf}
 \begin{tikzpicture}[level/.style={sibling distance=50mm/#1}]
     \node[rectangle, draw]{H}
         child {node[rectangle, draw]{C}
             child {node[rectangle, draw]{B}}
             child {node[rectangle, draw]{E}}
         }
-        child {node[rectangle, draw]{NX}
+        child {node[rectangle, draw]{N X}
             child {node[rectangle, draw]{K}}
             child {node[rectangle, draw]{S}}
             child {node[rectangle, draw]{Y Z}}
         };
 \end{tikzpicture}
 
+
 \section{Explain BTreeMin and BTreeSuccessor}
 \subsection*{BTreeMin}
 Given a node, traverse down the left-most child until there are no more children.
 Once there, return the index of the smallest element in that node, along with a pointer to the node.
 \subsection*{BTreeSuccessor}
-If the node has children return the BTreeMin of the node.Right
+If I has a right child, the successor is the BTreeMin of the right child.
 Otherwise, while we're the right most child of our parent, get the next parent.
 Finally after finding a non-right-most parent, return the key after our node.
 If we run out of parents, return null.
@@ -515,12 +518,11 @@ If we run out of parents, return null.
 }
 
 (successor_node, j) BTreeSuccessor(node, i) {
-    if(node.Children.Count > 0) {
-        // there must be keys.Count + 1 children
+    if(node.Children.Count > i) {
         return BTreeMin(node.Children[i + 1]);
     }
     //in a leaf node, and successor is in this node
-    if(i + 1 < node.Keys.Count) {
+    if(node.IsLeaf && i + 1 < node.Keys.Count) {
         return (node, i + 1);
     } else {
         Node parent = node.Parent; // DISK_READ
