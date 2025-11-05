@@ -67,15 +67,18 @@ If we include a child node, we need to mark its parent as excluded.
 Working up the tree we will in effect include every other row of the tree maximizing the number of included nodes.
 
 \section{Describe the strategy for maximizing the number of tasks scheduled without conflicts.}
-We are given a set of tasks which only take 1 unit of tiem to complete, and can be scheduled after a start time, and must finish before the deadline.
+We are given a set of tasks which only take 1 unit of time to complete, and can be scheduled after a start time, and must finish before the deadline.
 This seems to naturally fit a greedy strategy.
-I would start by sorting the tasks by their start times, and then by their deadlines.
-One way of viewing the task of maximizing the number of scheduled tasks is to minimize the number of empty time slots.
-The set of available tasks at a particular time is any task with a start time less than the current time, and a deadline greater than the current time.
-As the current time progresses, picking an available task (one with a start time <= current time) with the earliest deadline will minimize the number of idle time slots.
-Consider the case [(2,3), (1,5), (1,5), (1,5), (1,5)]
-If we had reversed the order of sorting, and inserted (2,3) first, then the timeslot 1 would be wasted, and one of the (1,5) tasks would be skipped.
-Similarly, if we had sorted by window size, we still would have selected (2,3) first.
+Consider the case [A(1,2), B(0,5), C(0,5), D(0,5), E(0,5)]
+The optimal solution is [B, A, C, D, E], which means that simply sorting by either start or end will not find the solution.
+Even sorting by the window size (end - start) would not produce the solution.
+Instead, we need to find the available set of tasks at each time step, and then select the earliest deadline.
+We start by sorting the array by start time, and as the time steps increase, we may move the left and right boundary of the array to only include tasks which can start.
+After sorting, the list becomes [B, C, D, E, A] and at time point 0, the available set is [B, C, D, E].
+We take B, because it has the earliest deadline of 5 and remove it from the set.
+At time point 1, the available set is now [C, D, E, A].
+We need to select the task with the earliest deadline, which is A.
+Following this strategy, we get the output [B, A, C, D, E].
 
 \section{Create a Huffman Tree for the following characters and frequencies: a:40, b:30, c: 90, d: 20, e: 60, f: 120, g:10, h:5}
 
