@@ -60,7 +60,11 @@ MergeLists(Lists, n)
 \end{lstlisting}
 \section{Maximize the number of nodes where no node's direct parent is included.}
 I start with the observation that the majority of nodes are near the bottom of the tree (there are way more students than professors, more professors than deans, etc.).
+We also know that each child has exactly one parent, but each parent may have multiple children.
 This suggests that a greedy strategy starting from the bottom and working up will yield the best results.
+We can use a post-order traversal of the tree to visit each child node before its parent.
+If we include a child node, we need to mark its parent as excluded.
+Working up the tree we will in effect include every other row of the tree maximizing the number of included nodes.
 
 \section{Describe the strategy for maximizing the number of tasks scheduled without conflicts.}
 
