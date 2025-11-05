@@ -67,6 +67,15 @@ If we include a child node, we need to mark its parent as excluded.
 Working up the tree we will in effect include every other row of the tree maximizing the number of included nodes.
 
 \section{Describe the strategy for maximizing the number of tasks scheduled without conflicts.}
+We are given a set of tasks which only take 1 unit of tiem to complete, and can be scheduled after a start time, and must finish before the deadline.
+This seems to naturally fit a greedy strategy.
+I would start by sorting the tasks by their start times, and then by their deadlines.
+One way of viewing the task of maximizing the number of scheduled tasks is to minimize the number of empty time slots.
+The set of available tasks at a particular time is any task with a start time less than the current time, and a deadline greater than the current time.
+As the current time progresses, picking an available task (one with a start time <= current time) with the earliest deadline will minimize the number of idle time slots.
+Consider the case [(2,3), (1,5), (1,5), (1,5), (1,5)]
+If we had reversed the order of sorting, and inserted (2,3) first, then the timeslot 1 would be wasted, and one of the (1,5) tasks would be skipped.
+Similarly, if we had sorted by window size, we still would have selected (2,3) first.
 
 \section{Create a Huffman Tree for the following characters and frequencies: a:40, b:30, c: 90, d: 20, e: 60, f: 120, g:10, h:5}
 
