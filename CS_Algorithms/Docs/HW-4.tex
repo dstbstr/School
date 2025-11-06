@@ -4,6 +4,12 @@
 \usepackage{qtree}
 \usepackage{tikz-qtree}
 
+\tikzset{
+    labeled/.style = {
+        circle, draw, thick, minimum size=1.5em, inner sep=0, label=right:{#1}
+    }
+}
+
 \begin{document}
 \title{CS320 Homework 4}
 \author{Dustin Randall}
@@ -27,7 +33,7 @@ The node we replaced could be smaller or larger than the last node, so we need t
 If it's larger than its parent, we sift up using IncreaseKey, otherwise we sift down using MaxHeapify.
 Both operations take \(O(\log n)\) time, and we'll only use one of them, so the time cost is \(O(\log n)\).
 
-\section{Give an $O(n log_k)$ time algorithm to merge k sorted lists. Give pseudocode and how it will use mergesort for a k-way sort.}
+\section{Give an $O(n \cdot log_k)$ time algorithm to merge k sorted lists. Give pseudocode and how it will use mergesort for a k-way sort.}
 My idea to merge k sorted lists using a min-heap is to construct a min-heap of size k, where the first element of each list is inserted into the initial array.
 The initial array is then heapified, and we know that the minimum element is the root.
 We then extract the root element and write it to the output array.
@@ -81,5 +87,49 @@ We need to select the task with the earliest deadline, which is A.
 Following this strategy, we get the output [B, A, C, D, E].
 
 \section{Create a Huffman Tree for the following characters and frequencies: a:40, b:30, c: 90, d: 20, e: 60, f: 120, g:10, h:5}
+\subsection*{Huffman Tree}
+\begin{tikzpicture}[level/.style={sibling distance=50mm/#1}]
+    \node[labeled=375]{}
+        child {node[labeled=220] {} 
+            child {node[labeled=120]{f} }
+            child {node[labeled=100]{} 
+                child {node[labeled=40]{a} }
+                child {node[labeled=60]{e} }
+            }
+        }
+        child {node[labeled=155] {}
+            child {node[labeled=90]{c} }
+            child {node[labeled=65]{}
+                child {node[labeled=30]{b} }
+                child {node[labeled=35] {}
+                    child {node[labeled=20]{d} }
+                    child {node[labeled=15] {}
+                        child {node[labeled=5]{h}}
+                        child {node[labeled=10]{g}}
+                    }
+                }
+            }
+        };
+
+\end{tikzpicture}
+\subsection*{Huffman Codes}
+\begin{itemize}
+    \item a: 010
+    \item b: 110
+    \item c: 10
+    \item d: 1110
+    \item e: 011
+    \item f: 00
+    \item g: 11111
+    \item h: 11110
+\end{itemize}
+
+\subsection*{Encoded size in bits}
+\(40 * 3 + 30 * 3 + 90 * 2 + 20 * 4 + 60 * 3 + 120 * 2 + 10 * 5 + 5 * 5\) \\
+\(120 + 90 + 180 + 80 + 180 + 240 + 50 + 25\) \\
+\(965\) bits
+
+\subsection*{Compression Ratio}
+\(\frac{965}{375 * 8} = \frac{965}{3000} = 0.321\bar{6} = 32.1\bar{6}\%\)
 
 \end{document}
