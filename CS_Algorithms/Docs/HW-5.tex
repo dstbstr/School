@@ -15,15 +15,18 @@ The base case is when we reach (m,n), where the weight is it's own value.
 \[
     m[i,j] = \begin{cases}
         w[i,j] & \text{if } i == m \text{ and } j == n \\
-        w[i,j] + \min(m[i+1,j], m[i,j+1], m[i+1,j+1]) & \text {otherwise}
+        w[i,j] + m[i+1,j] & \text{if } i < m \text{ and } j == n \\
+        w[i,j] + m[i,j+1] & \text{if } i == m \text{ and } j < n \\
+        w[i,j] + \min(m[i+1,j], m[i,j+1], m[i+1,j+1]) & \text {if } i < m \text{ and } j < n
     \end{cases}
 \]
 
 \subsection{Describe the dynamic programming algorithm, and determine its runtime.}
 Similar to the matrix chain multiplication problem, we'll need to cache 2 pieces of information for each cell.
 We need to store the minimum weight to reach (m,n) from a given cell, and we need to store the next cell in the path.
-Starting at the target cell (m,n), we find all the minimum weight for it's left cell, it's up cell, then it's diagonal cell.
-We continue this process until we reach (0,0).
+We start by initializing a 2D array cost[][] to be match the weight matrix.
+We then iterate from the bottom right corner (m,n) to the top left corner (0,0), and update cost[row][col] to be the cost[row][col] + min(cost[row+1][col], cost[row][col+1], cost[row+1][col+1]).
+The next array is also updated to the cell that provided the minimum cost.
 The runtime should be $\Theta(mn)$ because each node is visted exactly once, and the work done at each node is constant time.
 
 \subsection{Write an algorithm to find the actual path.}

@@ -1,0 +1,94 @@
+\documentclass{article}
+\usepackage{mathtools}
+\usepackage{listings}
+
+\begin{document}
+\title{CS320 Homework 5}
+\author{Dustin Randall}
+\maketitle
+
+\section{Show the BFS and DFS traversal of the provided graph, starting from vertex F.}
+\subsection{BFS Traversal}
+f h d b i n m
+\subsection{DFS Traversal}
+f h d b n m i
+
+\section{Give the pseudocode for converting a binary tree into an adjacentcy list.}
+\subsection{Pseudocode}
+I would approach this problem using a BFS traversal of the tree.
+Each time we visit a node, we add it's children to the adjacentcy list, and to the queue.
+If we know that we're given a complete binary tree, we can early out when we reach a node with no children.
+\begin{lstlisting}
+    function toAdjList(root) {
+        adjList = new List<List<Node>>()
+        if(root is null) return
+
+        queue = new Queue(root)
+        while(!queue.isEmpty()) {
+            current = queue.dequeue()
+            adjlist[current] = List<Node>()
+            if(current.left is not null) {
+                adjList[current].add(current.left)
+                queue.enqueue(current.left)
+            }
+            if(current.right is not null) {
+                adjList[current].add(current.right)
+                queue.enqueue(current.right)
+            }
+            // optionally early out here if right is null
+        }
+        return adjList
+    }
+\end{lstlisting}
+\subsection{Runtime analysis}
+The runtime of this algorithm is $O(n)$ because each node is visited exactly once, and the work done is constant for each node.
+
+\section{Design a BFS search using an adjacentcy matrix.}
+\subsection{Pseudocode}
+Given an adjacentcy matrix, we take the starting point, and find all of it's connected neighbors.
+Unfortunately, with an adjacentcy matrix, we have to check every other vertex to see if it's connected or not.
+Each connected neighbor gets added to the queue, and the algorithm continues as normal.
+\begin{lstlisting}
+function BFS(adjMatrix, start) {
+    visited = new Set()
+    queue = new Queue(start)
+    while(!queue.isEmpty()) {
+        current = queue.dequeue()
+        print(current) // or whatever you're doing in the search
+        foreach neighbor in adjMatrix[current] {
+            if(neighbor is not null and neighbor not in visited) {
+                visited.add(neighbor)
+                queue.enqueue(neighbor)
+            }
+        }
+    }
+}
+\end{lstlisting}
+
+\subsection{Runtime Analysis}
+The runtime of this algorithm is now $O(V^2)$ because for each vertex, we need to check every other vertex to see if it's connected or not.
+In an adjacentcy list implementation, the runtime is $O(V + E)$ which could be $O(V^2)$ in a dense graph, but is often much better.
+
+\section{Provide a non-recursion based DFS}
+I've seen someone change from BFS to DFS by changing just a single character, but I'll simply use a stack instead of a queue.
+\begin{lstlisting}
+function DFS(adjList, start) {
+    visited = new Set()
+    stack = new Stack(start)
+    while(!stack.isEmpty()) {
+        current = stack.pop()
+        DoStuff(current)
+        foreach neighbor in adjList[current] {
+            if(neighbor not in visited) {
+                visited.add(neighbor)
+                stack.push(neighbor)
+            }
+        }
+    }
+}
+\end{lstlisting}
+
+\section{Build a minimum spanning tree for the provided graph.}
+
+
+\end{document}
