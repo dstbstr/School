@@ -1,9 +1,10 @@
 \documentclass{article}
 \usepackage{mathtools}
 \usepackage{listings}
+\usepackage{tikz-network}
 
 \begin{document}
-\title{CS320 Homework 5}
+\title{CS320 Homework 6}
 \author{Dustin Randall}
 \maketitle
 
@@ -89,6 +90,106 @@ function DFS(adjList, start) {
 \end{lstlisting}
 
 \section{Build a minimum spanning tree for the provided graph.}
+Artistic interpretation of the provided graph \\
+\begin{tikzpicture}
+    \Vertex[x=1.5, y=0, label=A]{A}
+    \Vertex[x=0, y=3, label=B]{B}
+    \Vertex[x=1, y=6.2, label=C]{C}
+    \Vertex[x=2, y=8, label=D]{D}
+    \Vertex[x=5, y=8, label=E]{E}
+    \Vertex[x=8, y=8, label=F]{F}
+    \Vertex[x=12, y=7.5, label=G]{G}
+    \Vertex[x=13, y=6, label=H]{H}
+    \Vertex[x=11, y=1, label=I]{I}
+    \Vertex[x=9, y=0, label=J]{J}
+    \Vertex[x=4, y=0, label=K]{K}
+    \Vertex[x=2.5, y=2, label=L]{L}
+    \Vertex[x=1.5, y=3.5, label=M]{M}
+    \Vertex[x=3.5, y=6, label=N]{N}
+    \Vertex[x=6, y=5.5, label=O]{O}
+    \Vertex[x=10, y=6, label=P]{P}
+    \Vertex[x=8, y=4, label=Q]{Q}
+    \Vertex[x=6.5, y=2, label=R]{R}
+    \Vertex[x=4.5, y=3, label=S]{S}
+    
+    \Edge[label=1](R)(S)
+    \Edge[label=2](Q)(I)
+    \Edge[label=3](M)(N)
+    \Edge[label=4](L)(M)
+    \Edge[label=5](O)(F)
+    \Edge[label=6](E)(F)
+    \Edge[label=7](P)(F)
+    \Edge[label=8](J)(K)
+    \Edge[label=9](A)(L)
+    \Edge[label=10](Q)(J)
+    \Edge[label=11](M)(C)
+    \Edge[label=12](N)(O)
+    \Edge[label=13](N)(E)
+    \Edge[label=14](D)(E)
+    \Edge[label=15](H)(I)
+    \Edge[label=16](F)(G)
+    \Edge[label=16](K)(R)
+    \Edge[label=17](L)(S)
+    \Edge[label=18](S)(O)
+    \Edge[label=19](P)(H)
+    \Edge[label=20](R)(Q)
+    \Edge[label=21](Q)(O)
+    \Edge[label=22](A)(M)
+    \Edge[label=23](A)(B)
+    \Edge[label=24](Q)(P)
+    \Edge[label=25](G)(H)
+    \Edge[label=26](N)(D)
+    \Edge[label=27](B)(C)
+    \Edge[label=28](I)(J)
+    \Edge[label=29](P)(G)
+    \Edge[label=30](K)(A)
+    \Edge[label=31](C)(D)
+    \Edge[label=33](L)(N)
+    \Edge[label=32](J)(R)
+    \Edge[label=34](K)(S)
+\end{tikzpicture}
 
+
+\subsection*{Minimum Spanning Tree}
+\begin{tikzpicture}
+    \Vertex[x=1.5, y=0, label=A]{A}
+    \Vertex[x=0, y=3, label=B]{B}
+    \Vertex[x=1, y=6.2, label=C]{C}
+    \Vertex[x=2, y=8, label=D]{D}
+    \Vertex[x=5, y=8, label=E]{E}
+    \Vertex[x=8, y=8, label=F]{F}
+    \Vertex[x=12, y=7.5, label=G]{G}
+    \Vertex[x=13, y=6, label=H]{H}
+    \Vertex[x=11, y=1, label=I]{I}
+    \Vertex[x=9, y=0, label=J]{J}
+    \Vertex[x=4, y=0, label=K]{K}
+    \Vertex[x=2.5, y=2, label=L]{L}
+    \Vertex[x=1.5, y=3.5, label=M]{M}
+    \Vertex[x=3.5, y=6, label=N]{N}
+    \Vertex[x=6, y=5.5, label=O]{O}
+    \Vertex[x=10, y=6, label=P]{P}
+    \Vertex[x=8, y=4, label=Q]{Q}
+    \Vertex[x=6.5, y=2, label=R]{R}
+    \Vertex[x=4.5, y=3, label=S]{S}
+    
+    \Edge[label=1](R)(S)
+    \Edge[label=2](Q)(I)
+    \Edge[label=3](M)(N)
+    \Edge[label=4](L)(M)
+    \Edge[label=5](O)(F)
+    \Edge[label=6](E)(F)
+    \Edge[label=7](P)(F)
+    \Edge[label=8](J)(K)
+    \Edge[label=9](A)(L)
+    \Edge[label=10](Q)(J)
+    \Edge[label=11](M)(C)
+    \Edge[label=12](N)(O)
+    \Edge[label=14](D)(E)
+    \Edge[label=15](H)(I)
+    \Edge[label=16](F)(G)
+    \Edge[label=16](K)(R)
+    \Edge[label=17](L)(S)
+    \Edge[label=23](A)(B)
+\end{tikzpicture}
 
 \end{document}
