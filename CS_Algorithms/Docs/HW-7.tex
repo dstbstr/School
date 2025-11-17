@@ -3,29 +3,123 @@
 \usepackage{listings}
 \usepackage{tikz-network}
 
+\SetVertexStyle[Shape = circle, TextFont= \large]
+\SetEdgeStyle[TextFont=\large]
 \begin{document}
 \title{CS320 Homework 7}
 \author{Dustin Randall}
 \maketitle
 
 \section{Trace Dijkstra's algorithm to show the shortest path from vertex S.}
+\subsection*{Initial graph}
 \begin{tikzpicture}
-    \Vertex[x=2.5,y=5, label=S]{S}
-    \Vertex[x=0,y=3]{A}
-    \Vertex[x=5,y=3]{B}
-    \Vertex[x=1,y=0]{C}
-    \Vertex[x=4,y=0]{D}
+    \Vertex[x=2.5,y=5,label=S]{S}
+    \Vertex[x=0,y=3,label=$\infty$]{A}
+    \Vertex[x=5,y=3,label=$\infty$]{B}
+    \Vertex[x=1,y=0,label=$\infty$]{C}
+    \Vertex[x=4,y=0,label=$\infty$]{D}
 
     \Edge[Direct,label=3](S)(A)
     \Edge[Direct,label=5](S)(B)
+    \Edge[Direct,label=2](S)(C)
+    \Edge[Direct,label=9](S)(D)
     \Edge[Direct,label=6](A)(C)
-    \Edge[Direct,label=6](A)(D)
     \Edge[Direct,label=4](C)(B)
     \Edge[Direct,label=6](D)(B)
-    \Edge[Direct,label=6](D)(C)
-    \Edge[Direct,label=2](S)(C)
-    \Edge[Direct,label=4](S)(D)
+    \Edge[Direct,label=9](D)(C)
 \end{tikzpicture}
+
+\subsection*{Visit S and it's neighbors}
+\begin{tikzpicture}
+    \Vertex[x=2.5,y=5,label=S,color=black,fontcolor=white]{S}
+    \Vertex[x=0,y=3,label=3]{A}
+    \Vertex[x=5,y=3,label=5]{B}
+    \Vertex[x=1,y=0,label=2]{C}
+    \Vertex[x=4,y=0,label=9]{D}
+
+    \Edge[Direct,label=3,lw=3](S)(A)
+    \Edge[Direct,label=5,lw=3](S)(B)
+    \Edge[Direct,label=2,lw=3](S)(C)
+    \Edge[Direct,label=9,lw=3](S)(D)
+    \Edge[Direct,label=6](A)(C)
+    \Edge[Direct,label=4](C)(B)
+    \Edge[Direct,label=6](D)(B)
+    \Edge[Direct,label=9](D)(C)
+\end{tikzpicture}
+
+\subsection*{Visit 2 and it's neighbors}
+\begin{tikzpicture}
+    \Vertex[x=2.5,y=5,label=S,color=black,fontcolor=white]{S}
+    \Vertex[x=0,y=3,label=3]{A}
+    \Vertex[x=5,y=3,label=5]{B}
+    \Vertex[x=1,y=0,label=2,color=black,fontcolor=white]{C}
+    \Vertex[x=4,y=0,label=9]{D}
+
+    \Edge[Direct,label=3,lw=3](S)(A)
+    \Edge[Direct,label=5,lw=3](S)(B)
+    \Edge[Direct,label=2,lw=3](S)(C)
+    \Edge[Direct,label=9,lw=3](S)(D)
+    \Edge[Direct,label=6](A)(C)
+    \Edge[Direct,label=4](C)(B)
+    \Edge[Direct,label=6](D)(B)
+    \Edge[Direct,label=9](D)(C)
+\end{tikzpicture}
+
+\subsection*{Visit 3 and it's neighbors}
+\begin{tikzpicture}
+    \Vertex[x=2.5,y=5,label=S,color=black,fontcolor=white]{S}
+    \Vertex[x=0,y=3,label=3,color=black,fontcolor=white]{A}
+    \Vertex[x=5,y=3,label=5]{B}
+    \Vertex[x=1,y=0,label=2,color=black,fontcolor=white]{C}
+    \Vertex[x=4,y=0,label=9]{D}
+
+    \Edge[Direct,label=3,lw=3](S)(A)
+    \Edge[Direct,label=5,lw=3](S)(B)
+    \Edge[Direct,label=2,lw=3](S)(C)
+    \Edge[Direct,label=9,lw=3](S)(D)
+    \Edge[Direct,label=6](A)(C)
+    \Edge[Direct,label=4](C)(B)
+    \Edge[Direct,label=6](D)(B)
+    \Edge[Direct,label=9](D)(C)
+\end{tikzpicture}
+
+\subsection*{Visit 5 and it's neighbors}
+\begin{tikzpicture}
+    \Vertex[x=2.5,y=5,label=S,color=black,fontcolor=white]{S}
+    \Vertex[x=0,y=3,label=3,color=black,fontcolor=white]{A}
+    \Vertex[x=5,y=3,label=5,color=black,fontcolor=white]{B}
+    \Vertex[x=1,y=0,label=2,color=black,fontcolor=white]{C}
+    \Vertex[x=4,y=0,label=9]{D}
+
+    \Edge[Direct,label=3,lw=3](S)(A)
+    \Edge[Direct,label=5,lw=3](S)(B)
+    \Edge[Direct,label=2,lw=3](S)(C)
+    \Edge[Direct,label=9,lw=3](S)(D)
+    \Edge[Direct,label=6](A)(C)
+    \Edge[Direct,label=4](C)(B)
+    \Edge[Direct,label=6](D)(B)
+    \Edge[Direct,label=9](D)(C)
+\end{tikzpicture}
+
+\subsection*{Visit 9 and it's neighbors}
+\begin{tikzpicture}
+    \Vertex[x=2.5,y=5,label=S,color=black,fontcolor=white]{S}
+    \Vertex[x=0,y=3,label=3,color=black,fontcolor=white]{A}
+    \Vertex[x=5,y=3,label=5,color=black,fontcolor=white]{B}
+    \Vertex[x=1,y=0,label=2,color=black,fontcolor=white]{C}
+    \Vertex[x=4,y=0,label=9,color=black,fontcolor=white]{D}
+
+    \Edge[Direct,label=3,lw=3](S)(A)
+    \Edge[Direct,label=5,lw=3](S)(B)
+    \Edge[Direct,label=2,lw=3](S)(C)
+    \Edge[Direct,label=9,lw=3](S)(D)
+    \Edge[Direct,label=6](A)(C)
+    \Edge[Direct,label=4](C)(B)
+    \Edge[Direct,label=6](D)(B)
+    \Edge[Direct,label=9](D)(C)
+\end{tikzpicture}
+
+\subsection*{Complete}
 
 
 \section{Show the trace of the Bellman-Ford algorithm starting from z}
