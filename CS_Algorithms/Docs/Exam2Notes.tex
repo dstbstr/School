@@ -3,17 +3,30 @@
 \usepackage{float}
 \usepackage[margin=1cm]{geometry}
 \usepackage{listings}
+\usepackage{tikz-qtree}
+
+\tikzset{
+    labeled/.style = {
+        circle, draw, thick, minimum size=1.5em, inner sep=0, label=right:{#1}
+    }
+}
+\lstset{
+    basicstyle=\footnotesize\ttfamily,
+    breaklines=false
+}
 
 \begin{document}
 Dustin Randall \\
 
 \section{RBT}
 \subsection*{Invariants}
-\begin{itemize}
-    \item Root node is black
-    \item Red nodes have black parent
-    \item All paths to leaf nodes contain same number of black nodes
-\end{itemize}
+{\footnotesize
+    \begin{itemize}
+        \item Root node is black
+        \item Red nodes have black parent
+        \item All paths to leaf nodes contain same number of black nodes
+    \end{itemize}
+}
 \subsection*{Insert}
 Start with normal BST insert, new node is red.
 \begin{lstlisting}
@@ -50,19 +63,20 @@ Start with normal BST delete
 
 \section{B-Tree}
 \subsection*{Invariants}
-\begin{itemize}
-    \item All leaf nodes are at same depth
-    \item Each node has between \(t-1\) and \(2t-1\) keys (except root)
-\end{itemize}
+{\footnotesize
+    \begin{itemize}
+        \item All leaf nodes are at same depth
+        \item Each node has between \(t-1\) and \(2t-1\) keys (except root)
+    \end{itemize}
+}
 \subsection*{Insert}
 If current node is full, Split.
 Split: Promote the middle key to the parent node, left and right half become new nodes.
 Always insert into a leaf node.
 
 \subsection*{Delete}
-Delete(node, key) requires node.Count >= t
-use Merge to ensure this
-Borrow means move the borrowed key up, and the current node down
+Delete(node, key) requires node.Count $>= t$, use Merge to ensure this. \\
+Borrow means move the borrowed key up, and the current node down \\
 \begin{lstlisting}
 if(node is leaf) remove key if found
 else {
@@ -90,4 +104,41 @@ else {
     }
 }
 \end{lstlisting}
+
+\section{Heaps}
+\subsection*{Invariants}
+{\footnotesize
+    \begin{itemize}
+        \item Complete Binary Tree (every level filled except possibly last, filled left to right)
+        \item Max-Heap: Parent value $>=$ children values
+        \item MaxHeapify: sift-down, swapping with largest child until a heap. \(O(\log h)\)
+        \item IncreaseKey: sift-up, swapping with parent until a heap. \(O(\log h)\)
+    \end{itemize}
+}
+\section{Huffman Coding}
+Greedy algorithm for lossless data compression. \\
+a:40, b:30, c: 90, d: 20, e: 60, f: 120, g:10, h:5 \\
+\begin{tikzpicture}[level/.style={sibling distance=50mm/#1}]
+    \node[labeled=375]{}
+        child {node[labeled=220] {} 
+            child {node[labeled=120]{f} }
+            child {node[labeled=100]{} 
+                child {node[labeled=40]{a} }
+                child {node[labeled=60]{e} }
+            }
+        }
+        child {node[labeled=155] {}
+            child {node[labeled=90]{c} }
+            child {node[labeled=65]{}
+                child {node[labeled=30]{b} }
+                child {node[labeled=35] {}
+                    child {node[labeled=20]{d} }
+                    child {node[labeled=15] {}
+                        child {node[labeled=5]{h}}
+                        child {node[labeled=10]{g}}
+                    }
+                }
+            }
+        };
+\end{tikzpicture}
 \end{document}
