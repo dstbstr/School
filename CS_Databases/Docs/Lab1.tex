@@ -1,0 +1,82 @@
+\documentclass{article}
+\usepackage{xcolor} % For custom colors
+\usepackage{listings}
+\usepackage{graphicx}
+\graphicspath{ {./images/} }
+
+% Define SQL style
+\lstdefinelanguage{SQL}{
+  morekeywords={
+    SELECT, FROM, WHERE, AND, OR, INSERT, INTO, VALUES, UPDATE, SET, DELETE,
+    CREATE, TABLE, PRIMARY, KEY, FOREIGN, NOT, NULL, REFERENCES, INNER, JOIN,
+    LEFT, RIGHT, FULL, ON, AS, DISTINCT, GROUP, BY, ORDER, HAVING, LIMIT
+  },
+  sensitive=false,
+  morecomment=[l]{--}, % SQL single-line comments
+  morecomment=[s]{/*}{*/}, % SQL multi-line comments
+  morestring=[b]', % Strings in single quotes
+}
+\lstset{language=SQL,
+    numbers=left,
+    basicstyle=\ttfamily,
+    showstringspaces=false
+}
+    
+\begin{document}
+\title{CSCD 327 Lab 1}
+\author{Dustin Randall}
+\maketitle
+
+\section{Create student table(\underline{ID}, name, major, city, state)}
+\begin{lstlisting}
+create table student(
+  ID int,
+  name varchar(20),
+  major varchar(20),
+  city varchar(20),
+  state char(2),
+  primary key(ID)
+  )
+\end{lstlisting}
+\begin{figure}[ht]
+    \centering
+    \includegraphics{create_student.png}
+    \caption{Creating the student table}
+    \label{fig:create_student_table}
+\end{figure}
+
+\begin{lstlisting}
+create table department(
+  dnumber int,
+  dept_name varchar(20) unique,
+  building varchar(20),
+  primary key(dnumber)
+  )
+\end{lstlisting}
+
+
+\begin{lstlisting}
+alter table student
+ add first_name varchar(20),
+ add last_name varchar(20),
+ drop name
+\end{lstlisting}
+ 
+\begin{lstlisting}
+ alter table student
+ add dnumber int,
+ add constraint fk_constraint foreign key(dnumber) references department(dnumber) 
+\end{lstlisting}
+
+\begin{lstlisting}
+ rename table student to student_details
+\end{lstlisting}
+
+\begin{lstlisting}
+ describe student_details
+\end{lstlisting}
+
+\begin{lstlisting}
+ drop table student_details, department
+\end{lstlisting}
+\end{document}
