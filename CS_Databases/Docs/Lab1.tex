@@ -2,7 +2,7 @@
 \usepackage{xcolor} % For custom colors
 \usepackage{listings}
 \usepackage{graphicx}
-\graphicspath{ {./images/} }
+\graphicspath{ {./images/Lab1} }
 
 % Define SQL style
 \lstdefinelanguage{SQL}{
@@ -29,7 +29,7 @@
 
 \section{Create student table(\underline{ID}, name, major, city, state)}
 \begin{lstlisting}
-create table student(
+CREATE TABLE student(
   ID int,
   name varchar(20),
   major varchar(20),
@@ -40,43 +40,83 @@ create table student(
 \end{lstlisting}
 \begin{figure}[ht]
     \centering
-    \includegraphics{create_student.png}
+    \includegraphics[width=\textwidth]{create_student.png}
     \caption{Creating the student table}
-    \label{fig:create_student_table}
 \end{figure}
+\pagebreak
 
+\section{Create department table where dept\_name is unique.}
 \begin{lstlisting}
-create table department(
+CREATE TABLE department(
   dnumber int,
   dept_name varchar(20) unique,
   building varchar(20),
   primary key(dnumber)
   )
 \end{lstlisting}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{create_dept.png}
+    \caption{Creating the department table}
+\end{figure}
+\pagebreak
 
+\section{Split name into first and last name}
+\begin{lstlisting}
+ALTER TABLE student
+ ADD first_name varchar(20),
+ ADD last_name varchar(20),
+ DROP name
+\end{lstlisting}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{alter_student.png}
+    \caption{Rename the student table}
+\end{figure}
+\pagebreak
 
+\section{Add foreign key to the department table's dnumber}
 \begin{lstlisting}
-alter table student
- add first_name varchar(20),
- add last_name varchar(20),
- drop name
+ ALTER TABLE student
+ ADD dnumber int,
+ ADD constraint fk_constraint foreign key(dnumber) references department(dnumber) 
 \end{lstlisting}
- 
-\begin{lstlisting}
- alter table student
- add dnumber int,
- add constraint fk_constraint foreign key(dnumber) references department(dnumber) 
-\end{lstlisting}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{add_fk.png}
+    \caption{Adding foreign key to the student table}
+\end{figure}
+\pagebreak
 
+\section{Rename student table to student\_details}
 \begin{lstlisting}
- rename table student to student_details
+ RENAME TABLE student TO student_details
 \end{lstlisting}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{rename_student.png}
+    \caption{Rename the student table}
+\end{figure}
+\pagebreak
 
+\section{Retrieve the details of the columns of student\_details}
 \begin{lstlisting}
- describe student_details
+ DESCRIBE student_details
 \end{lstlisting}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{describe_student.png}
+    \caption{Describe student\_details}
+\end{figure}
+\pagebreak
 
+\section{Delete both tables}
 \begin{lstlisting}
- drop table student_details, department
+ DROP TABLE student_details, department
 \end{lstlisting}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{drop_tables.png}
+    \caption{Drop both tables}
+\end{figure}
 \end{document}
