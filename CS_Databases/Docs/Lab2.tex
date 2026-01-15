@@ -1,0 +1,238 @@
+\documentclass{article}
+\usepackage{xcolor} % For custom colors
+\usepackage{listings}
+\usepackage{graphicx}
+\graphicspath{ {./images/Lab2} }
+
+% Define SQL style
+\lstdefinelanguage{SQL}{
+  morekeywords={
+    ALTER, ADD, DROP, SELECT, FROM, WHERE, AND, OR, INSERT, INTO, VALUES, UPDATE, SET, DELETE,
+    CREATE, TABLE, PRIMARY, KEY, FOREIGN, NOT, NULL, REFERENCES, INNER, JOIN, CONSTRAINT,
+    LEFT, RIGHT, FULL, ON, AS, DISTINCT, GROUP, BY, ORDER, HAVING, LIMIT, UNIQUE, CASCADE, DEFAULT,
+    RENAME, DESCRIBE, TO
+  },
+  sensitive=false,
+  morecomment=[l]{--}, % SQL single-line comments
+  morecomment=[s]{/*}{*/}, % SQL multi-line comments
+  morestring=[b]', % Strings in single quotes
+}
+\lstset{language=SQL,
+    numbers=left,
+    basicstyle=\ttfamily,
+    showstringspaces=false,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{orange}\itshape,
+    stringstyle=\color{green},
+    frame=single,
+    breaklines=true
+}
+    
+\begin{document}
+\title{CSCD 327 Lab 2}
+\author{Dustin Randall}
+\maketitle
+
+\section{Create Customer table}
+\begin{lstlisting}
+CREATE TABLE customer (
+        customerId int,
+        first_name varchar(20),
+        last_name varchar(20),
+        city varchar(20),
+        state char(2),
+        check(state in ('WA', 'OR', 'ID')),
+        primary key(customerId)
+        );
+\end{lstlisting}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{CreateCustomer.png}
+    \caption{Creating the customer table}
+\end{figure}
+\pagebreak
+
+\section{Create Orders table}
+\begin{lstlisting}
+CREATE TABLE orders (
+        orderId char(5),
+        customerId int,
+        order_date date,
+        order_value decimal(10,2),
+        check(order_value > 0.0),
+        primary key(orderId),
+        foreign key(customerId) references customer(customerId)
+                on update cascade
+                on delete set null
+);
+\end{lstlisting}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{CreateOrders.png}
+    \caption{Creating the orders table}
+\end{figure}
+\pagebreak
+
+\section{Insert data into tables}
+\begin{lstlisting}
+INSERT INTO customer VALUES
+     (1001, 'Jane', 'Eyre', 'Spokane', 'WA'),
+     (1002, 'Harry', 'Potter', 'Boise', 'ID'),
+     (1003, 'James', 'Bond', 'Seattle', 'WA'),
+     (1004, 'Jo', 'March', 'Portland', 'OR'),
+     (1005, 'Sherlock', 'Holmes', 'Salem', 'OR');
+\end{lstlisting}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{InsertCustomers.png}
+    \caption{Inserting data into the customer table}
+\end{figure}
+
+\begin{lstlisting}
+INSERT INTO orders VALUES
+     ('DB101', 1001, '2026-01-01', 150.00),
+     ('DB102', 1003, '2026-01-01', 50.50),
+     ('DB103', 1001, '2026-01-03', 25.25),
+     ('DB104', 1005, '2026-01-04', 125.75),
+     ('DB105', 1004, '2026-01-07', 43.25),
+     ('DB106', 1004, '2026-01-08', 11.50),
+     ('DB107', 1001, '2026-01-12', 84.75);
+\end{lstlisting}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{InsertOrders.png}
+    \caption{Inserting data into the orders table}
+\end{figure}
+\pagebreak
+
+\section{Query inserted data}
+\begin{lstlisting}
+SELECT * FROM customer;
+\end{lstlisting}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{SelectCustomers.png}
+    \caption{Selecting all data from the customer table}
+\end{figure}
+
+\begin{lstlisting}
+SELECT * FROM orders;
+\end{lstlisting}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{SelectOrders.png}
+    \caption{Selecting all data from the orders table}
+\end{figure}
+\pagebreak
+
+\section{Attempt insert}
+The attempt fails because of a foreign key constraint violation (1010 is not a valid customer id).
+
+\begin{lstlisting}
+INSERT INTO orders VALUES ('DB108', 1010, '2026-01-15', 50.00);
+\end{lstlisting}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{BadInsert.png}
+    \caption{Attempting to insert invalid foreign key into orders table}
+\end{figure}
+\pagebreak
+
+\section{Delete Sherlock from customer table}
+\begin{lstlisting}
+DELETE from customer WHERE first_name = 'Sherlock';
+\end{lstlisting}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{DeleteSherlock.png}
+    \caption{Deleting Sherlock Holmes from customer table and checking orders table}
+\end{figure}
+\pagebreak
+
+\begin{lstlisting}
+SELECT * FROM customer;
+\end{lstlisting}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{SelectNoSherlock.png}
+    \caption{Customer table after deleting Sherlock Holmes}
+\end{figure}
+\pagebreak
+
+\begin{lstlisting}
+SELECT * FROM orders;
+\end{lstlisting}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{DeleteCascade.png}
+    \caption{Orders table with null customerId after deleting Sherlock Holmes}
+\end{figure}
+\pagebreak
+
+\section{update Harry Potter's customerId to 1006}
+\begin{lstlisting}
+UPDATE customer SET customerId = 1006 WHERE first_name = 'Harry' AND last_name = 'Potter';
+\end{lstlisting}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{UpdateHarry.png}
+    \caption{Updating Harry Potter's customerId to 1006}
+\end{figure}
+\pagebreak
+
+\begin{lstlisting}
+SELECT customerId FROM customer WHERE first_name = 'Harry' AND last_name = 'Potter';
+\end{lstlisting}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{NewCustomerId.png}
+    \caption{Selecting Harry Potter's updated customerId}
+\end{figure}
+\pagebreak
+
+\begin{lstlisting}
+SELECT * from orders WHERE customerId = 1006;
+\end{lstlisting}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{HarryHasNoOrders.png}
+    \caption{Orders table showing Harry Potter has no orders}
+\end{figure}
+\pagebreak
+
+\section{Find all customers in WA but not in Spokane}
+\begin{lstlisting}
+SELECT first_name, last_name from customer WHERE state = 'WA' AND city <> 'Spokane';
+\end{lstlisting}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{WaNoSpokane.png}
+    \caption{Selecting all customers in WA but not in Spokane}
+\end{figure}
+\pagebreak
+
+\section{Find orders between 25 and 100 inclusive, ordered by customerId}
+\begin{lstlisting}
+SELECT customerId, order_date FROM orders WHERE 
+        order_value BETWEEN 25 AND 100
+        ORDER BY customerId;
+\end{lstlisting}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{OrdersInRange.png}
+    \caption{Selecting orders with value between 25 and 100 inclusive, ordered by customerId}
+\end{figure}
+\pagebreak
+
+\section{Find distinct customerIds with orders on or after 2026-01-03}
+\begin{lstlisting}
+SELECT DISTINCT customerId FROM orders
+        WHERE order_date >= '2026-01-03';
+\end{lstlisting}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{OrdersAfterDate.png}
+    \caption{Selecting distinct customerIds with orders on or after 2026-01-03}
+\end{figure}
+
+\end{document}

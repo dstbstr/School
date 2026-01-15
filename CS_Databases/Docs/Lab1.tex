@@ -7,9 +7,10 @@
 % Define SQL style
 \lstdefinelanguage{SQL}{
   morekeywords={
-    SELECT, FROM, WHERE, AND, OR, INSERT, INTO, VALUES, UPDATE, SET, DELETE,
-    CREATE, TABLE, PRIMARY, KEY, FOREIGN, NOT, NULL, REFERENCES, INNER, JOIN,
-    LEFT, RIGHT, FULL, ON, AS, DISTINCT, GROUP, BY, ORDER, HAVING, LIMIT
+    ALTER, ADD, DROP, SELECT, FROM, WHERE, AND, OR, INSERT, INTO, VALUES, UPDATE, SET, DELETE,
+    CREATE, TABLE, PRIMARY, KEY, FOREIGN, NOT, NULL, REFERENCES, INNER, JOIN, CONSTRAINT,
+    LEFT, RIGHT, FULL, ON, AS, DISTINCT, GROUP, BY, ORDER, HAVING, LIMIT, UNIQUE, CASCADE, DEFAULT,
+    RENAME, DESCRIBE, TO
   },
   sensitive=false,
   morecomment=[l]{--}, % SQL single-line comments
@@ -19,7 +20,12 @@
 \lstset{language=SQL,
     numbers=left,
     basicstyle=\ttfamily,
-    showstringspaces=false
+    showstringspaces=false,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{orange}\itshape,
+    stringstyle=\color{green},
+    frame=single,
+    breaklines=true
 }
     
 \begin{document}
