@@ -4,6 +4,7 @@
 \usepackage{listings}
 \usepackage{graphicx}
 \usepackage{tikz}
+\usepackage[normalem]{ulem} % Dashed Underlines
 \usetikzlibrary{positioning, matrix, shapes.geometric, arrows}
 
 \begin{document}
@@ -18,14 +19,17 @@
         nodes={rectangle, anchor=west, inner xsep=4pt, minimum height=2mm, text width=2.5cm, align=left, draw=none},
         row sep=0,
         row 1/.style={nodes={fill=blue!20, font=\bfseries, align=center, text width=2.5cm, draw=black}}
-    }
+    },
+    weak_entity_border/.style={double, double distance=1.2pt, line width=0.4pt},
+    relationship/.style={diamond, draw, aspect=1.4, inner sep=2pt, minimum width=14mm},
+    identifying/.style={diamond, draw, double, double distance=1.2pt, aspect=1.4, inner sep=2pt, minimum width=14mm},
 }
 \section{Draw a schema diagram for the following database.}
 \begin{itemize}
-\item Teams $(\underline{teamID}, team\_name, city, founded\_year, budget\_million)$
-\item Players $(\underline{playerID}, player\_name, age, position, salary\_million, goals, assists, teamID)$
-\item Coaches $(\underline{coachID}, coach\_name, age, experience\_years, teamID, salary\_million)$
-\item Team\_Stats $(\underline{teamID}, \underline{season}, wins, losses, goals\_scored, goals\_conceded)$
+\item Teams $($\underline{teamID}, team\_name, city, founded\_year, budget\_million$)$
+\item Players $($\underline{playerID}, player\_name, age, position, salary\_million, goals, assists, teamID$)$
+\item Coaches $($\underline{coachID}, coach\_name, age, experience\_years, teamID, salary\_million$)$
+\item Team\_Stats $($\underline{teamID}, \underline{season}, wins, losses, goals\_scored, goals\_conceded$)$
 \end{itemize}
 
 \begin{tikzpicture}
@@ -108,6 +112,63 @@ It can be assumed that no two dependents of a staff member will have the same na
 \item The participation constraints.
 \item The roles of the entities in a relationship set as appropriate.
 \end{itemize}
+\break
+
+%Entity Sets
+Division$($\underline{division\_name}, location, \{phone\_numbers\}$)$ \\
+Staff$($\underline{staff\_number}, name, DoB, salary$)$ \\
+Task$($\underline{task\_id}, title, budget\_amount$)$ \\
+Dependent$($\dashuline{name}, DoB, relationship$)$
+
+%Relationship Sets
+HeadedBy [start\_date] : Division 1 --- 0..1 Staff \\
+Manages : Division 1 --- * Task \\
+AttachedTo : Staff * --- 1 Division \\
+Supervises : Staff 1 --- 0..* Staff \\
+DependentOf : Staff 1 === * Dependent
+
+\begin{tikzpicture}
+    % Entity Sets
+    \matrix(Division) [entity]{
+        Division \\
+        \underline{division\_name} \\
+        Location \\
+        phone\_numbers\\
+    };
+    \matrix(Staff) [entity, left=60mm of Division]{
+        Staff \\
+        \underline{staff\_number} \\
+        Name \\
+        DoB \\
+        Salary\\
+    };
+    \matrix(Task) [entity, below=30mm of Division]{
+        Task \\
+        \underline{TaskId} \\
+        Title \\
+        Budget\\
+    };
+    \matrix(Dependent) [entity, below=30mm of Staff]{
+        Dependent \\
+        \dashuline{Name} \\
+        DoB \\
+        Relationship\\
+    };
+
+      % draw borders around entities
+    \draw (Division-1-1.north west) rectangle (Division-4-1.south east);
+    \draw (Staff-1-1.north west) rectangle (Staff-5-1.south east);
+    \draw (Task-1-1.north west) rectangle (Task-4-1.south east);
+    \draw[weak_entity_border] (Dependent-1-1.north west) rectangle (Dependent-4-1.south east);
+
+    % Relationship Sets
+    \node[relationship, left=20mm of Staff] (Supervises) {Supervises};
+    \node[relationship, left=20mm of Division, yshift=10mm] (HeadedBy) {HeadedBy};
+    \node[relationship, below=5mm of HeadedBy] (AttachedTo) {AttachedTo};
+    \node[relationship, below=5mm of Division] (Manages) {Manages};
+    \node[identifying, above=5mm of Dependent] (DependentOf) {DependentOf};
+
+\end{tikzpicture}
 
 \section{Create Relational Schemas for the ER diagram. Explain the creation process step by step.}
 
