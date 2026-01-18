@@ -1,11 +1,8 @@
 \documentclass{article}
-\usepackage{xcolor} % For custom colors
-\usepackage[margin=1cm]{geometry}
-\usepackage{listings}
-\usepackage{graphicx}
+\usepackage[margin=1.5cm]{geometry}
 \usepackage{tikz}
 \usepackage[normalem]{ulem} % Dashed Underlines
-\usetikzlibrary{positioning, matrix, shapes.geometric, arrows}
+\usetikzlibrary{positioning, matrix, shapes.geometric, arrows.meta}
 
 \begin{document}
 \title{CSCD 327 Homework 1}
@@ -13,16 +10,23 @@
 \maketitle
 
 \tikzset{
+    er/text width/.initial=2.6cm,
+    er/header fill/.initial=blue!20,
+    er/double distance/.initial=1.2pt,
     entity/.style={
         matrix of nodes,
         anchor=north,
-        nodes={rectangle, anchor=west, inner xsep=4pt, minimum height=2mm, text width=2.5cm, align=left, draw=none},
+        nodes={rectangle, anchor=west, inner xsep=4pt, minimum height=2mm, text width=\pgfkeysvalueof{/tikz/er/text width}, align=left, draw=none},
         row sep=0,
-        row 1/.style={nodes={fill=blue!20, font=\bfseries, align=center, text width=2.5cm, draw=black}}
+        row 1/.style={nodes={fill=\pgfkeysvalueof{/tikz/er/header fill}, font=\bfseries, align=center, text width=\pgfkeysvalueof{/tikz/er/text width}, draw=black}}
     },
-    weak_entity_border/.style={double, double distance=1.2pt, line width=0.4pt},
-    relationship/.style={diamond, draw, aspect=1.4, inner sep=2pt, minimum width=14mm},
-    identifying/.style={diamond, draw, double, double distance=1.2pt, aspect=1.4, inner sep=2pt, minimum width=14mm},
+    DoubleLine/.style={double, double distance=\pgfkeysvalueof{/tikz/er/double distance}, line width=0.4pt},
+    relationship/.style={diamond, draw, aspect=1.4, inner sep=2pt, minimum width=14mm, font=\small},
+    identifying/.style={diamond, draw, DoubleLine, aspect=1.4, inner sep=2pt, minimum width=14mm},
+    %arrow styles
+    >=Stealth,
+    arrow/.style={{-Stealth}, thick},
+    arrowrev/.style={-{Stealth[reversed]}, thick}
 }
 \section{Draw a schema diagram for the following database.}
 \begin{itemize}
@@ -81,9 +85,9 @@
   \draw (TeamStats-1-1.north west) rectangle (TeamStats-7-1.south east);
 
   % draw arrows for foreign keys
-  \draw[->, thick] (Players-9-1.east) -- ++(6mm,0) |- (Teams-2-1.west);
-  \draw[->, thick] (Coaches-6-1.west) -- ++(-6mm,0) |- (Teams-2-1.east);
-  \draw[->, thick] (TeamStats-2-1.east) -- ++(6mm,0mm) |- (Teams-2-1.east);
+  \draw[arrow] (Players-9-1.east) -- ++(6mm,0) |- (Teams-2-1.west);
+  \draw[arrow] (Coaches-6-1.west) -- ++(-6mm,0) |- (Teams-2-1.east);
+  \draw[arrow] (TeamStats-2-1.east) -- ++(6mm,0mm) |- (Teams-2-1.east);
 
 \end{tikzpicture}
 
@@ -94,38 +98,6 @@ $(A_1, A_3)$ is not a candidate key for R because $A_1$ alone is a unique identi
 $(A_1, A_4)$ is a superkey for R because it can uniquely identify each tuple in R. Adding attributes to a superkey produces another superkey.
 
 \section{Draw an ER diagram for the requirements provided.}
-\begin{itemize}
-\item The organization has several divisions. Each division has a unique name, a location, and a set of phone numbers. 
-Each division is headed by a staff member, and is required to store the date on which a staff member starts heading a division.
-A staff member can only head 1 division, not all staff will head a division.
-\item Each division manages several tasks.
-A task has a unique id, a title, and a budget amount. A task is managed by exactly 1 division.
-Each staff member has a unique staff number. They also have a name, a DoB, and salary.
-Each staff member is attached to 1 division, and each division has multiple staff.
-\item Staff member can have a supervisor, and can also supervise others.
-One staff member can supervise multiple other staff members, but no staff member can have more than one supervisor.
-\item Dependent information is stored for staff with dependents.
-Dependents have a name, DoB, and a relationship with the staff member.
-It can be assumed that no two dependents of a staff member will have the same name.
-\item ER digaram should show Entity sets, and relationship sets with their attributes.
-\item The cardinality constraints.
-\item The participation constraints.
-\item The roles of the entities in a relationship set as appropriate.
-\end{itemize}
-\break
-
-%Entity Sets
-Division$($\underline{division\_name}, location, \{phone\_numbers\}$)$ \\
-Staff$($\underline{staff\_number}, name, DoB, salary$)$ \\
-Task$($\underline{task\_id}, title, budget\_amount$)$ \\
-Dependent$($\dashuline{name}, DoB, relationship$)$
-
-%Relationship Sets
-HeadedBy [start\_date] : Division 1 --- 0..1 Staff \\
-Manages : Division 1 --- * Task \\
-AttachedTo : Staff * --- 1 Division \\
-Supervises : Staff 1 --- 0..* Staff \\
-DependentOf : Staff 1 === * Dependent
 
 \begin{tikzpicture}
     % Entity Sets
@@ -133,7 +105,7 @@ DependentOf : Staff 1 === * Dependent
         Division \\
         \underline{division\_name} \\
         Location \\
-        phone\_numbers\\
+        \{phone\_numbers\}\\
     };
     \matrix(Staff) [entity, left=60mm of Division]{
         Staff \\
@@ -159,7 +131,7 @@ DependentOf : Staff 1 === * Dependent
     \draw (Division-1-1.north west) rectangle (Division-4-1.south east);
     \draw (Staff-1-1.north west) rectangle (Staff-5-1.south east);
     \draw (Task-1-1.north west) rectangle (Task-4-1.south east);
-    \draw[weak_entity_border] (Dependent-1-1.north west) rectangle (Dependent-4-1.south east);
+    \draw[DoubleLine] (Dependent-1-1.north west) rectangle (Dependent-4-1.south east);
 
     % Relationship Sets
     \node[relationship, left=20mm of Staff] (Supervises) {Supervises};
@@ -168,8 +140,67 @@ DependentOf : Staff 1 === * Dependent
     \node[relationship, below=5mm of Division] (Manages) {Manages};
     \node[identifying, above=5mm of Dependent] (DependentOf) {DependentOf};
 
+    % draw HeadedBy attribute
+    \node[above=10mm of HeadedBy] (StartDate) {start\_date};
+    \draw (StartDate.north west) rectangle (StartDate.south east);
+
+    % Arrows
+    \draw[DoubleLine] (HeadedBy.east) -- (Division-1-1.west);
+    \draw[arrow] (HeadedBy.west) -- (Staff-1-1.east);
+    \draw[-, dashed, thick] (HeadedBy.north) -- (StartDate.south);
+    \draw[arrow] (AttachedTo.east) -- (Division-4-1.west);
+    \draw[DoubleLine] (AttachedTo.west) -- (Staff-5-1.east);
+    \draw[-, thick] (Staff-1-1.west) -- node[midway, above, font=\scriptsize, inner sep=1pt]{Supervises} (Supervises.north);
+    \draw[arrow] (Supervises.south) -- node[midway, below, font=\scriptsize, inner sep=1pt]{Supervisor} (Staff-5-1.west);
+
+    \draw[arrow] (Manages.north) -- (Division.south);
+    \draw[DoubleLine] (Manages.south) -- (Task.north);
+    \draw[arrow] (DependentOf.north) -- (Staff.south);
+    \draw[DoubleLine] (DependentOf.south) -- (Dependent.north);
 \end{tikzpicture}
+\pagebreak
 
 \section{Create Relational Schemas for the ER diagram. Explain the creation process step by step.}
+\subsection*{Convert Strong Entity Sets}
+\begin{itemize}
+    \item Division$($\underline{division\_name}, location$)$
+    \begin{itemize}
+        \item DivisionPhone$($\underline{division\_name}, \underline{phone\_number}$)$
+    \end{itemize}
+    \item Staff$($\underline{staff\_number}, name, DoB, salary$)$
+    \item Task$($\underline{TaskId}, title, budget$)$
+\end{itemize}
+
+\subsection*{Convert Weak Entity Sets}
+\begin{itemize}
+    \item Dependent$($\underline{staff\_number}, \underline{name}, DoB, relationship$)$
+\end{itemize}
+
+\subsection*{Convert Relationship Sets}
+\begin{itemize}
+    \item HeadedBy$($\underline{division\_name}, staff\_number, start\_date$)$
+    \item AttachedTo$($\underline{staff\_number}, division\_name$)$
+    \item Manages$($\underline{task\_id}, division\_name$)$
+    \item Supervises$($\underline{staff\_number}, supervisor\_staff\_number$)$
+    \item DependentOf$($\underline{staff\_number}, \underline{name}$)$
+\end{itemize}
+
+\subsection*{Find Redundancies}
+\begin{itemize}
+    \item HeadedBy can be removed by adding staff\_name and start\_date to Division.
+    \item AttachedTo can be removed by adding division\_name to Staff.
+    \item Manages can be removed by adding division\_name to Task.
+    \item DependentOf can be removed as it is the identifying relationship for Dependent.
+\end{itemize}
+
+\subsection*{Final Schemas}
+\begin{itemize}
+    \item Division$($\underline{division\_name}, location, headed\_by, headed\_start\_date$)$
+    \item DivisionPhone$($\underline{division\_name}, \underline{phone\_number}$)$
+    \item Staff$($\underline{staff\_number}, name, DoB, salary, division\_name, supervisor\_staff\_number$)$
+    \item Task$($\underline{TaskId}, title, budget, division\_name$)$
+    \item Dependent$($\underline{staff\_number}, \underline{name}, DoB, relationship$)$
+    \item Supervises$($\underline{staff\_number}, supervisor\_staff\_number$)$
+\end{itemize}
 
 \end{document}
