@@ -1,0 +1,109 @@
+\documentclass{article}
+\usepackage{xcolor} % For custom colors
+\usepackage[margin=1cm]{geometry}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{positioning, matrix, shapes.geometric, arrows}
+
+\begin{document}
+\title{CSCD 327 Homework 1}
+\author{Dustin Randall}
+\maketitle
+
+\tikzset{
+    entity/.style={
+        matrix of nodes,
+        anchor=north,
+        nodes={rectangle, anchor=west, inner xsep=4pt, minimum height=2mm, text width=2.5cm, align=left, draw=none},
+        row sep=0,
+        row 1/.style={nodes={fill=blue!20, font=\bfseries, align=center, text width=2.5cm, draw=black}}
+    }
+}
+\section{Draw a schema diagram for the following database.}
+\begin{itemize}
+\item Teams $(\underline{teamID}, team\_name, city, founded\_year, budget\_million)$
+\item Players $(\underline{playerID}, player\_name, age, position, salary\_million, goals, assists, teamID)$
+\item Coaches $(\underline{coachID}, coach\_name, age, experience\_years, teamID, salary\_million)$
+\item Team\_Stats $(\underline{teamID}, \underline{season}, wins, losses, goals\_scored, goals\_conceded)$
+\end{itemize}
+
+\begin{tikzpicture}
+  \matrix (Teams) [entity]{
+    Teams\\
+    \underline{teamID}\\
+    team\_name\\
+    city\\
+    founded\_year\\
+    budget\_million\\
+  };
+  \draw (Teams-1-1.north west) rectangle (Teams-6-1.south east);
+
+  \matrix (Players) [entity, left=18mm of Teams]{
+    Players\\
+    \underline{playerID}\\
+    player\_name\\
+    age\\
+    position\\
+    salary\_million\\
+    goals\\
+    assists\\
+    teamID\\
+  };
+  \draw (Players-1-1.north west) rectangle (Players-9-1.south east);
+
+  \matrix (Coaches) [entity, right=18mm of Teams]{
+    Coaches\\
+    \underline{coachID}\\
+    coach\_name\\
+    age\\
+    experience\_years\\
+    teamID\\
+    salary\_million\\
+  };
+  \draw (Coaches-1-1.north west) rectangle (Coaches-7-1.south east);
+
+    \matrix (TeamStats) [entity, below=12mm of Teams]{
+    Team\_Stats\\
+    \underline{teamID}\\
+    \underline{season}\\
+    wins\\
+    losses\\
+    goals\_scored\\
+    goals\_conceded\\
+  };
+  \draw (TeamStats-1-1.north west) rectangle (TeamStats-7-1.south east);
+
+  \draw[->, thick] (Players-9-1.east) -- ++(6mm,0) |- (Teams-2-1.west);
+  \draw[->, thick] (Coaches-6-1.west) -- ++(-6mm,0) |- (Teams-2-1.east);
+  \draw[->, thick] (TeamStats-2-1.east) -- ++(6mm,0mm) |- (Teams-2-1.east);
+
+\end{tikzpicture}
+
+\section{Consider the following schema: R(\underline{$A_1$}, $A_2$, $A_3$, $A_4$).}
+\subsection{Is $(A_1, A_3)$ a candidate key for R? Why or why not?}
+\subsection{Is $(A_1, A_4)$ a superkey for R? Why or why not?}
+
+\section{Draw an ER diagram for the requirements provided.}
+\begin{itemize}
+\item The organization has several divisions. Each division has a unique name, a location, and a set of phone numbers. 
+Each division is headed by a staff member, and is required to store the date on which a staff member starts heading a division.
+A staff member can only head 1 division, not all staff will head a division.
+\item Each division manages several tasks.
+A task has a unique id, a title, and a budget amount. A task is managed by exactly 1 division.
+Each staff member has a unique staff number. They also have a name, a DoB, and salary.
+Each staff member is attached to 1 division, and each division has multiple staff.
+\item Staff member can have a supervisor, and can also supervise others.
+One staff member can supervise multiple other staff members, but no staff member can have more than one supervisor.
+\item Dependent information is stored for staff with dependents.
+Dependents have a name, DoB, and a relationship with the staff member.
+It can be assumed that no two dependents of a staff member will have the same name.
+\item ER digaram should show Entity sets, and relationship sets with their attributes.
+\item The cardinality constraints.
+\item The participation constraints.
+\item The roles of the entities in a relationship set as appropriate.
+\end{itemize}
+
+\section{Create Relational Schemas for the ER diagram. Explain the creation process step by step.}
+
+\end{document}
