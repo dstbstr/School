@@ -1,0 +1,48 @@
+\documentclass{article}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{xcolor} % For custom colors
+\usepackage{listings}
+\usepackage{graphicx}
+\graphicspath{ {./images/Lab9} }
+
+% Define SQL style
+\lstdefinelanguage{SQL}{
+  morekeywords={
+    ALTER, ADD, DROP, SELECT, FROM, WHERE, AND, OR, INSERT, INTO, VALUES, UPDATE, SET, DELETE,
+    CREATE, TABLE, PRIMARY, KEY, FOREIGN, NOT, NULL, REFERENCES, INNER, JOIN, CONSTRAINT,
+    LEFT, RIGHT, FULL, ON, AS, DISTINCT, GROUP, BY, ORDER, HAVING, LIMIT, UNIQUE, CASCADE, DEFAULT,
+    RENAME, DESCRIBE, TO, IN, IF, CASE, WHEN, THEN, ELSE, END
+  },
+  sensitive=false,
+  morecomment=[l]{--}, % SQL single-line comments
+  morecomment=[s]{/*}{*/}, % SQL multi-line comments
+  morestring=[b]', % Strings in single quotes
+}
+\lstset{language=SQL,
+    numbers=left,
+    basicstyle=\ttfamily,
+    showstringspaces=false,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{orange}\itshape,
+    stringstyle=\color{green},
+    frame=single,
+    breaklines=true
+}
+    
+\begin{document}
+\title{CSCD 327 Lab 9}
+\author{Dustin Randall}
+\maketitle
+
+\section{Problem 1}
+\begin{lstlisting}
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+%     \includegraphics{OldRich.png}
+     \caption{Finding old rich teams}
+ \end{figure}
+\pagebreak
+
+\end{document}
