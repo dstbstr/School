@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass[12pt]{article}
 \usepackage[margin=1.5cm]{geometry}
 \usepackage{xcolor} % For custom colors
 \usepackage{listings}
@@ -11,20 +11,23 @@
     ALTER, ADD, DROP, SELECT, FROM, WHERE, AND, OR, INSERT, INTO, VALUES, UPDATE, SET, DELETE,
     CREATE, TABLE, PRIMARY, KEY, FOREIGN, NOT, NULL, REFERENCES, INNER, JOIN, CONSTRAINT,
     LEFT, RIGHT, FULL, ON, AS, DISTINCT, GROUP, BY, ORDER, HAVING, LIMIT, UNIQUE, CASCADE, DEFAULT,
-    RENAME, DESCRIBE, TO, IN, IF, CASE, WHEN, THEN, ELSE, END
+    RENAME, DESCRIBE, TO, IN, IF, CASE, WHEN, THEN, ELSE, END, TIMESTAMPDIFF, CURRENT_DATE, ROUND, CONCAT,
+    UNION
   },
   sensitive=false,
   morecomment=[l]{--}, % SQL single-line comments
   morecomment=[s]{/*}{*/}, % SQL multi-line comments
   morestring=[b]', % Strings in single quotes
 }
+\definecolor{darkgreen}{rgb}{0,0.4,0}
+
 \lstset{language=SQL,
     numbers=left,
     basicstyle=\ttfamily,
     showstringspaces=false,
     keywordstyle=\color{blue}\bfseries,
     commentstyle=\color{orange}\itshape,
-    stringstyle=\color{green},
+    stringstyle=\color{darkgreen},
     frame=single,
     breaklines=true
 }
@@ -34,15 +37,162 @@
 \author{Dustin Randall}
 \maketitle
 
-\section{Problem 1}
+\section{Find overweight members}
 \begin{lstlisting}
+SELECT 
+member_id, 
+bmi, 
+IF(bmi > 25, 'YES', 'NO') AS overweight 
+FROM (
+        SELECT 
+        member_id,
+        ROUND(weight_kg / ((height_cm / 100) * (height_cm / 100)), 2) AS bmi
+        FROM members
+) AS T;
 \end{lstlisting}
 
 \begin{figure}[ht]
      \centering
-%     \includegraphics{OldRich.png}
-     \caption{Finding old rich teams}
+     \includegraphics{Overweight.png}
+     \caption{Finding overweight members}
  \end{figure}
 \pagebreak
+
+\section{Find member durations}
+\begin{lstlisting}
+SELECT
+        member_id,
+        CONCAT(first_name, ' ', last_name) AS full_name,
+        TIMESTAMPDIFF(month, join_date, CURRENT_DATE()) AS duration_months
+FROM members;
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{MemberDurations.png}
+     \caption{Finding member durations}
+ \end{figure}
+\pagebreak
+
+\section{Find oddly specific members}
+\begin{lstlisting}
+SELECT member_id FROM members WHERE date_of_birth < '1996-01-01'
+UNION
+SELECT member_id FROM payments WHERE payment_date BETWEEN '2025-01-01' AND '2025-01-10';
+
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{OddlySpecific.png}
+     \caption{Finding oddly specific members}
+ \end{figure}
+\pagebreak
+
+\section{Find trainer years}
+\begin{lstlisting}
+SELECT * FROM (
+  SELECT
+    CONCAT(first_name, ' ', last_name) AS full_name,
+    YEAR(hire_date) as hire_year 
+   FROM trainers) as T
+ORDER BY full_name;
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{TrainerYears.png}
+     \caption{Finding trainer years}
+ \end{figure}
+\pagebreak
+
+\section{Explain the output of the provided query}
+The provided query provides the cartesian product of the members and payments tables.
+Each table has 6 rows, resulting in 36 rows total.
+For each row in members, every row of payments is paired with it.
+This corresponds to the following in relational algebra: $members \times payments$
+\pagebreak
+
+\section{Explain the output of the provided query}
+\begin{lstlisting}
+SELECT *
+FROM members, payments
+WHERE members.member_id = payments.member_id;
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics[width=\textwidth]{AllMemberPayments.png}
+     \caption{Finding member payment dates}
+ \end{figure}
+
+The provided query performs an equijoin between members and payments on the member\_id column.
+This is equivalent to running the previous query, then filtering to just rows where the member\_id columns match.
+This is not a natural join as the query does not deduplicate the columns.
+The corresponding relational algebra is:
+\begin{large}{$members \bowtie_{members.member\_id=payments.member\_id} payments$}\end{large}
+\pagebreak
+
+\section{Find member payment dates}
+\begin{lstlisting}
+SELECT 
+  CONCAT(first_name, ' ', last_name) AS full_name,
+  payment_date
+FROM members, payments
+WHERE members.member_id = payments.member_id;
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{MemberPaymentDates.png}
+     \caption{Finding member payment dates}
+ \end{figure}
+\pagebreak
+
+\section{Find all sessions and trainer information}
+\begin{lstlisting}
+SELECT * FROM sessions, trainers
+WHERE sessions.trainer_id = trainers.trainer_id
+ORDER BY session_id
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics[width=\textwidth]{SessionsAndTrainers.png}
+     \includegraphics{SessionsAndTrainers2.png}
+     \caption{Finding sessions and trainers}
+ \end{figure}
+\pagebreak
+
+\section{Find Mike Adams Sessions}
+\begin{lstlisting}
+SELECT session_id, session_date, duration_minutes 
+FROM sessions, trainers
+WHERE 
+  sessions.trainer_id = trainers.trainer_id AND 
+  (first_name = 'Mike' AND last_name = 'Adams')
+ORDER BY session_id
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{MikeAdams.png}
+     \caption{Finding Mike Adams}
+ \end{figure}
+\pagebreak
+
+\section{Find Sophie Lee sessions}
+\begin{lstlisting}
+SELECT session_id, session_date 
+FROM sessions,members
+WHERE first_name = 'Sophie' AND last_name = 'Lee'
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{SophieLee.png}
+     \caption{Finding Sophie Lee sessions}
+ \end{figure}
+
 
 \end{document}

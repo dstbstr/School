@@ -1,9 +1,9 @@
-\documentclass{article}
+\documentclass[12pt]{article}
 \usepackage[margin=1.5cm]{geometry}
 \usepackage{xcolor} % For custom colors
 \usepackage{listings}
 \usepackage{graphicx}
-\graphicspath{ {./images/Lab6} }
+\graphicspath{ {./images/Lab4} }
 
 % Define SQL style
 \lstdefinelanguage{SQL}{
@@ -11,13 +11,15 @@
     ALTER, ADD, DROP, SELECT, FROM, WHERE, AND, OR, INSERT, INTO, VALUES, UPDATE, SET, DELETE,
     CREATE, TABLE, PRIMARY, KEY, FOREIGN, NOT, NULL, REFERENCES, INNER, JOIN, CONSTRAINT,
     LEFT, RIGHT, FULL, ON, AS, DISTINCT, GROUP, BY, ORDER, HAVING, LIMIT, UNIQUE, CASCADE, DEFAULT,
-    RENAME, DESCRIBE, TO, IN, IF, CASE, WHEN, THEN, ELSE, END
+    RENAME, DESCRIBE, TO, IN, IF, CASE, WHEN, THEN, ELSE, END, TIMESTAMPDIFF, CURRENT_DATE, ROUND, CONCAT,
+    UNION
   },
   sensitive=false,
   morecomment=[l]{--}, % SQL single-line comments
   morecomment=[s]{/*}{*/}, % SQL multi-line comments
   morestring=[b]', % Strings in single quotes
 }
+\definecolor{darkgreen}{rgb}{0,0.4,0}
 \lstset{language=SQL,
     numbers=left,
     basicstyle=\ttfamily,
