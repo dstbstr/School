@@ -1,0 +1,164 @@
+\documentclass{article}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{amssymb}
+%\usepackage{float}
+\usepackage{caption}
+
+\def\ojoin{\setbox0=\hbox{$\bowtie$}%
+  \rule[-.02ex]{.25em}{.4pt}\llap{\rule[\ht0]{.25em}{.4pt}}}
+\def\leftouterjoin{\mathbin{\ojoin\mkern-5.8mu\bowtie}}
+\def\rightouterjoin{\mathbin{\bowtie\mkern-5.8mu\ojoin}}
+\def\fullouterjoin{\mathbin{\ojoin\mkern-5.8mu\bowtie\mkern-5.8mu\ojoin}}
+
+\begin{document}
+\title{CSCD 327 Homework 2}
+\author{Dustin Randall}
+\maketitle
+
+% student (studentID, name, major, year, departmentID)
+% course (courseID, title, departmentID, credits)
+% department (departmentID, dept_name, location)
+% enrollment (studentID, courseID, grade)
+
+\section{Find the names and majors of all students from the Mathematics department.}
+\begin{Large}
+$\Pi_{name, major}(\sigma_{dept\_name = 'Mathematics'}(student \bowtie department))$
+\end{Large}
+
+\section{For all students who have enrolled in at least one course, list the names of the
+students with the titles and credits of the courses they have enrolled in.}
+Need to prevent false sharing between student.departmentID and course.departmentID,
+so our join for department specifies that we want the course's departmentID, not the student's. \\
+\begin{Large}
+    $\Pi_{name, title, credits}(student \bowtie enrollment \bowtie course \bowtie_{(course.departmentID = department.departmentId)} department)$
+\end{Large}
+
+\section{List the student IDs and names for all students who have not enrolled in any course
+offered by the department with department ID 101.}
+We find all of the students in courses offered by department 101,
+then remove all of those from the set of all students. \\
+\begin{Large}
+    $ToRemove \leftarrow \sigma_{departmentID = 101}(student \bowtie enrollment \bowtie course)$ \\
+    $\Pi_{studentID, name}(student) - \Pi_{studentID, name}(ToRemove)$
+\end{Large}
+
+\section{List all course IDs and course titles offered by the Finance department or the
+Business department.}
+\begin{Large}
+    $\Pi_{courseID, title}(\sigma_{dept\_name = 'Finance' \lor dept\_name= 'Business'}(course \bowtie department))$
+\end{Large}
+
+\section{Find the names of students who have enrolled in both courses with course IDs MIS101 and CS202.}
+We find each group of students, then find the intersection of those sets. \\
+\begin{Large}
+    $Mis \leftarrow \sigma_{courseID = 'MIS101'}(student \bowtie enrollment)$ \\
+    $Cs \leftarrow \sigma_{courseID = 'CS202'}(student \bowtie enrollment)$ \\
+    $\Pi_{name}(Mis) \cap \Pi_{name}(Cs)$
+\end{Large}
+
+\section{List the course titles and their offering departments’ names for all courses that no students have enrolled in.}
+We could have done this using a left outer join, but it seemed easier to remove all courses from the enrollment table. \\
+\begin{Large}
+    $EmptyCourses \leftarrow \Pi_{courseID}(course) - \Pi_{courseID}(enrollment)$ \\
+    $\Pi_{title, dept\_name}(EmptyCourses \bowtie course \bowtie department)$
+\end{Large}
+
+\section{List the names of students who received a grade of A or B in any course, along with
+the titles and names of the offering departments of those courses.}
+Need to prevent false sharing between student.departmentID and course.departmentID,
+so our join for department specifies that we want the course's departmentID, not the student's. \\
+\begin{Large}
+    $GoodGrades \leftarrow \sigma_{grade = 'A' \lor grade = 'B'}(enrollment)$ \\
+    $\Pi_{name, title, dept\_name}(GoodGrades \bowtie student \bowtie course \bowtie_{(course.departmentID = department.departmentId)} department)$
+\end{Large}
+
+\section{Find the names and majors of all students who have enrolled in at least one course
+offered by the Physics department.}
+Find all of the physics courses, then find enrollment records for those courses.
+From there, we join those student ids with the student table. \\
+\begin{Large}
+    $PhysicsCourses \leftarrow \Pi_{courseID}(\sigma_{dept\_name = 'Physics'}(course \bowtie department))$ \\
+    $PhysicsStudents \leftarrow \Pi_{studentID}(enrollment \bowtie PhysicsCourses)$ \\
+    $\Pi_{name, major}(PhysicsStudents \bowtie student)$
+\end{Large}
+
+\section{List the titles of the courses that no students who are in Freshman year have enrolled
+in.}
+We need to remove all courses that freshmen have enrolled in from the set of all courses.
+We can't simply use enrollment, because that may exclude courses where no students are enrolled. \\
+
+\begin{Large}
+    $Freshmen \leftarrow \Pi_{studentID}(\sigma_{year = 'Freshman'}(student))$ \\
+    $FreshmanCourses \leftarrow \Pi_{courseID}(enrollment \bowtie Freshmen)$ \\
+    $UpperClasses \leftarrow \Pi_{courseID}(course) - FreshmanCourses$ \\
+    $\Pi_{title}(UpperClasses \bowtie course)$
+\end{Large}
+
+\section{Find the names of the students who have enrolled in the course with the title Database
+Systems, along with the name of the offering department.}
+We find the course with the specified title (presumably one, but could be multiple).
+When we join with student, we need to specify that we're joining on studentID and not departmentID.
+Could have done this by renaming dept\_name as another approach. \\
+\begin{Large} 
+    $DbCourse \leftarrow \Pi_{courseID, dept\_name}(\sigma_{title = 'Database Systems'}(course \bowtie department))$ \\
+    $\Pi_{name, dept\_name}(DbCourse \bowtie enrollment \bowtie_{enrollment.studentID = student.studentID} student)$
+\end{Large}
+
+\section{Produce the output of the following queries}
+% SID   name            class
+% 1001  John Smith      Freshman
+% 1002  Emma White      Junior
+% 1003  Amber Brown     Senior
+% 1004  David Hernandez Junior
+
+
+% CID   club_name        SID
+% C101  Robotics Club   1001
+% C102  Coding Club     1002
+% C103  Chess Club      1002
+% C104  Science Club    1005
+
+
+\begin{table*}{$club \leftouterjoin student$}
+\begin{tabular}{|c|c|c|c|c|}
+    \hline
+    SID & name & class & CID & club\_name \\
+    \hline
+    1001 & John Smith & Freshman & C101 & Robotics Club \\
+    1002 & Emma White & Junior & C102 & Coding Club \\
+    1002 & Emma White & Junior & C103 & Chess Club \\
+    1005 & NULL & NULL & C104 & Science Club \\
+    \hline
+\end{tabular}
+\end{table*}
+
+\begin{table*}{$club \rightouterjoin student$}
+\begin{tabular}{|c|c|c|c|c|}
+    \hline
+    SID & name & class & CID & club\_name \\
+    \hline
+    1001 & John Smith & Freshman & C101 & Robotics Club \\
+    1002 & Emma White & Junior & C102 & Coding Club \\
+    1002 & Emma White & Junior & C103 & Chess Club \\
+    1003 & Amber Brown & Senior & NULL & NULL \\
+    1004 & David Hernandez & Junior & NULL & NULL \\
+    \hline
+\end{tabular}
+\end{table*}
+
+\begin{table*}{$student \fullouterjoin club$}
+\begin{tabular}{|c|c|c|c|c|}
+    \hline
+    SID & name & class & CID & club\_name \\
+    \hline
+    1001 & John Smith & Freshman & C101 & Robotics Club \\
+    1002 & Emma White & Junior & C102 & Coding Club \\
+    1002 & Emma White & Junior & C103 & Chess Club \\
+    1003 & Amber Brown & Senior & NULL & NULL \\
+    1004 & David Hernandez & Junior & NULL & NULL \\
+    1005 & NULL & NULL & C104 & Science Club \\
+    \hline
+\end{tabular}
+\end{table*}
+
+\end{document}

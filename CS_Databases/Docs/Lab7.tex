@@ -3,14 +3,14 @@
 \usepackage{xcolor} % For custom colors
 \usepackage{listings}
 \usepackage{graphicx}
-\graphicspath{ {./images/Lab4} }
+\graphicspath{ {./images/Lab7} }
 
 % Define SQL style
 \lstdefinelanguage{SQL}{
   morekeywords={
     ALTER, ADD, DROP, SELECT, FROM, WHERE, AND, OR, INSERT, INTO, VALUES, UPDATE, SET, DELETE,
-    CREATE, TABLE, PRIMARY, KEY, FOREIGN, NOT, NULL, REFERENCES, INNER, JOIN, CONSTRAINT,
-    LEFT, RIGHT, FULL, ON, AS, DISTINCT, GROUP, BY, ORDER, HAVING, LIMIT, UNIQUE, CASCADE, DEFAULT,
+    CREATE, TABLE, PRIMARY, KEY, FOREIGN, NOT, NULL, REFERENCES, INNER, OUTER, NATURAL, JOIN, CONSTRAINT,
+    LEFT, RIGHT, FULL, ON, AS, USING, DISTINCT, GROUP, BY, ORDER, HAVING, LIMIT, UNIQUE, CASCADE, DEFAULT,
     RENAME, DESCRIBE, TO, IN, IF, CASE, WHEN, THEN, ELSE, END, TIMESTAMPDIFF, CURRENT_DATE, ROUND, CONCAT,
     UNION
   },
@@ -26,7 +26,7 @@
     showstringspaces=false,
     keywordstyle=\color{blue}\bfseries,
     commentstyle=\color{orange}\itshape,
-    stringstyle=\color{green},
+    stringstyle=\color{darkgreen},
     frame=single,
     breaklines=true
 }

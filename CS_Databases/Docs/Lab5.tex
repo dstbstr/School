@@ -3,14 +3,14 @@
 \usepackage{xcolor} % For custom colors
 \usepackage{listings}
 \usepackage{graphicx}
-\graphicspath{ {./images/Lab4} }
+\graphicspath{ {./images/Lab5} }
 
 % Define SQL style
 \lstdefinelanguage{SQL}{
   morekeywords={
     ALTER, ADD, DROP, SELECT, FROM, WHERE, AND, OR, INSERT, INTO, VALUES, UPDATE, SET, DELETE,
-    CREATE, TABLE, PRIMARY, KEY, FOREIGN, NOT, NULL, REFERENCES, INNER, JOIN, CONSTRAINT,
-    LEFT, RIGHT, FULL, ON, AS, DISTINCT, GROUP, BY, ORDER, HAVING, LIMIT, UNIQUE, CASCADE, DEFAULT,
+    CREATE, TABLE, PRIMARY, KEY, FOREIGN, NOT, NULL, REFERENCES, INNER, OUTER, NATURAL, JOIN, CONSTRAINT,
+    LEFT, RIGHT, FULL, ON, AS, USING, DISTINCT, GROUP, BY, ORDER, HAVING, LIMIT, UNIQUE, CASCADE, DEFAULT,
     RENAME, DESCRIBE, TO, IN, IF, CASE, WHEN, THEN, ELSE, END, TIMESTAMPDIFF, CURRENT_DATE, ROUND, CONCAT,
     UNION
   },
@@ -26,7 +26,7 @@
     showstringspaces=false,
     keywordstyle=\color{blue}\bfseries,
     commentstyle=\color{orange}\itshape,
-    stringstyle=\color{green},
+    stringstyle=\color{darkgreen},
     frame=single,
     breaklines=true
 }
@@ -36,14 +36,143 @@
 \author{Dustin Randall}
 \maketitle
 
-\section{Problem 1}
+\section{Find All Customer Orders}
 \begin{lstlisting}
+SELECT order_id, name AS customer_name, email AS customer_email, order_date
+FROM orders NATURAL JOIN customers
+ORDER BY order_id;
+
 \end{lstlisting}
 
 \begin{figure}[ht]
      \centering
-%     \includegraphics{OldRich.png}
-     \caption{Finding old rich teams}
+     \includegraphics{CustomerOrders.png}
+     \caption{Finding customer orders}
+ \end{figure}
+\pagebreak
+
+\section{Find The Customers Who Have Placed An Order}
+\begin{lstlisting}
+SELECT DISTINCT name AS customer_name
+FROM customers NATURAL JOIN orders;
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{CustomerNames.png}
+     \caption{Finding customer names}
+ \end{figure}
+\pagebreak
+
+\section{Find Orders Before Jan 20}
+\begin{lstlisting}
+SELECT order_id, order_date, product_id, quantity
+FROM orders NATURAL JOIN order_items
+WHERE order_date < '2026-01-20'
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{Jan20Orders.png}
+     \caption{Finding orders before Jan 20}
+ \end{figure}
+\pagebreak
+
+\section{Find Electronic Orders}
+\begin{lstlisting}
+SELECT name AS product_name, quantity, order_id
+FROM orders NATURAL JOIN order_items JOIN products USING(product_id)
+WHERE category = 'Electronics'
+ORDER BY product_name
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{Electronics.png}
+     \caption{Finding electronic orders}
+ \end{figure}
+\pagebreak
+
+\section{Find Multi Item Customers}
+\begin{lstlisting}
+SELECT DISTINCT name AS customer_name
+FROM orders NATURAL JOIN order_items JOIN customers USING(customer_id)
+WHERE quantity > 1
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{MultiItemCustomers.png}
+     \caption{Finding multi item customers}
+ \end{figure}
+\pagebreak
+
+\section{Find T-Shirt Orders}
+\begin{lstlisting}
+SELECT order_id, order_date
+FROM orders NATURAL JOIN products
+WHERE name = 'T-Shirt'
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{TShirts.png}
+     \caption{Finding T-Shirt orders}
+ \end{figure}
+\pagebreak
+
+\section{Find Recent Alice Orders}
+\begin{lstlisting}
+SELECT product_id, quantity
+FROM orders NATURAL JOIN order_items JOIN customers USING(customer_id)
+WHERE name = 'Alice Smith' AND order_date > '2026-01-15'
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{RecentAlice.png}
+     \caption{Finding recent Alice orders}
+ \end{figure}
+\pagebreak
+
+\section{Find All Alice Orders}
+\begin{lstlisting}
+SELECT order_id, products.name AS product_name, quantity
+FROM orders NATURAL JOIN order_items JOIN customers USING(customer_id) JOIN products USING(product_id)
+WHERE customers.name = 'Alice Smith'
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{AllAliceOrders.png}
+     \caption{Finding all Alice orders}
+ \end{figure}
+\pagebreak
+
+\section{Find USA Orders}
+\begin{lstlisting}
+SELECT DISTINCT products.name
+FROM orders NATURAL JOIN order_items JOIN customers USING(customer_id) JOIN products USING(product_id)
+WHERE country = 'USA'
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{USAOrders.png}
+     \caption{Finding USA orders}
+ \end{figure}
+\pagebreak
+
+\section{Find Electronics Customers}
+\begin{lstlisting}
+SELECT customers.name AS customer_name, products.name AS product_name
+FROM orders NATURAL JOIN order_items JOIN customers USING(customer_id) JOIN products USING(product_id)
+WHERE category = 'Electronics'
+\end{lstlisting}
+\begin{figure}[ht]
+     \centering
+     \includegraphics{ElectronicsCustomers.png}
+     \caption{Finding electronics customers}
  \end{figure}
 \pagebreak
 
