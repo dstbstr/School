@@ -129,7 +129,12 @@ Could have done this by renaming dept\_name as another approach. \\
     1002 & Emma White & Junior & C103 & Chess Club \\
     1005 & NULL & NULL & C104 & Science Club \\
     \hline
-\end{tabular}
+\end{tabular} \\
+A Left Outer Join of club and student will produce all rows from the club table,
+and any matching rows from the student table. If there is no match, it fills in null.
+There is 1 row in the club table with no match in the student table, 
+so that row will have null values for the student attributes. 
+The resulting table will have duplicate attributes removed, leaving us with 5 columns.\\
 \end{table*}
 
 \begin{table*}{$club \rightouterjoin student$}
@@ -143,7 +148,10 @@ Could have done this by renaming dept\_name as another approach. \\
     1003 & Amber Brown & Senior & NULL & NULL \\
     1004 & David Hernandez & Junior & NULL & NULL \\
     \hline
-\end{tabular}
+\end{tabular} \\
+A Right Outer Join of club and student will produce all rows from the student table,
+and any matching rows from the club table. If there is no match, it fills in null.
+There are 2 rows in student with no matches in club, so they appear with nulls in the club columns. \\
 \end{table*}
 
 \begin{table*}{$student \fullouterjoin club$}
@@ -158,7 +166,11 @@ Could have done this by renaming dept\_name as another approach. \\
     1004 & David Hernandez & Junior & NULL & NULL \\
     1005 & NULL & NULL & C104 & Science Club \\
     \hline
-\end{tabular}
+\end{tabular} \\
+A full outer join between student and club will produce all rows from both tables.
+The matching rows will be combined, and the rest will have nulls for missing attributes.
+As before, there are 5 attributes in the resulting table. \\
+
 \end{table*}
 
 \end{document}
