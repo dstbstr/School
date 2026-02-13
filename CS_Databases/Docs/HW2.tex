@@ -1,7 +1,7 @@
 \documentclass{article}
 \usepackage[margin=1.5cm]{geometry}
 \usepackage{amssymb}
-%\usepackage{float}
+\usepackage{float}
 \usepackage{caption}
 
 \def\ojoin{\setbox0=\hbox{$\bowtie$}%
@@ -27,16 +27,12 @@ $\Pi_{name, major}(\sigma_{dept\_name = 'Mathematics'}(student \bowtie departmen
 
 \section{For all students who have enrolled in at least one course, list the names of the
 students with the titles and credits of the courses they have enrolled in.}
-Need to prevent false sharing between student.departmentID and course.departmentID,
-so our join for department specifies that we want the course's departmentID, not the student's. \\
 \begin{Large}
     $\Pi_{name, title, credits}(student \bowtie enrollment \bowtie course \bowtie_{(course.departmentID = department.departmentId)} department)$
 \end{Large}
 
 \section{List the student IDs and names for all students who have not enrolled in any course
 offered by the department with department ID 101.}
-We find all of the students in courses offered by department 101,
-then remove all of those from the set of all students. \\
 \begin{Large}
     $ToRemove \leftarrow \sigma_{departmentID = 101}(student \bowtie enrollment \bowtie course)$ \\
     $\Pi_{studentID, name}(student) - \Pi_{studentID, name}(ToRemove)$
@@ -49,7 +45,6 @@ Business department.}
 \end{Large}
 
 \section{Find the names of students who have enrolled in both courses with course IDs MIS101 and CS202.}
-We find each group of students, then find the intersection of those sets. \\
 \begin{Large}
     $Mis \leftarrow \sigma_{courseID = 'MIS101'}(student \bowtie enrollment)$ \\
     $Cs \leftarrow \sigma_{courseID = 'CS202'}(student \bowtie enrollment)$ \\
@@ -57,7 +52,6 @@ We find each group of students, then find the intersection of those sets. \\
 \end{Large}
 
 \section{List the course titles and their offering departments’ names for all courses that no students have enrolled in.}
-We could have done this using a left outer join, but it seemed easier to remove all courses from the enrollment table. \\
 \begin{Large}
     $EmptyCourses \leftarrow \Pi_{courseID}(course) - \Pi_{courseID}(enrollment)$ \\
     $\Pi_{title, dept\_name}(EmptyCourses \bowtie course \bowtie department)$
@@ -65,8 +59,6 @@ We could have done this using a left outer join, but it seemed easier to remove 
 
 \section{List the names of students who received a grade of A or B in any course, along with
 the titles and names of the offering departments of those courses.}
-Need to prevent false sharing between student.departmentID and course.departmentID,
-so our join for department specifies that we want the course's departmentID, not the student's. \\
 \begin{Large}
     $GoodGrades \leftarrow \sigma_{grade = 'A' \lor grade = 'B'}(enrollment)$ \\
     $\Pi_{name, title, dept\_name}(GoodGrades \bowtie student \bowtie course \bowtie_{(course.departmentID = department.departmentId)} department)$
@@ -74,8 +66,6 @@ so our join for department specifies that we want the course's departmentID, not
 
 \section{Find the names and majors of all students who have enrolled in at least one course
 offered by the Physics department.}
-Find all of the physics courses, then find enrollment records for those courses.
-From there, we join those student ids with the student table. \\
 \begin{Large}
     $PhysicsCourses \leftarrow \Pi_{courseID}(\sigma_{dept\_name = 'Physics'}(course \bowtie department))$ \\
     $PhysicsStudents \leftarrow \Pi_{studentID}(enrollment \bowtie PhysicsCourses)$ \\
@@ -84,8 +74,6 @@ From there, we join those student ids with the student table. \\
 
 \section{List the titles of the courses that no students who are in Freshman year have enrolled
 in.}
-We need to remove all courses that freshmen have enrolled in from the set of all courses.
-We can't simply use enrollment, because that may exclude courses where no students are enrolled. \\
 
 \begin{Large}
     $Freshmen \leftarrow \Pi_{studentID}(\sigma_{year = 'Freshman'}(student))$ \\
@@ -96,9 +84,6 @@ We can't simply use enrollment, because that may exclude courses where no studen
 
 \section{Find the names of the students who have enrolled in the course with the title Database
 Systems, along with the name of the offering department.}
-We find the course with the specified title (presumably one, but could be multiple).
-When we join with student, we need to specify that we're joining on studentID and not departmentID.
-Could have done this by renaming dept\_name as another approach. \\
 \begin{Large} 
     $DbCourse \leftarrow \Pi_{courseID, dept\_name}(\sigma_{title = 'Database Systems'}(course \bowtie department))$ \\
     $\Pi_{name, dept\_name}(DbCourse \bowtie enrollment \bowtie_{enrollment.studentID = student.studentID} student)$
@@ -119,7 +104,7 @@ Could have done this by renaming dept\_name as another approach. \\
 % C104  Science Club    1005
 
 
-\begin{table*}{$club \leftouterjoin student$}
+\begin{table}[H]{$club \leftouterjoin student$}
 \begin{tabular}{|c|c|c|c|c|}
     \hline
     SID & name & class & CID & club\_name \\
@@ -135,9 +120,9 @@ and any matching rows from the student table. If there is no match, it fills in 
 There is 1 row in the club table with no match in the student table, 
 so that row will have null values for the student attributes. 
 The resulting table will have duplicate attributes removed, leaving us with 5 columns.\\
-\end{table*}
+\end{table}
 
-\begin{table*}{$club \rightouterjoin student$}
+\begin{table}[H]{$club \rightouterjoin student$}
 \begin{tabular}{|c|c|c|c|c|}
     \hline
     SID & name & class & CID & club\_name \\
@@ -152,9 +137,9 @@ The resulting table will have duplicate attributes removed, leaving us with 5 co
 A Right Outer Join of club and student will produce all rows from the student table,
 and any matching rows from the club table. If there is no match, it fills in null.
 There are 2 rows in student with no matches in club, so they appear with nulls in the club columns. \\
-\end{table*}
+\end{table}
 
-\begin{table*}{$student \fullouterjoin club$}
+\begin{table}[H]{$student \fullouterjoin club$}
 \begin{tabular}{|c|c|c|c|c|}
     \hline
     SID & name & class & CID & club\_name \\
@@ -171,6 +156,6 @@ A full outer join between student and club will produce all rows from both table
 The matching rows will be combined, and the rest will have nulls for missing attributes.
 As before, there are 5 attributes in the resulting table. \\
 
-\end{table*}
+\end{table}
 
 \end{document}

@@ -36,15 +36,190 @@
 \author{Dustin Randall}
 \maketitle
 
-\section{Problem 1}
+\section{Find the average budget for the departments}
 \begin{lstlisting}
+  SELECT ROUND(avg(annual_budget), 2) AS budget 
+  FROM Departments;
 \end{lstlisting}
 
 \begin{figure}[ht]
      \centering
-%     \includegraphics{OldRich.png}
-     \caption{Finding old rich teams}
+     \includegraphics{AvgBudget.png}
+     \caption{Finding average budget for departments}
  \end{figure}
 \pagebreak
+
+\section{Find the average budget for the departments}
+\begin{lstlisting}
+Select MIN(grant_amount) AS MinGrant, MAX(grant_amount) AS MaxGrant
+FROM Projects
+WHERE start_year <= 2023;
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{MinMaxGrants.png}
+     \caption{Finding min and max grants for projects in 2023 or earlier}
+ \end{figure}
+\pagebreak
+
+\section{Professors Without Projects}
+\begin{lstlisting}
+SELECT name FROM Professors P LEFT OUTER JOIN Assignments A ON A.professor_id = P.professor_id
+WHERE project_id IS NULL
+ORDER BY name;
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{ProfessorNoAssignment.png}
+     \caption{Finding professors without projects}
+
+ \end{figure}
+\pagebreak
+
+\section{Average Citations By Year}
+\begin{lstlisting}
+SELECT publication_year, ROUND(AVG(citations), 2) AS AveragePublications 
+FROM Publications
+GROUP BY publication_year
+ORDER BY publication_year;
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{AvgPubs.png}
+     \caption{Finding average citations by year}
+
+ \end{figure}
+\pagebreak
+
+\section{Find Total Prof Hours}
+\begin{lstlisting}
+SELECT professor_id, SUM(hours_allocated) AS total_hours 
+FROM Professors NATURAL JOIN Assignments
+WHERE professor_id < 20
+GROUP BY professor_id
+ORDER BY total_hours DESC;
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{ProfHours.png}
+     \caption{Finding total hours for professors}
+ \end{figure}
+\pagebreak
+
+\section{Average Salary By Department}
+\begin{lstlisting}
+SELECT department_name, COUNT(professor_id) AS prof_count, ROUND(AVG(salary), 2) AS avg_salary
+FROM Departments NATURAL JOIN Professors
+GROUP BY department_id;
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{DeptSalary.png}
+     \caption{Finding average salary}
+\end{figure}
+\pagebreak
+
+\section{Publications By Project}
+\begin{lstlisting}
+SELECT project_title, COUNT(publication_id) AS pubs
+FROM Projects NATURAL JOIN Publications
+WHERE end_year <= 2024
+GROUP BY project_id;
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{ProjectPubs.png}
+     \caption{Finding publications by project}
+ \end{figure}
+\pagebreak
+
+\section{Quantum Professors}
+\begin{lstlisting}
+SELECT COUNT(*) AS prof_count 
+FROM Professors 
+  NATURAL JOIN Assignments 
+  NATURAL JOIN Projects
+WHERE project_title = 'Quantum Computing';
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{ProfCount.png}
+     \caption{Finding professors in Quantum Computing project}
+ \end{figure}
+\pagebreak
+
+\section{Biotech Projects}
+\begin{lstlisting}
+SELECT COUNT(*) AS proj_count, 
+  ROUND(AVG(grant_amount), 2) AS avg_grant
+FROM Professors 
+  NATURAL JOIN Projects
+  NATURAL JOIN Departments  
+WHERE department_name = 'Biotechnology';
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{Biotech.png}
+     \caption{Finding biotech projects and average grant amounts}
+ \end{figure}
+\pagebreak
+
+\section{Profs By Project}
+\begin{lstlisting}
+SELECT project_title, 
+  COUNT(*) AS prof_count, 
+  ROUND(AVG(citations), 2) AS avg_cites 
+FROM Projects 
+  NATURAL JOIN Assignments 
+  NATURAL JOIN Publications
+GROUP BY project_id;
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{ProfsByProject.png}
+     \caption{Finding professors by project and average citations}
+ \end{figure}
+\pagebreak
+
+\section{John Smith Citations}
+\begin{lstlisting}
+SELECT ROUND(AVG(citations), 2) AS cites
+FROM Professors
+  NATURAL JOIN Assignments
+  NATURAL JOIN Publications 
+WHERE name = 'John Smith'
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{JohnSmith.png}
+     \caption{Finding average citations for John Smith}
+ \end{figure}
+\pagebreak
+
+\section{Recent Publications}
+\begin{lstlisting}
+SELECT department_name, MAX(publication_year) recent
+FROM Publications
+  NATURAL JOIN Projects
+  NATURAL JOIN Departments
+WHERE department_name = 'Computer Science' OR department_name = 'Mathematics'
+GROUP BY department_name
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{RecentPubs.png}
+     \caption{Finding recent publications by department}
+ \end{figure}
 
 \end{document}
