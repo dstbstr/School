@@ -12,7 +12,7 @@
     CREATE, TABLE, PRIMARY, KEY, FOREIGN, NOT, NULL, REFERENCES, INNER, OUTER, NATURAL, JOIN, CONSTRAINT,
     LEFT, RIGHT, FULL, ON, AS, USING, DISTINCT, GROUP, BY, ORDER, HAVING, LIMIT, UNIQUE, CASCADE, DEFAULT,
     RENAME, DESCRIBE, TO, IN, IF, CASE, WHEN, THEN, ELSE, END, TIMESTAMPDIFF, CURRENT_DATE, ROUND, CONCAT,
-    UNION
+    UNION, WITH, SOME, ALL, EXISTS, ANY, SUM, AVG, COUNT, MIN, MAX
   },
   sensitive=false,
   morecomment=[l]{--}, % SQL single-line comments
@@ -36,15 +36,239 @@
 \author{Dustin Randall}
 \maketitle
 
-\section{Problem 1}
+\section{Find Above Average Departments}
 \begin{lstlisting}
+SELECT department_name 
+FROM Departments
+WHERE annual_budget > (
+  SELECT AVG(annual_budget)
+  FROM Departments
+)
 \end{lstlisting}
 
 \begin{figure}[ht]
      \centering
-%     \includegraphics{OldRich.png}
-     \caption{Finding old rich teams}
+     \includegraphics{AboveAvgDepts.png}
+     \caption{Finding above average departments}
  \end{figure}
 \pagebreak
+
+\section{Find Best Paid Prof}
+\begin{lstlisting}
+SELECT name FROM Professors
+WHERE salary = (
+  SELECT MAX(salary)
+  FROM Professors
+)
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{BestPaid.png}
+     \caption{Finding best paid professor}
+ \end{figure}
+\pagebreak
+
+\section{Find Small Grants}
+\begin{lstlisting}
+SELECT project_title FROM Projects
+WHERE grant_amount < (
+  SELECT MAX(grant_amount) FROM Projects
+  WHERE end_year < 2024
+)
+ORDER BY project_title
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{SmallGrants.png}
+     \caption{Finding small grants}
+
+ \end{figure}
+\pagebreak
+
+\section{Find Max Average Salary}
+\begin{lstlisting}
+SELECT ROUND(MAX(avgSalary), 2) AS maxAvg
+FROM (
+  SELECT AVG(salary) AS avgSalary
+  FROM Professors
+  GROUP BY department_id
+) AS T
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{MaxAvgSalary.png}
+     \caption{Finding max average salary}
+
+ \end{figure}
+\pagebreak
+
+\section{Find Bored Profs}
+\begin{lstlisting}
+SELECT name FROM Professors
+WHERE professor_id NOT IN (
+  SELECT professor_id
+  FROM Assignments
+)
+ORDER BY name
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{BoredProfs.png}
+     \caption{Finding bored professors}
+
+ \end{figure}
+\pagebreak
+
+\section{Find Mid Departments}
+\begin{lstlisting}
+SELECT department_name FROM Departments
+WHERE annual_budget NOT IN (
+  SELECT MAX(annual_budget) FROM Departments
+  UNION
+  SELECT MIN(annual_budget) FROM Departments
+) 
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{MidDepts.png}
+     \caption{Finding mid budget departments}
+
+ \end{figure}
+\pagebreak
+
+\section{Find Assignments with professors 11 and 12}
+\begin{lstlisting}
+SELECT project_id
+FROM Assignments
+WHERE professor_id IN (11, 12)
+GROUP BY project_id
+HAVING COUNT(DISTINCT professor_id) >= 2;
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{Proj1112.png}
+     \caption{Finding projects assigned to both professors 11 and 12}
+
+ \end{figure}
+\pagebreak
+
+\section{Find Titles for previous query}
+\begin{lstlisting}
+SELECT project_title
+FROM Assignments NATURAL JOIN Projects
+WHERE professor_id IN (11, 12)
+GROUP BY project_id
+HAVING COUNT(DISTINCT professor_id) >= 2;
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{Proj1112Titles.png}
+     \caption{Finding titles of projects assigned to both professors 11 and 12}
+
+ \end{figure}
+\pagebreak
+
+\section{Find Projects with the most publications}
+\begin{lstlisting}
+WITH maxCount(v) AS (
+  SELECT MAX(pubCount) as maxCount
+  FROM (
+        SELECT COUNT(*) AS pubCount
+        FROM Publications
+        GROUP BY project_id
+   ) AS PubCounts
+)
+SELECT project_id
+FROM (
+  SELECT project_id, COUNT(*) AS pubCount
+  FROM Publications
+  GROUP BY project_id
+) AS T, maxCount
+WHERE T.pubCount = maxCount.v
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{BestPubProjs.png}
+     \caption{Finding projects with the most publications}
+
+ \end{figure}
+\pagebreak
+
+\section{Find Best Paid Profs By Dept}
+\begin{lstlisting}
+SELECT name FROM (
+  SELECT department_id, AVG(salary) avgSalary
+  FROM Professors
+  GROUP BY department_id
+) AS AvgSalaries NATURAL JOIN Professors P
+WHERE salary > avgSalary 
+ORDER BY name
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{WellPaidProfs.png}
+     \caption{Finding best paid professors by department}
+ \end{figure}
+\pagebreak
+
+\section{Find Most Demanding Projects}
+\begin{lstlisting}
+WITH projAvgHours AS (
+  SELECT project_id, ROUND(Avg(hours), 2) AS avgHours
+  FROM (
+    SELECT project_id, SUM(hours_allocated) AS hours
+    FROM Assignments
+    GROUP BY project_id, professor_id
+  ) AS T
+  GROUP BY project_id
+),
+maxAvg AS (
+  SELECT MAX(avgHours) AS maxHours
+  FROM projAvgHours
+)
+SELECT project_title
+FROM projAvgHours A
+JOIN maxAvg M
+  ON A.avgHours = M.maxHours
+NATURAL JOIN Projects P
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{DemandingProjects.png}
+     \caption{Finding most demanding projects}
+ \end{figure}
+\pagebreak
+
+\section{Find Over 500s}
+\begin{lstlisting}
+WITH projAvgHours AS (
+  SELECT project_id, ROUND(Avg(hours), 2) AS avgHours
+  FROM (
+    SELECT project_id, SUM(hours_allocated) AS hours
+    FROM Assignments
+    GROUP BY project_id, professor_id
+  ) AS T
+  GROUP BY project_id
+)
+SELECT COUNT(*) AS projCount
+FROM projAvgHours
+WHERE avgHours > 500
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{Over500.png}
+     \caption{Finding projects with average hours over 500}
+ \end{figure}
 
 \end{document}
