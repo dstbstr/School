@@ -24,12 +24,12 @@ public class Query {
 	private ResultSet result;
 	private Scanner scanner = new Scanner(System.in);
 
-	private static final String UPDATE_AUTHOR_QUERY = "UPDATE author SET firstName = ?, lastName = ? WHERE authorID = ?";
-	private static final String DELETE_AUTHOR_QUERY = "DELETE FROM author WHERE authorID = ?";
+	private static final String UPDATE_AUTHOR_QUERY = "UPDATE author SET firstName = ?, lastName = ? WHERE authorID = ?;";
+	private static final String DELETE_AUTHOR_QUERY = "DELETE FROM author WHERE authorID = ?;";
 	private static final String LIST_MULTI_AUTHORS_QUERY = """
 				SELECT firstName, lastName, COUNT(*) AS bookCount FROM author NATURAL JOIN book_author
 				GROUP BY authorID 
-				HAVING bookCount > 1""";
+				HAVING bookCount > 1;""";
 
 	private static final String LIST_TOP_SHIPPERS_QUERY = """
 		SELECT ROUND(AVG(shipCost), 2) AS AvgCost, firstName, lastName 
@@ -46,12 +46,12 @@ public class Query {
 
 	private static final String FIND_BOOKS_BY_PRICE = """
 		SELECT title, name from book NATURAL JOIN publisher
-		WHERE price >= ? AND price <= ?""";
+		WHERE price >= ? AND price <= ?;""";
 
 	private static final String GET_ORDER_VALUE = """
 		SELECT SUM(IF(shipCost, shipCost, 0)) + SUM(IF(price, price, 0) * quantity) AS totalCost 
 		FROM orders NATURAL JOIN items NATURAL JOIN book
-		WHERE orderID = ?""";
+		WHERE orderID = ?;""";
 
 	private static final String GET_POPULAR_REGIONS = """
 		SELECT region, COUNT(*) AS orderCount 
@@ -69,7 +69,7 @@ public class Query {
 	private static final String GET_CUSTOMER_PAID = """
 		SELECT firstName, lastName, SUM(price * quantity) AS totalPrice
 		FROM customer NATURAL JOIN orders NATURAL JOIN items NATURAL JOIN book
-		WHERE firstName = ? AND lastName = ?""";
+		WHERE firstName = ? AND lastName = ?;""";
 
 	/*
 	author(authorID, firstName, lastName)
@@ -156,8 +156,10 @@ public class Query {
 	}
 
 	public void getCoauthors() throws SQLException{
-		CallableStatement stmt = conn.prepareCall("{call GetCoauthors(?)}");
-		//stmt.registerOutParameter();
+		CallableStatement stmt = conn.prepareCall("{call GetAuthorPairs()}");
+		stmt.execute();
+		result = stmt.getResultSet();
+		printResultSet(result, "authors");
 	}
 
 	private <T> T getInput(String prompt, Class<T> type) {

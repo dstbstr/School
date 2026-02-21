@@ -1,0 +1,187 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{xcolor} % For custom colors
+\usepackage{listings}
+\usepackage{graphicx}
+\graphicspath{ {./Screenshots} }
+
+% Define SQL style
+\lstdefinelanguage{SQL}{
+  morekeywords={
+    ALTER, ADD, DROP, SELECT, FROM, WHERE, AND, OR, INSERT, INTO, VALUES, UPDATE, SET, DELETE,
+    CREATE, TABLE, PRIMARY, KEY, FOREIGN, NOT, NULL, REFERENCES, INNER, OUTER, NATURAL, JOIN, CONSTRAINT,
+    LEFT, RIGHT, FULL, ON, AS, USING, DISTINCT, GROUP, BY, ORDER, HAVING, LIMIT, UNIQUE, CASCADE, DEFAULT,
+    RENAME, DESCRIBE, TO, IN, IF, CASE, WHEN, THEN, ELSE, END, TIMESTAMPDIFF, CURRENT_DATE, ROUND, CONCAT,
+    UNION, WITH, SOME, ALL, EXISTS, ANY, SUM, AVG, COUNT, MIN, MAX
+  },
+  sensitive=false,
+  morecomment=[l]{--}, % SQL single-line comments
+  morecomment=[s]{/*}{*/}, % SQL multi-line comments
+  morestring=[b]', % Strings in single quotes
+}
+\definecolor{darkgreen}{rgb}{0,0.4,0}
+\lstset{language=SQL,
+    numbers=left,
+    basicstyle=\ttfamily,
+    showstringspaces=false,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{orange}\itshape,
+    stringstyle=\color{darkgreen},
+    frame=single,
+    breaklines=true
+}
+    
+\begin{document}
+\title{CSCD 327 Project 1}
+\author{Dustin Randall}
+\maketitle
+
+\section{Update Author}
+\begin{lstlisting}
+UPDATE author 
+SET firstName = ?, lastName = ? 
+WHERE authorID = ?;
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{UpdateAuthor.png}
+     \caption{Update Provided Author}
+\end{figure}
+\pagebreak
+
+\section{Delete Author}
+\begin{lstlisting}
+DELETE 
+FROM author 
+WHERE authorID = ?;
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{DeleteAuthor.png}
+     \caption{Delete Provided Author}
+\end{figure}
+\pagebreak
+
+\section{List Multi Authors}
+\begin{lstlisting}
+SELECT firstName, lastName, COUNT(*) AS bookCount 
+FROM author NATURAL JOIN book_author
+GROUP BY authorID 
+HAVING bookCount > 1;
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{MultiAuthors.png}
+     \caption{List Multiple Authors}
+\end{figure}
+\pagebreak
+
+\section{Find Top Shippers}
+\begin{lstlisting}
+SELECT ROUND(AVG(shipCost), 2) AS AvgCost, firstName, lastName 
+FROM orders NATURAL JOIN customer
+GROUP BY customerID
+HAVING AvgCost = (
+    SELECT MAX(AvgCost) As AvgCost
+    FROM (
+        SELECT AVG(shipCost) AS AvgCost
+        FROM orders
+        GROUP BY customerID
+    ) AS T
+);
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{TopShippers.png}
+     \caption{Find Top Shippers}
+\end{figure}
+\pagebreak
+
+\section{Books By Price}
+\begin{lstlisting}
+SELECT title, name 
+FROM book NATURAL JOIN publisher
+WHERE price >= ? AND price <= ?;
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{BooksByPrice.png}
+     \caption{Books By Price}
+\end{figure}
+\pagebreak
+
+\section{Order Value}
+\begin{lstlisting}
+SELECT SUM(IF(shipCost, shipCost, 0)) + SUM(IF(price, price, 0) * quantity) AS totalCost 
+FROM orders NATURAL JOIN items NATURAL JOIN book
+WHERE orderID = ?;
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{OrderValue.png}
+     \caption{Order Value}
+\end{figure}
+\pagebreak
+
+\section{Popular Regions}
+\begin{lstlisting}
+SELECT region, COUNT(*) AS orderCount 
+FROM orders NATURAL JOIN customer
+GROUP BY region
+HAVING orderCount = (
+    SELECT MAX(orderCount)
+    FROM (
+        SELECT region, COUNT(*) AS orderCount
+        FROM orders NATURAL JOIN customer
+        GROUP BY region
+    ) AS T
+);
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{PopularRegions.png}
+     \caption{Popular Regions}
+\end{figure}
+\pagebreak
+
+\section{Customer Paid}
+\begin{lstlisting}
+SELECT firstName, lastName, SUM(price * quantity) AS totalPrice
+FROM customer NATURAL JOIN orders NATURAL JOIN items NATURAL JOIN book
+WHERE firstName = ? AND lastName = ?;
+\end{lstlisting}
+
+\begin{figure}[ht]
+     \centering
+     \includegraphics{CustomerPaid.png}
+     \caption{Customer Paid}
+\end{figure}
+\pagebreak
+
+\section{Average Category Price}
+\begin{figure}[ht]
+     \centering
+     %\includegraphics{AuthorPairs1.png}
+     %\includegraphics{AuthorPairs2.png}
+     \caption{Average Category Price}
+\end{figure}
+\pagebreak
+
+\section{Author Pairs}
+\begin{figure}[ht]
+     \centering
+     \includegraphics{AuthorPairs1.png}
+     \includegraphics{AuthorPairs2.png}
+     \caption{Customer Paid}
+\end{figure}
+\pagebreak
+
+
+\end{document}
