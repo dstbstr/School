@@ -166,22 +166,43 @@ WHERE firstName = ? AND lastName = ?;
 \pagebreak
 
 \section{Average Category Price}
+\begin{lstlisting}
+SELECT category, GetAvgPriceByCategory(category) AS avgPrice
+FROM book
+GROUP BY category;
+\end{lstlisting}
+
 \begin{figure}[ht]
      \centering
-     %\includegraphics{AuthorPairs1.png}
-     %\includegraphics{AuthorPairs2.png}
+     \includegraphics{AvgPriceCat.png}
      \caption{Average Category Price}
 \end{figure}
 \pagebreak
 
 \section{Author Pairs}
+\begin{lstlisting}
+WITH Isbns AS (
+    SELECT ISBN FROM book_author
+    GROUP BY ISBN
+    HAVING COUNT(authorID) > 1
+),
+AllAuthors AS (
+    SELECT ISBN, CONCAT(firstName, ' ', lastName) AS authorName
+    FROM book_author NATURAL JOIN author 
+    WHERE ISBN IN (
+        SELECT ISBN FROM Isbns
+    )
+)
+SELECT DISTINCT CONCAT(Lhs.authorName, ' and ', Rhs.authorName) AS authors
+FROM AllAuthors AS Lhs, AllAuthors AS Rhs
+WHERE Lhs.authorName < Rhs.authorName AND Lhs.ISBN = Rhs.ISBN
+ORDER BY authors;
+\end{lstlisting}
+
 \begin{figure}[ht]
      \centering
-     \includegraphics{AuthorPairs1.png}
-     \includegraphics{AuthorPairs2.png}
-     \caption{Customer Paid}
+     \includegraphics{GetCoauthors.png}
+     \caption{Author Pairs}
 \end{figure}
-\pagebreak
-
 
 \end{document}

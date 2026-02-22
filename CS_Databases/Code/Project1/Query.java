@@ -71,6 +71,11 @@ public class Query {
 		FROM customer NATURAL JOIN orders NATURAL JOIN items NATURAL JOIN book
 		WHERE firstName = ? AND lastName = ?;""";
 
+	private static final String GET_AVERAGE_PRICES = """
+		SELECT category, GetAvgPriceByCategory(category) AS avgPrice
+		FROM book
+		GROUP BY category;""";
+
 	/*
 	author(authorID, firstName, lastName)
 	publisher(publisherID, name, contact, phone)
@@ -151,8 +156,10 @@ public class Query {
 		printResultSet(result, "firstName", "lastName", "totalPrice");
 	}
 
-	public void getAveragePrices() {
-
+	public void getAveragePrices() throws SQLException {
+		stmt = conn.prepareStatement(GET_AVERAGE_PRICES);
+		result = stmt.executeQuery();
+		printResultSet(result, "category", "avgPrice");
 	}
 
 	public void getCoauthors() throws SQLException{
