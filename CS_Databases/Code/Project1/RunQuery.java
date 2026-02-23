@@ -6,7 +6,6 @@
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.io.IOException;
 import java.util.Scanner;
 
 public class RunQuery {
@@ -17,7 +16,6 @@ public class RunQuery {
 		Connection conn = null;
 
 		try {
-
 			conn = getConnection();
 			Query db = new Query(conn);
 
@@ -71,9 +69,6 @@ public class RunQuery {
 				}
 			}
 		}
-		// catch (IOException e) {
-		// 	e.printStackTrace();
-		// }
 	}
 
 	public static Connection getConnection() throws SQLException {
@@ -84,7 +79,7 @@ public class RunQuery {
 		String database = "w26drandall3_projectDB";
 		String url = "jdbc:mysql://" + serverName + "/" + database;
 		String username = "w26drandall3";
-		String password = "Dstbstr2026!!"; // TODO: Remove password before submission
+		String password = "";
 		connection = DriverManager.getConnection(url, username, password);
 		return connection;
 	}
