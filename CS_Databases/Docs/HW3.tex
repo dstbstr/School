@@ -11,6 +11,155 @@
 
 \section{Which of the following FDs may hold?}
 \subsection{$Z \rightarrow Y$}
+$Z \rightarrow Y$ cannot hold because Y at z3 = y2 and y4
 \subsection{$\{W, X \} \rightarrow Y$}
+$\{W, X \} \rightarrow Y$ may hold. There are no two tuples with the same $\{W, X\}$ values to compare.
 \subsection{$\{Y, Z \} \rightarrow X$}
+$\{Y, Z \} \rightarrow X$ may hold. There are no two tuples with the same $\{Y, Z\}$ values to compare.
+
+\section{Is the relation in 2NF?}
+No, the relation is not in 2NF because the nonprime attributes Name and $\{Course Title, Instructor\}$
+are not fully dependent on the primary key $\{StudentID, CourseID\}$.
+
+\section{CarSale(\underline{VIN}, DateSold, \underline{Salesperson}, Commission, Discount)}
+\subsection{Is CarSale in 2NF?}
+No, CarSale is not in 2NF because the nonprime attribute Commission is partially dependent on the primary key $\{VIN, Salesperson\}$.
+\subsection{Normalize to 2NF then 3NF.}
+\subsubsection{2NF}
+To convert into 2NF, we need to remove the partial dependency of Commission on Salesperson.
+We extract CarSale2 with Salesperson as the primary key, and Commission as the nonprime attribute. \\
+CarSale1(\underline{VIN}, DateSold, \underline{Salesperson}, Discount) \\
+CarSale2(\underline{Salesperson}, Commission) \\
+\subsubsection{3NF}
+To convert into 3NF, we need to remove the transitive dependency of Discount on VIN by creating a separate relation. \\
+CarSale1(\underline{VIN}, DateSold, \underline{Salesperson}) \\
+CarSale2(\underline{Salesperson}, Commission) \\
+CarSale3(\underline{DateSold}, Discount) \\
+\subsection{Justify each table as 3NF.}
+CarSale1 is in 3NF because DateSold is fully functionally dependent on the primary key $\{VIN, Salesperson\}$ \\
+CarSale2 is in 3NF because Commission is fully functionally dependent on the primary key Salesperson. \\
+CarSale3 is in 3NF because Discount is fully functionally dependent on the primary key DateSold.
+\subsection{Use the Chase Test to check if the decomposition is lossless.}
+\begin{table}[H]{Initial Table}
+\begin{tabular}{|c|c|c|c|c|c|}
+    \hline
+    & VIN & DateSold & Salesperson & Commission & Discount \\
+    \hline
+    CarSale1 & b11 & b12 & b13 & b14 & b15 \\
+    \hline
+    CarSale2 & b21 & b22 & b23 & b24 & b25 \\
+    \hline
+    CarSale3 & b31 & b32 & b33 & b34 & b35 \\
+    \hline
+    \end{tabular}
+\end{table}
+\begin{table}[H]{Apply Columns for CarSale 1-3}
+\begin{tabular}{|c|c|c|c|c|c|}
+    \hline
+    & VIN & DateSold & Salesperson & Commission & Discount \\
+    \hline
+    CarSale1 & a1 & a2 & a3 & b14 & b15 \\
+    \hline
+    CarSale2 & b21 & b22 & a3 & a4 & b25 \\
+    \hline
+    CarSale3 & b31 & a2 & b33 & b34 & a5 \\
+    \hline
+    \end{tabular}
+\end{table}
+
+\begin{table}[H]{Apply $Salesperson \rightarrow Commission$}
+\begin{tabular}{|c|c|c|c|c|c|}
+    \hline
+    & VIN & DateSold & Salesperson & Commission & Discount \\
+    \hline
+    CarSale1 & a1 & a2 & a3 & a4 & b15 \\
+    \hline
+    CarSale2 & b21 & b22 & a3 & a4 & b25 \\
+    \hline
+    CarSale3 & b31 & a2 & b33 & b34 & a5 \\
+    \hline
+    \end{tabular}
+\end{table}
+
+\begin{table}[H]{Apply $DateSold \rightarrow Discount$}
+\begin{tabular}{|c|c|c|c|c|c|}
+    \hline
+    & VIN & DateSold & Salesperson & Commission & Discount \\
+    \hline
+    CarSale1 & a1 & a2 & a3 & a4 & a5 \\
+    \hline
+    CarSale2 & b21 & b22 & a3 & a4 & b25 \\
+    \hline
+    CarSale3 & b31 & a2 & b33 & b34 & a5 \\
+    \hline
+    \end{tabular}
+\end{table}
+Since the first row now has all a's, the decomposition is lossless.
+
+\section {$Product(Supplier, Brand, Type, Quantity, Store)$}
+\subsection{Is Product in 3NF? Why or why not?}
+Product can be considered in 3NF given the 2 FDs: $\{Brand, Type\} \rightarrow Supplier$ and $\{Supplier, Store, Type\} \rightarrow Brand$.
+Supplier and Brand are both prime attributes of Product.
+\subsection{Is Product in BCNF? Why or why not?}
+Product is not in BCNF because both FDs have non-superkey determinants. 
+$\{Brand, Type\}$ and $\{Supplier, Store, Type\}$ are not superkeys of Product.
+
+\section{$R(A, B, C, D)$ with FDs: $A \rightarrow B$, $B \rightarrow C$}
+\begin{table}[H]{Initial Table}
+\begin{tabular}{|c|c|c|c|c|}
+    \hline
+    & A & B & C & D \\
+    \hline
+    $\{A, B\}$ & b11 & b12 & b13 & b14 \\
+    \hline
+    $\{B, C\}$ & b21 & b22 & b23 & b24 \\
+    \hline
+    $\{C, D\}$ & b31 & b32 & b33 & b34 \\
+    \hline
+    \end{tabular}
+\end{table}
+
+\begin{table}[H]{Substitute As for columns}
+\begin{tabular}{|c|c|c|c|c|}
+    \hline
+    & A & B & C & D \\
+    \hline
+    $\{A, B\}$ & a1 & a2 & b13 & b14 \\
+    \hline
+    $\{B, C\}$ & b21 & a2 & a3 & b24 \\
+    \hline
+    $\{C, D\}$ & b31 & b32 & a3 & a4 \\
+    \hline
+    \end{tabular}
+\end{table}
+
+\begin{table}[H]{Apply $A \rightarrow B$}
+\begin{tabular}{|c|c|c|c|c|}
+    \hline
+    & A & B & C & D \\
+    \hline
+    $\{A, B\}$ & a1 & a2 & b13 & b14 \\
+    \hline
+    $\{B, C\}$ & a1 & a2 & a3 & b24 \\
+    \hline
+    $\{C, D\}$ & b31 & b32 & a3 & a4 \\
+    \hline
+    \end{tabular}
+\end{table}
+
+\begin{table}[H]{Apply $B \rightarrow C$}
+\begin{tabular}{|c|c|c|c|c|}
+    \hline
+    & A & B & C & D \\
+    \hline
+    $\{A, B\}$ & a1 & a2 & a3 & b14 \\
+    \hline
+    $\{B, C\}$ & a1 & a2 & a3 & b24 \\
+    \hline
+    $\{C, D\}$ & b31 & b32 & a3 & a4 \\
+    \hline
+    \end{tabular}
+\end{table}
+At this point we've run out of FDs to apply, and no rows contain all a's, so the decomposition is lossy.
+
 \end{document}
