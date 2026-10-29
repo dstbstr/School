@@ -2,3 +2,6 @@
 **/lib/*
 **/.vscode/*
 *.pdf
+**/.idea/*
+**/.github/*
+**/target/*
