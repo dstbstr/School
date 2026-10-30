@@ -5,263 +5,235 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from pathlib import Path
+import file_ops
 
 import requests_cache
 from retry_requests import retry
 
-def next_image_path(path: Path) -> Path:
-	highest = 1 if path.exists() else 0
-	prefix = f"{path.stem}_"
+def get_weather_data() -> pd.DataFrame:
+	# Setup the Open-Meteo API client with cache and retry on error
+	cache_session = requests_cache.CachedSession('.cache', expire_after = -1)
+	retry_session = retry(cache_session, retries = 5, backoff_factor = 0.2)
+	openmeteo = openmeteo_requests.Client(session = retry_session)
 
-	for candidate in path.parent.glob(f"{prefix}*{path.suffix}"):
-		suffix = candidate.stem[len(prefix):]
-		if candidate.stem.startswith(prefix) and suffix.isdigit():
-			highest = max(highest, int(suffix))
+	# Make sure all required weather variables are listed here
+	# The order of variables in hourly or daily is important to assign them correctly below
+	url = "https://archive-api.open-meteo.com/v1/archive"
+	params = {
+		"latitude": 47.6597,
+		"longitude": -117.4291,
+		"start_date": "1970-01-01",
+		"end_date": "2025-12-31",
+		"daily": ["temperature_2m_min","temperature_2m_max", "temperature_2m_mean", "shortwave_radiation_sum"],
+		"temperature_unit": "fahrenheit",
+		"wind_speed_unit": "mph",
+	}
+	responses = openmeteo.weather_api(url, params = params)
 
-		if highest == 0:
-			return path
+	# Process first location. Add a for-loop for multiple locations or weather models
+	response = responses[0]
+	daily = response.Daily()
 
-	return path.with_name(f"{path.stem}_{highest+1}{path.suffix}")
+	daily_data = {
+		"date": pd.date_range(
+			start = pd.to_datetime(daily.Time(), unit = "s", utc = True),
+			end =  pd.to_datetime(daily.TimeEnd(), unit = "s", utc = True),
+			freq = pd.Timedelta(seconds = daily.Interval()),
+			inclusive = "left"
+		)
+	}
+
+	daily_data["temp_min"] = daily.Variables(0).ValuesAsNumpy()
+	daily_data["temp_max"] = daily.Variables(1).ValuesAsNumpy()
+	daily_data["temp_mean"] = daily.Variables(2).ValuesAsNumpy()
+	daily_data["rad_sum"] = daily.Variables(3).ValuesAsNumpy()
 	
-# Setup the Open-Meteo API client with cache and retry on error
-cache_session = requests_cache.CachedSession('.cache', expire_after = -1)
-retry_session = retry(cache_session, retries = 5, backoff_factor = 0.2)
-openmeteo = openmeteo_requests.Client(session = retry_session)
+	daily_dataframe = pd.DataFrame(data = daily_data)
+	daily_dataframe["year"] = daily_dataframe["date"].dt.year
 
-# Make sure all required weather variables are listed here
-# The order of variables in hourly or daily is important to assign them correctly below
-url = "https://archive-api.open-meteo.com/v1/archive"
-params = {
-	"latitude": 47.6597,
-	"longitude": -117.4291,
-	"start_date": "1970-01-01",
-	"end_date": "2025-12-31",
-	"daily": ["temperature_2m_min","temperature_2m_max", "temperature_2m_mean", "shortwave_radiation_sum"],
-	"temperature_unit": "fahrenheit",
-	"wind_speed_unit": "mph",
-}
-responses = openmeteo.weather_api(url, params = params)
+	return daily_dataframe
 
-# Process first location. Add a for-loop for multiple locations or weather models
-response = responses[0]
-print(f"Coordinates: {response.Latitude()}°N {response.Longitude()}°E")
-print(f"Elevation: {response.Elevation()} m asl")
-
-# Process daily data. The order of variables needs to be the same as requested.
-daily = response.Daily()
-daily_temperature_2m_min = daily.Variables(0).ValuesAsNumpy()
-daily_temperature_2m_max = daily.Variables(1).ValuesAsNumpy()
-daily_temperature_2m_mean = daily.Variables(2).ValuesAsNumpy()
-daily_shortwave_radiation_sum = daily.Variables(3).ValuesAsNumpy()
-
-daily_data = {
-	"date": pd.date_range(
-		start = pd.to_datetime(daily.Time(), unit = "s", utc = True),
-		end =  pd.to_datetime(daily.TimeEnd(), unit = "s", utc = True),
-		freq = pd.Timedelta(seconds = daily.Interval()),
-		inclusive = "left"
+def get_annual_data(daily: pd.DataFrame) -> pd.DataFrame:
+	return (
+		daily.groupby("year")
+		.agg(
+			radiation_total = ("rad_sum", "sum"),
+			mean_temperature = ("temp_mean", "mean"),
+			mean_daily_max=("temp_max", "mean"),
+			mean_daily_min=("temp_min", "mean"),
+			days=("date", "size")
+		)
+		.reset_index()
 	)
-}
 
-daily_data["temperature_2m_min"] = daily_temperature_2m_min
-daily_data["temperature_2m_max"] = daily_temperature_2m_max
-daily_data["temperature_2m_mean"] = daily_temperature_2m_mean
-daily_data["shortwave_radiation_sum"] = daily_shortwave_radiation_sum
+def get_monthly_baseline(daily: pd.DataFrame, start_year: int, end_year: int) -> pd.DataFrame:
+	baseline = daily.loc[daily["year"].between(start_year, end_year)].copy()
+	baseline["month"] = baseline["date"].dt.month
 
-daily_dataframe = pd.DataFrame(data = daily_data)
-daily_dataframe["year"] = daily_dataframe["date"].dt.year
-
-### Baseline
-baseline = daily_dataframe.loc[daily_dataframe["year"].between(1985, 2014)].copy()
-baseline["month"] = baseline["date"].dt.month
-
-monthly_baseline = baseline.groupby("month").agg(
-	high_mean=("temperature_2m_max", "mean"),
-	high_std=("temperature_2m_max", "std"),
-	low_mean=("temperature_2m_min", "mean"),
-	low_std=("temperature_2m_min", "std"),
-	rad_mean=("shortwave_radiation_sum", "mean"),
-	rad_std=("shortwave_radiation_sum", "std")
-)
-
-daily_dataframe["month"] = daily_dataframe["date"].dt.month
-daily = daily_dataframe.join(monthly_baseline, on="month")
-daily["too_hot"] = (
-	daily["temperature_2m_max"] > daily["high_mean"] + daily["high_std"]
-)
-daily["too_cold"] = (
-	daily["temperature_2m_min"] < daily["low_mean"] - daily["low_std"]
-)
-daily["too_bright"] = (
-	daily["shortwave_radiation_sum"] > daily["rad_mean"] + daily["rad_std"]
-)
-daily["too_dim"] = (
-	daily["shortwave_radiation_sum"] < daily["rad_mean"] - daily["rad_std"]
-)
-
-
-### Annual Weather Plots
-
-annual = (
-    daily_dataframe.groupby("year")
-    .agg(
-        radiation_total = ("shortwave_radiation_sum", "sum"),
-        mean_temperature = ("temperature_2m_mean", "mean"),
-        mean_daily_max=("temperature_2m_max", "mean"),
-        mean_daily_min=("temperature_2m_min", "mean"),
-        days=("date", "size")
+	return baseline.groupby("month").agg(
+		high_mean=("temp_max", "mean"),
+		high_std=("temp_max", "std"),
+		low_mean=("temp_min", "mean"),
+		low_std=("temp_min", "std"),
+		rad_mean=("rad_sum", "mean"),
+		rad_std=("rad_sum", "std")
 	)
-    .reset_index()
-)
 
-X = annual["year"].to_numpy()
-radY = annual["radiation_total"].to_numpy()
-avgY = annual["mean_temperature"].to_numpy()
-maxY = annual["mean_daily_max"].to_numpy()
-minY = annual["mean_daily_min"].to_numpy()
+def get_daily_outliers(daily: pd.DataFrame, monthly_baseline: pd.DataFrame) -> pd.DataFrame:
+	result = daily.copy()
+	result["month"] = result["date"].dt.month
+	result = result.join(monthly_baseline, on="month")
 
-radSlope, radIntercept = np.polyfit(X, radY, 1)
-avgSlope, avgIntercept = np.polyfit(X, avgY, 1)
-maxSlope, maxIntercept = np.polyfit(X, maxY, 1)
-minSlope, minIntercept = np.polyfit(X, minY, 1)
+	result["too_hot"] = (result["temp_max"] > result["high_mean"] + result["high_std"])
+	result["too_cold"] = (result["temp_min"] < result["low_mean"] - result["low_std"])
+	result["too_bright"] = (result["rad_sum"] > result["rad_mean"] + result["rad_std"])
+	result["too_dim"] = (result["rad_sum"] < result["rad_mean"] - result["rad_std"])
 
-fig, (ax_rad, ax_temp), = plt.subplots(
-    2, 1, sharex=True, figsize=(10, 7), constrained_layout=True
-)
+	return result
 
-ax_rad.plot(X, radY, "o-", label="Annual total")
-ax_rad.plot(X, radSlope * X + radIntercept, "--", label="Linear trend")
-ax_rad.set(
-    title="Annual Radiation",
-    ylabel="Radiation (MJ/m²)"
-)
-ax_rad.legend()
-
-ax_temp.plot(X, avgY, "o-", label="Annual mean temperature")
-ax_temp.plot(X, avgSlope * X + avgIntercept, "--", label="Mean-temperature trend")
-ax_temp.plot(X, maxY, "o-", label="Average daily high")
-ax_temp.plot(X, maxSlope * X + maxIntercept, "--", label="Daily-high trend")
-ax_temp.plot(X, minY, "o-", label="Average daily low")
-ax_temp.plot(X, minSlope * X + minIntercept, "--", label="Daily-low trend")
-ax_temp.set(
-    title="Annual Mean Temperature",
-    xlabel="Year",
-    ylabel="Temperature (°F)"
-)
-ax_temp.xaxis.set_major_locator(MaxNLocator(integer=True, nbins=10))
-ax_temp.legend()
-
-figures_dir = Path(__file__).resolve().parent.parent / "Figures"
-figures_dir.mkdir(parents=True, exist_ok=True)
-fig.savefig(next_image_path(figures_dir / "annual_weather.png"), format="png", dpi=500, bbox_inches="tight")
-plt.close(fig)
-
-### Annual Weather Stats
-# annual_stats = (
-#     daily_dataframe.groupby(daily_dataframe["date"].dt.year)
-#     .agg(
-#         radiation_mean=("shortwave_radiation_sum", "mean"),
-#         radiation_std=("shortwave_radiation_sum", "std"),
-#         temp_mean=("temperature_2m_mean", "mean"),
-#         temp_std=("temperature_2m_mean", "std"),
-#         high_mean=("temperature_2m_max", "mean"),
-#         high_std=("temperature_2m_max", "std")
-# 	)
-#     .rename_axis("year")
-#     .reset_index()
-# )
-
-# X_stats = annual_stats["year"].to_numpy()
-
-# fig, (ax_rad, ax_temp) = plt.subplots(
-#     2, 1, sharex=True, figsize=(10, 7), constrained_layout=True
-# )
-
-# ax_rad.errorbar(
-#     X_stats,
-#     annual_stats["radiation_mean"],
-#     yerr=annual_stats["radiation_std"],
-#     fmt="o-",
-#     capsize=2,
-#     label="Mean daily radiation ± SD"
-# )
-# ax_rad.set(title="Within-year Daily Variation", ylabel="Radiation (MJ/m²)")
-# ax_rad.legend()
-
-# ax_temp.errorbar(
-#     X_stats,
-#     annual_stats["temp_mean"],
-#     yerr=annual_stats["temp_std"],
-#     fmt="o-",
-#     capsize=2,
-#     label="Mean daily temperature ± SD"
-# )
-
-# ax_temp.errorbar(
-#     X_stats,
-#     annual_stats["high_mean"],
-#     yerr=annual_stats["high_std"],
-#     fmt="o-",
-#     capsize=2,
-#     label="Mean daily high ± SD"
-# )
-# ax_temp.set(xlabel="year", ylabel="Temperature (°F)")
-# ax_temp.xaxis.set_major_locator(MaxNLocator(integer=True, nbins=10))
-# ax_temp.legend()
-
-# fig.savefig(next_image_path(figures_dir / "annual_stats.png"), format="png", dpi=500, bbox_inches="tight")
-
-### Outlier plot
-annual_outliers = (
-	daily.groupby("year")
-	.agg(
-		days=("date", "size"),
-		hot=("too_hot", "sum"),
-		cold=("too_cold", "sum"),
-		bright=("too_bright", "sum"),
-		dim=("too_dim", "sum")
+def get_annual_outliers(baseline: pd.DataFrame) -> pd.DataFrame:
+	annual_outliers = (
+		baseline.groupby("year")
+		.agg(
+			days=("date", "size"),
+			hot=("too_hot", "sum"),
+			cold=("too_cold", "sum"),
+			bright=("too_bright", "sum"),
+			dim=("too_dim", "sum")
+		)
+		.reset_index()
 	)
-	.reset_index()
-)
-
-for name in ("hot", "cold", "bright", "dim"):
-	annual_outliers[f"{name}_pct"] = 100 * annual_outliers[name] / annual_outliers["days"]
-
-outlier_X = annual_outliers["year"].to_numpy()
-hotSlope, hotIntercept = np.polyfit(outlier_X, annual_outliers["hot_pct"], 1)
-coldSlope, coldIntercept = np.polyfit(outlier_X, annual_outliers["cold_pct"], 1)
-brightSlope, brightIntercept = np.polyfit(outlier_X, annual_outliers["bright_pct"], 1)
-dimSlope, dimIntercept = np.polyfit(outlier_X, annual_outliers["dim_pct"], 1)
+	return annual_outliers
 
 
-fig_outliers, (ax_temp, ax_rad) = plt.subplots(
-	2, 1, sharex=True, figsize=(10, 7), constrained_layout=True
-)
-ax_temp.plot(annual_outliers["year"], annual_outliers["cold_pct"], "o-", label="Unusually Cold")
-ax_temp.plot(annual_outliers["year"], annual_outliers["hot_pct"], "o-", label="Unusually Hot")
-ax_temp.plot(annual_outliers["year"], hotSlope * outlier_X + hotIntercept, "--", label="Hot Trend")
-ax_temp.plot(annual_outliers["year"], coldSlope * outlier_X + coldIntercept, "--", label="Cold Trend")
-ax_temp.set(title="Unusual Temperature Days", ylabel="Days per year (%)")
-ax_temp.legend()
+def plot_with_trend(ax, x, y, data_label, trend_label):
+	x = np.asarray(x)
+	y = np.asarray(y)
+	slope, intercept = np.polyfit(x, y, 1)
 
-ax_rad.plot(annual_outliers["year"], annual_outliers["dim_pct"], "o-", label="Unusually Dim")
-ax_rad.plot(annual_outliers["year"], annual_outliers["bright_pct"], "o-", label="Unusually Bright")
-ax_rad.plot(annual_outliers["year"], dimSlope * outlier_X + dimIntercept, "--", label="Dim Trend")
-ax_rad.plot(annual_outliers["year"], brightSlope * outlier_X + brightIntercept, "--", label="Bright Trend")
-ax_rad.set(title="Unusual Radiation Days", ylabel="Days per year (%)")
-ax_rad.xaxis.set_major_locator(MaxNLocator(integer=True, nbins=10))
-ax_rad.legend()
-fig_outliers.savefig(next_image_path(figures_dir / "outliers.png"), format="png", dpi=500, bbox_inches="tight")
-plt.close(fig_outliers)
+	data_line = ax.plot(x, y, "o-", label=data_label)
+	ax.plot(
+		x,
+		slope * x + intercept,
+		"--",
+		label=trend_label
+	)
+	return slope
 
-### Scatter plot
-daily["radiation_z"] = (
-	daily["shortwave_radiation_sum"] - daily["rad_mean"]
-) / daily["rad_std"]
+def plot_annual(annual: pd.DataFrame, figures_dir: Path):
+	X = annual["year"].to_numpy()
+	radY = annual["radiation_total"].to_numpy()
+	avgY = annual["mean_temperature"].to_numpy()
+	maxY = annual["mean_daily_max"].to_numpy()
+	minY = annual["mean_daily_min"].to_numpy()
 
-daily["high_z"] = (
-	daily["temperature_2m_max"] - daily["high_mean"]
-) / daily["high_std"]
+	fig, (ax_rad, ax_temp), = plt.subplots(
+		2, 1, sharex=True, figsize=(10, 7), constrained_layout=True
+	)
 
+	plot_with_trend(ax_rad, X, radY, "Annual total", "Radiation trend")
 
-#plt.close(fig_outliers)
+	ax_rad.set(
+		title="Annual Radiation",
+		ylabel="Radiation (MJ/m²)"
+	)
+	ax_rad.legend()
+
+	plot_with_trend(ax_temp, X, avgY, "Annual mean temperature", "Mean-temperature trend")
+	plot_with_trend(ax_temp, X, maxY, "Average daily high", "Daily-high trend")
+	plot_with_trend(ax_temp, X, minY, "Average daily low", "Daily-low trend")
+
+	ax_temp.set(
+		title="Annual Temperature",
+		xlabel="Year",
+		ylabel="Temperature (°F)"
+	)
+	ax_temp.xaxis.set_major_locator(MaxNLocator(integer=True, nbins=10))
+	ax_temp.legend()
+
+	fig.savefig(file_ops.next_path(figures_dir / "annual_weather.png"), format="png", dpi=500, bbox_inches="tight")
+	plt.close(fig)
+
+def plot_outliers(outliers: pd.DataFrame, figures_dir: Path):
+	for name in ("hot", "cold", "bright", "dim"):
+		outliers[f"{name}_pct"] = 100 * outliers[name] / outliers["days"]
+
+	x = outliers["year"].to_numpy()
+
+	fig, (ax_temp, ax_rad) = plt.subplots(
+		2, 1, sharex=True, figsize=(10, 7), constrained_layout=True
+	)
+	plot_with_trend(ax_temp, x, outliers["hot_pct"], "Unusually Hot", "Hot Trend")
+	plot_with_trend(ax_temp, x, outliers["cold_pct"], "Unusually Cold", "Cold Trend")
+	ax_temp.set(title="Unusual Temperature Days", ylabel="Days per year (%)")
+	ax_temp.legend()
+
+	plot_with_trend(ax_rad, x, outliers["dim_pct"], "Unusually Dim", "Dim Trend")
+	plot_with_trend(ax_rad, x, outliers["bright_pct"], "Unusually Bright", "Bright Trend")
+	ax_rad.set(title="Unusual Radiation Days", ylabel="Days per year (%)")
+	ax_rad.xaxis.set_major_locator(MaxNLocator(integer=True, nbins=10))
+	ax_rad.legend()
+	fig.savefig(file_ops.next_path(figures_dir / "outliers.png"), format="png", dpi=500, bbox_inches="tight")
+	plt.close(fig)
+
+def plot_scatter(daily_outliers: pd.DataFrame, figures_dir: Path) -> None:
+	points = pd.DataFrame({
+		"rad_z":(daily_outliers["rad_sum"] - daily_outliers["rad_mean"]) / daily_outliers["rad_std"],
+		"high_z":(daily_outliers["temp_max"] - daily_outliers["high_mean"]) / daily_outliers["high_std"]
+	}).dropna()
+
+	x = points["rad_z"].to_numpy()
+	y = points["high_z"].to_numpy()
+	slope, intercept = np.polyfit(x, y, 1)
+	correlation = points["rad_z"].corr(points["high_z"])
+
+	fig, ax, = plt.subplots(figsize=(8, 6), constrained_layout=True)
+	ax.scatter(x, y, label="Daily observations")
+
+	fit_x = np.linspace(x.min(), x.max(), 100)
+	ax.plot(fit_x, slope * fit_x + intercept, "--", label=f"Linear fit (r={correlation:.2f})")
+
+	for threshold in (-1, 0, 1):
+		ax.axhline(threshold, color="gray", linewidth=0.7, alpha=0.5)
+		ax.axvline(threshold, color="gray", linewidth=0.7, alpha=0.5)
+
+	ax.set(
+		title="Daily Radiation vs Daily High Temperature",
+		xlabel="Radiation anomaly (standard deviations)",
+		ylabel="High Temperature anomaly (standard deviations)"
+	)
+
+	ax.legend()
+	hb = ax.hexbin(x, y, gridsize=45, mincnt=1, cmap="viridis")
+	fig.colorbar(hb, ax=ax, label="Number of days")
+	fig.savefig(file_ops.next_path(figures_dir / "scatter.png"), format="png", dpi=500, bbox_inches="tight")
+	plt.close(fig)
+
+def main():
+	print("Gathering data")
+	daily = get_weather_data()
+
+	print("Processing data")
+	annual = get_annual_data(daily)
+	monthly_baseline = get_monthly_baseline(daily, 1985, 2014)
+	daily_outliers = get_daily_outliers(daily, monthly_baseline)
+	annual_outliers = get_annual_outliers(daily_outliers)
+	#annual_outliers = summarize_by_year(daily_outliers)
+
+	figures_dir = Path(__file__).resolve().parent.parent / "Figures"
+	figures_dir.mkdir(parents=True, exist_ok=True)
+
+	print("Generating plots")
+	plot_annual(annual, figures_dir)
+	plot_outliers(annual_outliers, figures_dir)
+	plot_scatter(daily_outliers, figures_dir)
+
+	print("Deduplicating figures")
+	file_ops.deduplicate(figures_dir / "annual_weather.png")
+	file_ops.deduplicate(figures_dir / "outliers.png")
+	file_ops.deduplicate(figures_dir / "scatter.png")
+
+	print("Done")
+if __name__ == "__main__":
+	main()
+
