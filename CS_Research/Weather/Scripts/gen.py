@@ -209,6 +209,32 @@ def plot_scatter(daily_outliers: pd.DataFrame, figures_dir: Path) -> None:
 	fig.savefig(file_ops.next_path(figures_dir / "scatter.png"), format="png", dpi=500, bbox_inches="tight")
 	plt.close(fig)
 
+def plot_lag(daily_outliers: pd.DataFrame, figures_dir: Path) -> None:
+	points = daily_outliers[
+		["date", "rad_sum", "rad_mean", "rad_std", "temp_max", "high_mean", "high_std"]
+	].copy().sort_values("date").reset_index(drop=True)
+
+	points["rad_z"] = (points["rad_sum"] - points["rad_mean"]) / points["rad_std"]
+	points["high_z"] = (points["temp_max"] - points["high_mean"]) / points["high_std"]
+
+	lags = range(3)
+	correlations = [
+		points["rad_z"].corr(points["high_z"].shift(-lag))
+		for lag in lags
+	]
+
+	fig, ax = plt.subplots()
+	ax.plot(list(lags), correlations, "o-")
+	ax.set(
+		title="Radiation Lead vs Temperature Anomaly Correlation",
+		xlabel="Lag (days)",
+		ylabel="Correlation"
+	)
+	ax.set_xticks(list(lags))
+	fig.savefig(file_ops.next_path(figures_dir / "lag.png"), format="png", dpi=500, bbox_inches="tight")
+	plt.close(fig)
+	
+
 def main():
 	print("Gathering data")
 	daily = get_weather_data()
@@ -227,11 +253,13 @@ def main():
 	plot_annual(annual, figures_dir)
 	plot_outliers(annual_outliers, figures_dir)
 	plot_scatter(daily_outliers, figures_dir)
+	plot_lag(daily_outliers, figures_dir)
 
 	print("Deduplicating figures")
 	file_ops.deduplicate(figures_dir / "annual_weather.png")
 	file_ops.deduplicate(figures_dir / "outliers.png")
 	file_ops.deduplicate(figures_dir / "scatter.png")
+	file_ops.deduplicate(figures_dir / "lag.png")
 
 	print("Done")
 if __name__ == "__main__":
