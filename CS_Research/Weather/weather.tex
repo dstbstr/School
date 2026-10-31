@@ -1,37 +1,104 @@
 \documentclass{article}
-\usepackage{filecontents}
+\usepackage{mathtools}
 \usepackage{graphicx}
-%\usepackage{tikz}
-%\usepackage{amsmath}
+\usepackage{xcolor}
+
+\newcommand{\citationneeded}{\textsuperscript{\color{blue} [citation needed]}}
 
 \begin{document}
-\title{Weather}
+\title{Relationship Between Local Radiation and Temperature}
 \author{Dustin Randall}
 \date{}
 \maketitle
 
-This is a stand-in document.
-\begin{figure}
+It is a common assertion that the average temperature in the world has been increasing over the past several decades.~\citationneeded{}
+One potential hypothesis to explain this trend is that the sun has also been increasing in its temperature over the same period.
+What does the Spokane weather data tell us about the effect of radiation on daily temperature?
+To answer this question, we look at the weather data from 1970 through 2025.
+
+\begin{figure}[ht]
   \includegraphics[width=\linewidth]{Figures/annual_weather_1.png}
-  \caption{Annual Weather Overview}
+  \caption{Total radiation and temperature stats over 55 years}
   \label{fig:annual_weather}
 \end{figure}
 
-\begin{figure}
+Figure 1 shows two opposing trends: the total radiation received over each year has decreased, while the minimum, average, and maximum temperatures have steadily increased.
+According to these data, the increase in temperature does not appear to directly correlate with the total radiation received.
+
+Another idea that people have proposed is that weather has become more extreme over time.~\citationneeded{}
+In order to define extreme weather, we must first establish a baseline of typical weather.
+For this paper, we take a 30-year span from 1/1/1985 through 12/31/2014.
+The particular choice of years is largely arbitrary, so I chose the year I was born as the starting point.
+Using this baseline, I define extreme weather as any day where the observed data point is more than one standard deviation outside typical.
+
+More specifically, let $m$ denote a calendar month and $v$ a measured variable.
+Let $x_{i,m,v}$ be the $i$th valid daily observation of value $v$ in month $m$ during the 1985--2014 baseline.
+Let $n_{m,v}$ be the number of these observations.
+For a day $d$ in month $m$, let $x_{d,v}$ be the observed daily value of variable $v$.
+
+\[
+\mu_{m,v} = \frac{1}{n_{m,v}} \sum_{i=1}^{n_{m,v}} x_{i,m,v}
+\]
+\[
+s_{m,v} = \sqrt{\frac{1}{n_{m,v}-1} \sum_{i=1}^{n_{m,v}}{(x_{i,m,v}-\mu_{m,v})^2}}
+\]
+\[
+z_{d,v} = \frac{x_{d,v} - \mu_{m,v}}{s_{m,v}}
+\]
+
+I classify a day as extreme based on the z-score being more than one standard deviation away from the mean.
+
+\[
+\text{label} = \begin{cases}
+  hot \text{ or } bright & \text{if } z_{d,v} > 1 \\
+  cold \text{ or } dim & \text{if } z_{d,v} < -1 \\
+\end{cases}
+\]
+
+\begin{figure}[ht]
   \includegraphics[width=\linewidth]{Figures/outliers_1.png}
-  \caption{Annual Outliers Statistics}
+  \caption{Annual Temperature And Radiation Outliers}
   \label{fig:outliers_stats}
 \end{figure}
 
-\begin{figure}
+Figure 2 shows two plots: the top plot shows the number of unusually hot and cold days per year.
+The bottom plot shows the number of unusually bright and dim days per year.
+The trend lines on these plots tell us that the number of unusually cold days has been steadily decreasing, while the number of unusually hot days has been increasing.
+Counter to what would be expected, the number of unusually bright days has been steadily decreasing over time, and the number of unusually dim days has been increasing.
+This provides further evidence that the increase in unusually hot days is not a direct result of increased radiation, at least in Spokane.
+
+\begin{figure}[ht]
   \includegraphics[width=\linewidth]{Figures/scatter_2.png}
   \caption{Scatter Plot of Daily Radiation vs Daily High Temperature}
   \label{fig:scatter}
 \end{figure}
 
-\begin{figure}
+Figure 3 shows that there is a slight correlation between daily radiation and daily high temperature, with an r value of 0.24.
+This makes some sense because seasonal variation in temperature and radiation are correlated with both trending higher in the summer months.
+This correlation however does not imply a causal relationship between the two, and may be explained by other factors.
+
+We define $r$ as the Pearson correlation coefficient between daily radiation and daily high temperature.
+Let $R_d$ and $T_d$ denote the standardized radiation and high-temperature anomalies for paired day $d$, and let $N$ be the count of valid paired days.
+$\bar{R}$ and $\bar{T}$ denote the mean of $R_d$ and $T_d$ respectively.
+
+\[
+r =
+\frac{\sum_{d=1}^{N}(R_d-\bar{R})(T_d-\bar{T})}
+{\sqrt{
+  \left[\sum_{d=1}^{N}{(R_d-\bar{R})^2}\right]
+  \left[\sum_{d=1}^{N}{(T_d-\bar{T})^2}\right]
+}}
+\]
+
+\begin{figure}[ht]
   \includegraphics[width=\linewidth]{Figures/lag_1.png}
   \caption{Radiation Lead vs Temperature Anomaly Correlation}
   \label{fig:lag}
 \end{figure}
+
+Finally, I analyzed whether the radiation received on a given day has a strong predictive effect on the future temperature.
+Figure 4 shows that the correlation between radiation and temperature is strongest when radiation leads temperature by 1 day, but the correlation is still relatively weak.
+These data suggest that the increase in temperature over the last 55 years in Spokane cannot adequately be explained by changes in daily radiation.
+In fact, Spokane's total radiation trended downward over time which may have dampened the effect on the temperature increase.
+
 \end{document}

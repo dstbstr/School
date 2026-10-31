@@ -30,7 +30,6 @@ def get_weather_data() -> pd.DataFrame:
 	}
 	responses = openmeteo.weather_api(url, params = params)
 
-	# Process first location. Add a for-loop for multiple locations or weather models
 	response = responses[0]
 	daily = response.Daily()
 
@@ -244,7 +243,6 @@ def main():
 	monthly_baseline = get_monthly_baseline(daily, 1985, 2014)
 	daily_outliers = get_daily_outliers(daily, monthly_baseline)
 	annual_outliers = get_annual_outliers(daily_outliers)
-	#annual_outliers = summarize_by_year(daily_outliers)
 
 	figures_dir = Path(__file__).resolve().parent.parent / "Figures"
 	figures_dir.mkdir(parents=True, exist_ok=True)
