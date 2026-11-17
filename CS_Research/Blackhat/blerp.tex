@@ -1,0 +1,53 @@
+\documentclass{article}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{url}
+\usepackage[margin=1in]{geometry}
+
+\begin{document}
+\title{Blackhat Video Review - BLERP}
+\author{Dustin Randall}
+\date{}
+\maketitle
+
+\section{Summary}
+I scrolled through the available Black Hat presentations and when I saw the word BLERP, I was hooked.
+I realized that it was a talk about Bluetooth Low Energy, which is being used in one of the senior projects this year.
+The video can be found at \url{https://www.youtube.com/watch?v=_08bb55Q33o}.
+
+A grad student and his advisor presented the vulnerabilities they discovered in the BLE re-pairing process.
+This work was important because BLE runs on billions of devices and any vulnerabilities in the standard can leave those devices vulnerable.
+The presentation started by explaining the basic pairing process in BLE and focused on the SL or Security Level, the PK or Pairing Key, and the E or Entropy level.
+The standard for BLE is over 3800 pages, and there are only 4 references to "re-pairing" when grepped.
+
+Overall, they discovered 6 separate vulnerabilities in the re-pairing process and developed 4 separate attacks.
+These vulnerabilities are all attacking the fact that during re-pairing the E level is not verified, and neither is the new Security Level.
+This enables a downgrade attack where the attacker can reduce the entropy level to something which can be cracked by brute force.
+The four attacks allow impersonating either the central or peripheral device, as well as performing 2 different man-in-the-middle attacks.
+
+They tested their attacks against 22 different devices, including 13 vendors, 16 central devices, and 9 peripheral devices.
+Nearly all the devices were vulnerable to all the attacks with Windows and Linux PCs being partially resistant.
+During the talk, they showed a demo where a phone was connected to a mouse, and they showed that a re-pairing attack allowed a python script to connect to the phone impersonating the mouse.
+Another slide showed that they had created a stand-alone device which could perform the attack, and have open-sourced the code to run it from a Linux machine.
+
+The researchers did the responsible disclosure of their findings and attained CVE-2025-62235.
+They also proposed 2 primary mitigations to the standard which would prevent all 6 vulnerabilities.
+Changing standards is difficult and time-consuming, so they also provided mitigations which vendors could apply without departing from the existing standard.
+When they provided these findings to the vendors, the majority of them did not implement the suggested mitigations, leaving many devices still vulnerable.
+As of 2026 the standard remains unchanged as well.
+
+\section{Presentation}
+I think that the presentation was put together well.
+The slides were clear and visual without being overly textual.
+I felt that the progression was logical and well-paced, and that I did not require a lot of background knowledge to follow their main points.
+The one minor issue I noticed is that the grad student tended to hold the microphone away from his face, which made the audio hard to hear at times.
+
+\section{Content}
+I really enjoyed the content of the presentation.
+It certainly highlighted the vulnerability in so many devices, and the reality of politics in industry.
+I'm not sure what the potential for impact is with performing these attacks with BLE devices in the wild.
+They suggested maybe smartwatches could access sensitive data like health information.
+I think that central devices must already be skeptical of peripheral devices which may mitigate the level of risk posed by impersonating a peripheral device.
+
+\end{document}
