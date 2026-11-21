@@ -1,25 +1,34 @@
 package com.randalld7;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeDefinition;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.BillingMode;
+import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
 import software.amazon.awssdk.services.dynamodb.model.CreateTableRequest;
 import software.amazon.awssdk.services.dynamodb.model.DescribeTableRequest;
+import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
 import software.amazon.awssdk.services.dynamodb.model.KeySchemaElement;
 import software.amazon.awssdk.services.dynamodb.model.KeyType;
+import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
 import software.amazon.awssdk.services.dynamodb.model.ResourceInUseException;
 import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType;
 import software.amazon.awssdk.services.dynamodb.model.ScanRequest;
+import software.amazon.awssdk.services.dynamodb.model.UpdateItemRequest;
 
 public class AwsTransport implements Transport {
     private final DynamoDbAsyncClient ddb;
@@ -34,24 +43,45 @@ public class AwsTransport implements Transport {
     @Override
     public CompletableFuture<UUID> findOrStartGame(String playerId) {
         return ensureTableExists().thenCompose(ignored -> {
-            // logic goes here
-            return CompletableFuture.completedFuture(UUID.randomUUID());
+            return findOrStartReady(playerId);
         });
     }
 
     @Override
     public CompletableFuture<MoveResult> submitMove(UUID gameId, String playerId, int squareIndex) {
-        
+        return getGameState(gameId)
+            .thenCompose(gameState -> {
+                boolean isP1 = playerId.equals(gameState.p1());
+                if(gameState.p1Turn() == isP1) {
+                    if(gameState.board()[squareIndex] == 0) {
+                        gameState.board()[squareIndex] = isP1 ? 1 : 2;
+                        gameState = gameState.turn(!gameState.p1Turn(), squareIndex);
+
+                        return save(gameId, gameState)
+                            .thenApply(newState -> new MoveResult(true, newState));
+                    }
+                }
+
+                return CompletableFuture.completedFuture(new MoveResult(false, gameState));
+            });
     }
 
     @Override
     public CompletableFuture<GameState> waitForTurn(UUID gameId, String playerId) {
-        
-    }
+        return tryGetActiveGame(gameId).thenCompose(result -> {
+            if(result.isPresent()) {
+                GameState state = result.get();
+                boolean isP1 = playerId.equals(state.p1());
 
-    @Override
-    public CompletableFuture<Void> finishGame(UUID gameId) {
-        
+                if(state.p1Turn() == isP1) {
+                    return CompletableFuture.completedFuture(state);
+                }
+            }
+
+            Executor afterDelay = CompletableFuture.delayedExecutor(250, TimeUnit.MILLISECONDS);
+            return CompletableFuture.runAsync(() -> {}, afterDelay)
+                .thenCompose(ignored -> waitForTurn(gameId, playerId));
+        });
     }
 
     @Override
@@ -61,9 +91,44 @@ public class AwsTransport implements Transport {
         }
     }
 
+    private CompletableFuture<Optional<GameState>> tryGetActiveGame(UUID gameId) {
+        return getGameState(gameId)
+            .thenApply(Optional::of)
+            .exceptionally(ignored -> Optional.empty());
+    }
+
+    private CompletableFuture<GameState> getGameState(UUID gameId) {
+        GetItemRequest getItemRequest = GetItemRequest.builder()
+            .tableName(TABLE_NAME)
+            .key(Map.of("gameId", AttributeValue.builder().s(gameId.toString()).build()))
+            .build();
+
+        return ddb.getItem(getItemRequest)
+            .thenApply(getItemResponse -> toGameState(getItemResponse.item()));
+    }
+    
+    private CompletableFuture<UUID> findOrStartReady(String playerId) {
+        return tryGetPendingGame(playerId)
+        .thenCompose(candidate -> {
+            if(candidate.isEmpty()) {
+                return startNewGame(playerId);
+            }
+
+            GameState game = candidate.get();
+            UUID gameId = UUID.fromString(game.gameId());
+
+            return tryClaimPendingGame(gameId, playerId).thenCompose(claimed -> {
+                return claimed 
+                    ? CompletableFuture.completedFuture(gameId)
+                    : startNewGame(playerId);
+            });
+        });
+    }
+
     private CompletableFuture<Optional<GameState>> tryGetPendingGame(String playerId) {
         ScanRequest scanRequest = ScanRequest.builder()
             .tableName(TABLE_NAME)
+            .consistentRead(true)
             .filterExpression("attribute_not_exists(p2) AND p1 <> :playerId")
             .expressionAttributeValues(Map.of(":playerId", AttributeValue.builder().s(playerId).build()))
             .build();
@@ -74,48 +139,79 @@ public class AwsTransport implements Transport {
                 .map(this::toGameState));
     }
 
+    private CompletableFuture<UUID> startNewGame(String playerId) {
+        UUID gameId = UUID.randomUUID();
+        GameState newGame = new GameState(gameId.toString(), playerId, null, true, new int[GameState.BOARD_SIZE], -1);
+
+        return save(gameId, newGame)
+            .thenApply(ignored -> gameId);
+    }
+
+    private CompletableFuture<GameState> save(UUID gameId, GameState gameState) {
+        Map<String, AttributeValue> item = toAttributeMap(gameState);
+        item.put("expiresAt", AttributeValue.builder()
+            .n(Long.toString(Instant.now().plus(Duration.ofDays(1)).getEpochSecond()))
+            .build());
+            
+        PutItemRequest putItemRequest = PutItemRequest.builder()
+            .tableName(TABLE_NAME)
+            .item(item)
+            .build();
+
+        return ddb.putItem(putItemRequest).thenApply(ignored -> gameState);
+    }
+
+    private CompletableFuture<Boolean> tryClaimPendingGame(UUID gameId, String playerId) {
+        var request = UpdateItemRequest.builder()
+            .tableName(TABLE_NAME)
+            .key(Map.of("gameId", AttributeValue.builder().s(gameId.toString()).build()))
+            .updateExpression("SET p2 = :playerId")
+            .conditionExpression("attribute_not_exists(p2) AND p1 <> :playerId")
+            .expressionAttributeValues(Map.of(
+                ":playerId", AttributeValue.builder().s(playerId).build()
+            ))
+            .build();
+
+        return ddb.updateItem(request)
+            .thenApply(updateItemResponse -> true)
+            .exceptionally(err -> {
+                Throwable cause = unwrap(err);
+                if(cause instanceof ConditionalCheckFailedException) {
+                    return false;
+                }
+                throw new CompletionException(cause);
+            });
+    }
+
     private GameState toGameState(Map<String, AttributeValue> item) {
         String gameId = item.get("gameId").s();
         String p1 = item.get("p1").s();
         String p2 = item.get("p2") != null ? item.get("p2").s() : null;
         boolean p1Turn = item.get("p1Turn") != null ? Boolean.parseBoolean(item.get("p1Turn").s()) : true;
-        int[] board = item.get("board") != null ? Arrays.stream(item.get("board").ss().toArray(new String[0])).mapToInt(Integer::parseInt).toArray() : new int[GameState.BOARD_SIZE];
+        int[] board = item.get("board").l().stream()
+            .mapToInt(v -> Integer.parseInt(v.n())).toArray();
         int lastMove = item.get("lastMove") != null ? Integer.parseInt(item.get("lastMove").s()) : -1;
         
         return new GameState(gameId, p1, p2, p1Turn, board, lastMove);
     }
-    /*
-        public static int queryTable(DynamoDbClient ddb, String tableName, String partitionKeyName, String partitionKeyVal,
-            String partitionAlias) {
-        // Set up an alias for the partition key name in case it's a reserved word.
-        HashMap<String, String> attrNameAlias = new HashMap<String, String>();
-        attrNameAlias.put(partitionAlias, partitionKeyName);
 
-        // Set up mapping of the partition name with the value.
-        HashMap<String, AttributeValue> attrValues = new HashMap<>();
-        attrValues.put(":" + partitionKeyName, AttributeValue.builder()
-                .s(partitionKeyVal)
-                .build());
-
-        QueryRequest queryReq = QueryRequest.builder()
-                .tableName(tableName)
-                .keyConditionExpression(partitionAlias + " = :" + partitionKeyName)
-                .expressionAttributeNames(attrNameAlias)
-                .expressionAttributeValues(attrValues)
-                .build();
-
-        try {
-            QueryResponse response = ddb.query(queryReq);
-            return response.count();
-
-        } catch (DynamoDbException e) {
-            System.err.println(e.getMessage());
-            System.exit(1);
+    private Map<String, AttributeValue> toAttributeMap(GameState state) {
+        Map<String, AttributeValue> item = new HashMap<>();
+        item.put("gameId", AttributeValue.builder().s(state.gameId()).build());
+        item.put("p1", AttributeValue.builder().s(state.p1()).build());
+        if(state.p2() != null) {
+            item.put("p2", AttributeValue.builder().s(state.p2()).build());
         }
-        return -1;
+        item.put("p1Turn", AttributeValue.builder().s(Boolean.toString(state.p1Turn())).build());
+        item.put("board", AttributeValue.builder()
+            .l(Arrays.stream(state.board())
+                .mapToObj(i -> AttributeValue.builder()
+                    .n(Integer.toString(i)).build())
+                .toList())
+            .build());
+        item.put("lastMove", AttributeValue.builder().s(Integer.toString(state.lastMove())).build());
+        return item;
     }
-
-    */
     
     private CompletableFuture<Void> ensureTableExists() {
         DescribeTableRequest request = DescribeTableRequest.builder().tableName(TABLE_NAME).build();

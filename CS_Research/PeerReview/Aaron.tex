@@ -1,0 +1,39 @@
+\documentclass{article}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{url}
+\usepackage[margin=1in]{geometry}
+\usepackage{filecontents}
+
+
+\begin{document}
+\title{Peer Review - Aaron \\
+Augmenting Decompiler Output with Learned Variable Names and Types}
+\author{Dustin Randall}
+\date{}
+\maketitle
+
+\section{What was interesting}
+This topic was interesting to me because I have looked at compiled C++ code and realize that it is so very different from the original code.
+Decompiling binaries back into readable source code is used for a variety of applications, including by IDEs when exceptions are thrown from compiled libraries.
+Seeing approaches for augmenting decompiler output seems like a very challenging space, and I wonder if the approach may be overfit to existing C code.
+
+\section{Why is it important}
+The ability to decompile binaries is also used in reverse engineering and automated program repair.
+Improving the quality of the decompiled output can improve the ability to understand and eventually modify the original binary using binary patching.
+Investigating techniques for augmenting decompiler output can also contribute to diagnosing code gen errors from compilers which can accelerate new language feature development.
+
+\section{Presentation}
+I thought the visuals used were well done and helped in understanding the topics.
+I generally am not a fan of people sitting while presenting, but it wasn't overly distracting.
+One potential additional visual would be showing a side-by-side comparison of surprising compiler optimizations, potentially using godbolt.org.
+
+\section{Citations}
+Beyond {Classification}: {Inferring} {Function} {Names} in {Stripped} {Binaries} via {Domain} {Adapted} {LLMs}~\cite{jiang_beyond_2025}
+and Decompile-{Bench}: {Million}-{Scale} {Binary}-{Source} {Function} {Pairs} for {Real}-{World} {Binary} {Decompilation}~\cite{tan_decompile-bench_2025}
+
+\bibliography{citations}
+\bibliographystyle{plain}
+
+\end{document}

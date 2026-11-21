@@ -73,16 +73,6 @@ public class LocalTransport implements Transport {
             });
     }
 
-    @Override
-    public CompletableFuture<Void> finishGame(UUID gameId) {
-        try {
-            Files.deleteIfExists(Path.of(RootDir, "active", gameId.toString()));
-        } catch(IOException ex) {
-            throw new CompletionException("Finish failed", ex);
-        }
-        return CompletableFuture.completedFuture(null);
-    }
-
     @Override 
     public void close() {
         if(IO_EXECUTOR instanceof ExecutorService es) {

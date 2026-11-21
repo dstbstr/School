@@ -10,7 +10,5 @@ public interface Transport {
     CompletableFuture<MoveResult> submitMove(UUID gameId, String playerId, int squareIndex);
     CompletableFuture<GameState> waitForTurn(UUID gameId, String playerId);
 
-    CompletableFuture<Void> finishGame(UUID gameId);
-
     void close();
 }
