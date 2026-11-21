@@ -3,8 +3,8 @@ package com.finalProject;
 public class Main {
     public static void main(String[] args) {
         UserSettings userSettings = new UserSettings("C:\\Program Files\\Java\\jdk-25\\bin", "Z:/source/repos/School/CS_Aws/final_project/src/main/resources/junit-platform-console-standalone-6.2.0-M1.jar");
-        AssignmentSettings assignmentSettings = new AssignmentSettings("Z:/source/repos/School/CS_Aws/auto_grader_assets/Hw1/Tester.java", "Z:/source/repos/School/CS_Aws/auto_grader_assets/Hw1/Temp");
-        String submission = "Z:\\source\\repos\\School\\CS_Aws\\auto_grader_assets\\Hw1\\Submissions\\F25Hw1\\1_4100720_139664267_1";
+        AssignmentSettings assignmentSettings = new AssignmentSettings("Z:/auto_grader_assets/Hw1/Tester.java", "Z:/auto_grader_assets/Hw1/Temp");
+        String submission = "Z:\\auto_grader_assets\\Hw1\\Submissions\\F25Hw1\\1_4100720_139664267_1";
         
         TestRunner testRunner = new TestRunner(userSettings, assignmentSettings);
         try {
