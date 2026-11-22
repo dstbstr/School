@@ -38,15 +38,10 @@ public class LocalAiDetect {
             result.getAllComparisons().stream()
                 .filter(comp -> comp.firstSubmission().isNew() != comp.secondSubmission().isNew())
                 .forEach(comp -> {
-                    var lhs = comp.firstSubmission().getRoot().getName();
-                    var rhs = comp.secondSubmission().getRoot().getName();
                     var score = comp.similarity();
-
-                    var candidateLhs = new AiMatch(score, rhs);
-                    report.highestScores().merge(lhs, candidateLhs, (current, next) -> next.score() > current.score() ? next : current);
-
-                    var candidateRhs = new AiMatch(score, lhs);
-                    report.highestScores().merge(rhs, candidateRhs, (current, next) -> next.score() > current.score() ? next : current);                
+                    var id = comp.firstSubmission().isNew() ? comp.secondSubmission().getRoot().getName() : comp.firstSubmission().getRoot().getName();
+                    var candidate = new AiMatch(score, id);
+                    report.highestScores().merge(id, candidate, (current, next) -> next.score() > current.score() ? next : current);
                 });
         } catch (ExitException e) {
             // error handling here

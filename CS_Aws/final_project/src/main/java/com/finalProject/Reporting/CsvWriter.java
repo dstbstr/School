@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
+import com.finalProject.Evaluator.EvalResult;
 import com.finalProject.Settings;
 
 import java.nio.file.Files;
@@ -13,9 +14,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class CsvWriter implements AutoCloseable {
-    public record Result(String name, double testScore, String errors) {}
-
     private final BufferedWriter writer;
+    private boolean headerWritten = false;
 
     public CsvWriter(Settings.Assignment settings) throws IOException {
         String timestamp = DateTimeFormatter.ofPattern("MMdd_HHmmss").format(LocalDateTime.now());
@@ -23,9 +23,6 @@ public class CsvWriter implements AutoCloseable {
         Files.createDirectories(outDir);
         Path csvPath = outDir.resolve("report-" + timestamp + ".csv");
         writer = Files.newBufferedWriter(csvPath, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
-        
-        writer.write("Name,TestScore,Notes");
-        writer.newLine();
     }
 
     @Override
@@ -35,17 +32,62 @@ public class CsvWriter implements AutoCloseable {
         }
     }
 
-    public synchronized void writeResult(Result result) {
+    public synchronized void writeResult(String submission, EvalResult result) {
+        writeHeader(result);
         try {
-            writer.write(quoteCsv(result.name()) + "," + formatDouble(result.testScore()) + "," + (result.errors() != null ? quoteCsv(result.errors()) : ""));
+            writer.write(quoteCsv(submission));
+            if(result.localPlagScore().isPresent()) {
+                writer.write("," + formatDouble(result.localPlagScore().get()));
+            }
+            if(result.remotePlagScore().isPresent()) {
+                writer.write("," + formatDouble(result.remotePlagScore().get()));
+            }
+            if(result.localAiScore().isPresent()) {
+                writer.write("," + formatDouble(result.localAiScore().get()));
+            }
+            if(result.remoteAiScore().isPresent()) {
+                writer.write("," + formatDouble(result.remoteAiScore().get()));
+            }
+            if(result.testRunScore().isPresent()) {
+                writer.write("," + formatDouble(result.testRunScore().get()));
+            }
+            writer.write("," + (result.errors() != null ? quoteCsv(String.join(" ", result.errors())) : ""));
             writer.newLine();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
+    private void writeHeader(EvalResult result) {
+        if(!headerWritten) {
+            try {
+                writer.write("Submission");
+                if(result.localPlagScore().isPresent()) {
+                    writer.write(",Local Plagiarism Score");
+                }
+                if(result.remotePlagScore().isPresent()) {
+                    writer.write(",Remote Plagiarism Score");
+                }
+                if(result.localAiScore().isPresent()) {
+                    writer.write(",Local AI Score");
+                }
+                if(result.remoteAiScore().isPresent()) {
+                    writer.write(",Remote AI Score");
+                }
+                if(result.testRunScore().isPresent()) {
+                    writer.write(",Test Run Score");
+                }
+                writer.write(",Errors");
+                writer.newLine();
+                headerWritten = true;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
     private static String quoteCsv(String value) {
-        return "\"" + value.replace("\"", "\"\"") + "\"";
+        return "\"" + value.replace("\"", "\"\"").replace("\n", " ") + "\"";
     }
     private static String formatDouble(double value) {
         return String.format(Locale.ROOT, "%.2f", value);

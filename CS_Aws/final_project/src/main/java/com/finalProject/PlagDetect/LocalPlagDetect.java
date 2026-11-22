@@ -21,11 +21,10 @@ public class LocalPlagDetect {
 
         JavaLanguage language = new JavaLanguage();
         
-        language.getOptions(); //Use this to set language specific options, same as language specific arguments above.
-        Set<File> submissionDirectories = Set.of(new File(submissionDir));
-        Set<File> oldSubmissions = Set.of();
+        Set<File> newDir = Set.of(new File(submissionDir));
+        Set<File> oldDir = Set.of();
         File baseCode = new File(assignmentSettings.baseCode());
-        jplagOptions = new JPlagOptions(language, submissionDirectories, oldSubmissions)
+        jplagOptions = new JPlagOptions(language, newDir, oldDir)
             .withBaseCodeSubmissionDirectory(baseCode)
             .withNormalize(true);
     }

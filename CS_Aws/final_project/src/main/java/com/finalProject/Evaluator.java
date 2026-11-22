@@ -3,6 +3,7 @@ package com.finalProject;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +17,6 @@ import com.finalProject.AiDetect.LocalAiDetect;
 import com.finalProject.AiDetect.LocalAiDetect.AiReport;
 import com.finalProject.PlagDetect.LocalPlagDetect;
 import com.finalProject.PlagDetect.LocalPlagDetect.SimilarityReport;
-import com.finalProject.Reporting.CsvWriter;
 import com.finalProject.Testing.TestResultParser;
 import com.finalProject.Testing.TestRunner;
 
@@ -26,14 +26,20 @@ public class Evaluator implements AutoCloseable {
         Optional<Double> remotePlagScore, 
         Optional<Double> localAiScore, 
         Optional<Double> remoteAiScore,
-        Optional<Double> testRunScore
+        Optional<Double> testRunScore,
+        List<String> errors
     ) {
-        public static EvalResult empty() {return new EvalResult(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());}
-        public EvalResult withLocalPlagScore(Optional<Double> score) {return new EvalResult(score, this.remotePlagScore, this.localAiScore, this.remoteAiScore, this.testRunScore);}
-        public EvalResult withRemotePlagScore(Optional<Double> score) {return new EvalResult(this.localPlagScore, score, this.localAiScore, this.remoteAiScore, this.testRunScore);}
-        public EvalResult withLocalAiScore(Optional<Double> score) {return new EvalResult(this.localPlagScore, this.remotePlagScore, score, this.remoteAiScore, this.testRunScore);}
-        public EvalResult withRemoteAiScore(Optional<Double> score) {return new EvalResult(this.localPlagScore, this.remotePlagScore, this.localAiScore, score, this.testRunScore);}
-        public EvalResult withTestRunScore(Optional<Double> score) {return new EvalResult(this.localPlagScore, this.remotePlagScore, this.localAiScore, this.remoteAiScore, score);}
+        public static EvalResult empty() {return new EvalResult(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), List.of());}
+        public EvalResult withLocalPlagScore(Optional<Double> score) {return new EvalResult(score, this.remotePlagScore, this.localAiScore, this.remoteAiScore, this.testRunScore, this.errors);}
+        public EvalResult withRemotePlagScore(Optional<Double> score) {return new EvalResult(this.localPlagScore, score, this.localAiScore, this.remoteAiScore, this.testRunScore, this.errors);}
+        public EvalResult withLocalAiScore(Optional<Double> score) {return new EvalResult(this.localPlagScore, this.remotePlagScore, score, this.remoteAiScore, this.testRunScore, this.errors);}
+        public EvalResult withRemoteAiScore(Optional<Double> score) {return new EvalResult(this.localPlagScore, this.remotePlagScore, this.localAiScore, score, this.testRunScore, this.errors);}
+        public EvalResult withTestRunScore(Optional<Double> score) {return new EvalResult(this.localPlagScore, this.remotePlagScore, this.localAiScore, this.remoteAiScore, score, this.errors);}
+        public EvalResult withError(String error) {
+            var updatedErrors = new ArrayList<>(errors);
+            updatedErrors.add(error);
+            return new EvalResult(this.localPlagScore, this.remotePlagScore, this.localAiScore, this.remoteAiScore, this.testRunScore, updatedErrors);
+        }
     }
     
     private final Settings settings;
@@ -100,7 +106,7 @@ public class Evaluator implements AutoCloseable {
     private void runRemoteAiDetect(String submissionDir, AiReport localResult, Map<String, EvalResult> outResult) {
     }
     
-    private record TestOutcome(String submission, EvalResult result) {}
+    private record TestOutcome(String submission, EvalResult result, String compileErrors) {}
     
     private CompletableFuture<Void> runTestRun(String submissionDir, Map<String, EvalResult> outResult) {
             TestRunner testRunner = new TestRunner(settings, new TestResultParser());
@@ -112,13 +118,16 @@ public class Evaluator implements AutoCloseable {
                     .filter(Files::isDirectory)
                     .map(path -> {
                         return CompletableFuture.supplyAsync(() -> testRunner.runTests(path.toString()).join(), executor)
-                            .thenApply(result -> new TestOutcome(path.getFileName().toString(), EvalResult.empty().withTestRunScore(Optional.of(result.getScore()))));
+                            .thenApply(result -> new TestOutcome(path.getFileName().toString(), EvalResult.empty().withTestRunScore(Optional.of(result.getScore())), result.compileError()));
                     }).toList();
 
                 return CompletableFuture.allOf(jobs.toArray(new CompletableFuture[0]))
                     .thenRun(() -> jobs.forEach(job -> {
                         TestOutcome outcome = job.join();
                         outResult.merge(outcome.submission(), outcome.result(), (current, update) -> current.withTestRunScore(update.testRunScore()));
+                        if(outcome.compileErrors() != null && !outcome.compileErrors().isEmpty()) {
+                            outResult.merge(outcome.submission(), outcome.result(), (current, update) -> current.withError(outcome.compileErrors()));
+                        }
                     }));
             } catch(IOException e) {
                 throw new CompletionException(e);
