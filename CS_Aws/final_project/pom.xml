@@ -70,6 +70,12 @@
             <artifactId>jackson-datatype-jsr310</artifactId>
             <version>2.23.0</version>
         </dependency>
+        <!-- CLI -->
+        <dependency>
+            <groupId>info.picocli</groupId>
+            <artifactId>picocli</artifactId>
+            <version>4.7.7</version>
+        </dependency>
         <!-- JPlag -->
         <dependency>
             <groupId>de.jplag</groupId>

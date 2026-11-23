@@ -16,7 +16,7 @@ public class LocalAiDetect {
     public record AiMatch(double score, String model) {}
     public record AiReport(HashMap<String, AiMatch> highestScores) {}
 
-    private final JPlagOptions jplagOptions;
+    private JPlagOptions jplagOptions;
 
     public LocalAiDetect(Settings.Assignment settings, String submissionDir) {
         JavaLanguage language = new JavaLanguage();
@@ -24,10 +24,12 @@ public class LocalAiDetect {
         // reverse the roles to have fewer comparisons
         Set<File> newDir = Set.of(new File(settings.aiCodeDir()));
         Set<File> oldDir = Set.of(new File(submissionDir));
-        File baseCode = new File(settings.baseCode());
         jplagOptions = new JPlagOptions(language, newDir, oldDir)
-            .withBaseCodeSubmissionDirectory(baseCode)
             .withNormalize(true);
+        if(settings.baseCode() != null) {
+            File baseCode = new File(settings.baseCode());
+            jplagOptions = jplagOptions.withBaseCodeSubmissionDirectory(baseCode);
+        }
     }
 
     public AiReport DetectAi() {

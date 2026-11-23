@@ -1,0 +1,31 @@
+.assignment-row {
+    padding: 8 10;
+    -fx-padding: 8 10;
+    border-color: #d0d7de;
+    -fx-border-color: #d0d7de;
+    border-width: 1;
+    -fx-border-width: 1;
+}
+
+.highlight {
+    background-color: transparent;
+    -fx-background-color: transparent;
+}
+
+.highlight:hover {
+    background-color: lightblue;
+    -fx-background-color: lightblue;
+    cursor: hand;
+    -fx-cursor: hand;
+}
+
+.delete-button {
+    -fx-text-fill: white;
+    background-color: #c62828;
+    -fx-background-color: #c62828;
+}
+
+.delete-button:hover {
+    background-color: #b71c1c;
+    -fx-background-color: #b71c1c;
+}

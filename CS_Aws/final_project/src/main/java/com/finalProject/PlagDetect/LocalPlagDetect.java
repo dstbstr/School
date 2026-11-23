@@ -14,7 +14,7 @@ public class LocalPlagDetect {
     public record BestMatch(double score, String submissionName) {}
     public record SimilarityReport(Map<String, BestMatch> highestScores) {}
 
-    private final JPlagOptions jplagOptions;
+    private JPlagOptions jplagOptions;
 
     public LocalPlagDetect(Settings.Assignment assignmentSettings, String submissionDir) {
         //&$javaHome/java -jar Z:\Bin\jplag-6.3.0-jar-with-dependencies.jar -bc ./Provided.java --normalize --overwrite .\Submissions\F25Hw1\
@@ -23,10 +23,13 @@ public class LocalPlagDetect {
         
         Set<File> newDir = Set.of(new File(submissionDir));
         Set<File> oldDir = Set.of();
-        File baseCode = new File(assignmentSettings.baseCode());
         jplagOptions = new JPlagOptions(language, newDir, oldDir)
-            .withBaseCodeSubmissionDirectory(baseCode)
             .withNormalize(true);
+            
+        if(assignmentSettings.baseCode() != null) {
+            File baseCode = new File(assignmentSettings.baseCode());
+            jplagOptions = jplagOptions.withBaseCodeSubmissionDirectory(baseCode);
+        }
     }
 
     public SimilarityReport RunSimilarity() {
