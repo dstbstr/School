@@ -1,5 +1,6 @@
 package com.finalProject;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -10,6 +11,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
+import com.finalProject.Reporting.CsvWriter;
 
 import javafx.application.Application;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -391,6 +394,7 @@ public class Gui extends Application {
         
         private final TextField submissionDirField = new TextField();
         private final Button submitButton = new Button("Submit");
+        private final Button backButton = new Button("Back");
         private final ProgressIndicator progress = new ProgressIndicator();
 
         public EvalAssignmentPane(AssignmentRow assignment) {
@@ -425,13 +429,19 @@ public class Gui extends Application {
                 runEvaluation();
             });
 
+            backButton.setOnAction(e -> {
+                showListView();
+            });
+
             progress.setVisible(false);
             progress.setManaged(false);
 
-            HBox actions = new HBox(10, submitButton, progress);
+            HBox actions = new HBox(10, submitButton, progress, backButton);
 
             grid.addRow(0, new Label("Submission Directory:"), submissionDirField, browseSubButton);
             grid.addRow(1, actions);
+            
+            GridPane.setHgrow(submissionDirField, Priority.ALWAYS);
             return grid;
         }
             
@@ -488,6 +498,22 @@ public class Gui extends Application {
         private record ResultRow(String submission, Evaluator.EvalResult result) {}
 
         private void showResults(Map<String, Evaluator.EvalResult> results) {
+            Button exportCsvButton = new Button("Export Csv");
+            Button backButton = new Button("Back");
+
+            exportCsvButton.setOnAction(e -> {
+                try(var csv = new CsvWriter(settings)) {
+                    for(var entry : results.entrySet()) {
+                        csv.writeResult(entry.getKey(), entry.getValue());
+                    }
+                } catch(Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
+
+            backButton.setOnAction(e -> {
+                showEvalView(assignment);
+            });
             TableView<ResultRow> table = new TableView<>();
 
             TableColumn<ResultRow, String> submission = new TableColumn<>("Submission");
@@ -506,53 +532,17 @@ public class Gui extends Application {
             testRunScore.setCellValueFactory(cell -> new ReadOnlyStringWrapper(formatScore(cell.getValue().result().testRunScore())));
             errors.setCellValueFactory(cell -> new ReadOnlyStringWrapper(String.join(" ", cell.getValue().result().errors())));
             
-            table.getColumns().addAll(submission, localAiScore, remoteAiScore, localPlagScore, remotePlagScore, testRunScore, errors);
+            table.getColumns().addAll(List.of(submission, localAiScore, remoteAiScore, localPlagScore, remotePlagScore, testRunScore, errors));
             ObservableList<ResultRow> data = FXCollections.observableArrayList();
             for (var entry : results.entrySet()) {
                 var result = entry.getValue();
                 data.add(new ResultRow(entry.getKey(),result));
             }
             table.setItems(data);
+
+            HBox actionsBox = new HBox(10, exportCsvButton, backButton);
+            setTop(actionsBox);
             setCenter(table);
-
-            /*
-            int row = 0;
-            int col = 0;
-            var firstEntry = results.entrySet().stream().findFirst();
-            if(firstEntry.isPresent()) {
-                var entry = firstEntry.get();
-            }
-
-            for (var entry : results.entrySet()) {
-                col = 0;
-                resultsGrid.add(new Label(entry.getKey()), col++, row);
-                var result = entry.getValue();
-                if(result.localAiScore().isPresent()) {
-                    var score = result.localAiScore().get() * 100;
-                    resultsGrid.add(new Label(String.format("%.2f", score)), col++, row);
-                }
-                if(result.remoteAiScore().isPresent()) {
-                    var score = result.remoteAiScore().get() * 100;
-                    resultsGrid.add(new Label(String.format("%.2f", score)), col++, row);
-                }
-                if(result.localPlagScore().isPresent()) {
-                    var score = result.localPlagScore().get() * 100;
-                    resultsGrid.add(new Label(String.format("%.2f", score)), col++, row);
-                }
-                if(result.remotePlagScore().isPresent()) {
-                    var score = result.remotePlagScore().get() * 100;
-                    resultsGrid.add(new Label(String.format("%.2f", score)), col++, row);
-                }
-                if(result.testRunScore().isPresent()) {
-                    var score = result.testRunScore().get();
-                    resultsGrid.add(new Label(String.format("%.2f", score)), col++, row);
-                }
-
-                row++;
-            }
-
-            setCenter(resultsGrid);
-            */
         }
 
         private String formatScore(Optional<Double> score) {
