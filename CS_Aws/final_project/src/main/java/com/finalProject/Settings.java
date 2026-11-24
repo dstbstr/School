@@ -2,7 +2,24 @@ package com.finalProject;
 
 import java.time.Duration;
 
-public record Settings(Settings.User user, Settings.Assignment assignment, Settings.Eval eval) {
+public record Settings(Settings.User user, Settings.Assignment assignment, Settings.Eval eval, Settings.Model model) {
+
+    public Settings withUser(User user) {
+        return new Settings(user, this.assignment, this.eval, this.model);
+    }
+    
+    public Settings withAssignment(Assignment assignment) {
+        return new Settings(this.user, assignment, this.eval, this.model);
+    }
+
+    public Settings withEval(Eval eval) {
+        return new Settings(this.user, this.assignment, eval, this.model);
+    }
+
+    public Settings withModel(Model model) {
+        return new Settings(this.user, this.assignment, this.eval, model);
+    }
+
     public record User(String javaDir, String junitJar, String rootAssignmentDir, int maxThreads) {
         public User withJavaDir(String javaDir) {
             return new User(javaDir, this.junitJar, this.rootAssignmentDir, this.maxThreads);
@@ -21,37 +38,41 @@ public record Settings(Settings.User user, Settings.Assignment assignment, Setti
         }
     }
     
-    public record Assignment(String testerPath, String baseCode, String aiCodeDir, String gradingPrompt, String similarityPrompt, String outDir, Duration compileTimeout, Duration testTimeout) {
+    public record Assignment(String testerPath, String baseCode, String aiCodeDir, String gradingPrompt, String similarityPrompt, String aiLikenessPrompt, String outDir, Duration compileTimeout, Duration testTimeout) {
         public Assignment withTesterPath(String testerPath) {
-            return new Assignment(testerPath, this.baseCode, this.aiCodeDir, this.gradingPrompt, this.similarityPrompt, this.outDir, this.compileTimeout, this.testTimeout);
+            return new Assignment(testerPath, this.baseCode, this.aiCodeDir, this.gradingPrompt, this.similarityPrompt, this.aiLikenessPrompt, this.outDir, this.compileTimeout, this.testTimeout);
         }
 
         public Assignment withBaseCode(String baseCode) {
-            return new Assignment(this.testerPath, baseCode, this.aiCodeDir, this.gradingPrompt, this.similarityPrompt, this.outDir, this.compileTimeout, this.testTimeout);
+            return new Assignment(this.testerPath, baseCode, this.aiCodeDir, this.gradingPrompt, this.similarityPrompt, this.aiLikenessPrompt, this.outDir, this.compileTimeout, this.testTimeout);
         }
-
+        
         public Assignment withAiCodeDir(String aiCodeDir) {
-            return new Assignment(this.testerPath, this.baseCode, aiCodeDir, this.gradingPrompt, this.similarityPrompt, this.outDir, this.compileTimeout, this.testTimeout);
+            return new Assignment(this.testerPath, this.baseCode, aiCodeDir, this.gradingPrompt, this.similarityPrompt, this.aiLikenessPrompt, this.outDir, this.compileTimeout, this.testTimeout);
         }
-
+        
         public Assignment withGradingPrompt(String gradingPrompt) {
-            return new Assignment(this.testerPath, this.baseCode, this.aiCodeDir, gradingPrompt, this.similarityPrompt, this.outDir, this.compileTimeout, this.testTimeout);
+            return new Assignment(this.testerPath, this.baseCode, this.aiCodeDir, gradingPrompt, this.similarityPrompt, this.aiLikenessPrompt, this.outDir, this.compileTimeout, this.testTimeout);
         }
-
+        
         public Assignment withSimilarityPrompt(String similarityPrompt) {
-            return new Assignment(this.testerPath, this.baseCode, this.aiCodeDir, this.gradingPrompt, similarityPrompt, this.outDir, this.compileTimeout, this.testTimeout);
+            return new Assignment(this.testerPath, this.baseCode, this.aiCodeDir, this.gradingPrompt, similarityPrompt, this.aiLikenessPrompt, this.outDir, this.compileTimeout, this.testTimeout);
+        }
+        
+        public Assignment withAiLikenessPrompt(String aiLikenessPrompt) {
+            return new Assignment(this.testerPath, this.baseCode, this.aiCodeDir, this.gradingPrompt, this.similarityPrompt, aiLikenessPrompt, this.outDir, this.compileTimeout, this.testTimeout);
         }
 
         public Assignment withOutDir(String outDir) {
-            return new Assignment(this.testerPath, this.baseCode, this.aiCodeDir, this.gradingPrompt, this.similarityPrompt, outDir, this.compileTimeout, this.testTimeout);
+            return new Assignment(this.testerPath, this.baseCode, this.aiCodeDir, this.gradingPrompt, this.similarityPrompt, this.aiLikenessPrompt, outDir, this.compileTimeout, this.testTimeout);
         }
 
         public Assignment withCompileTimeout(Duration compileTimeout) {
-            return new Assignment(this.testerPath, this.baseCode, this.aiCodeDir, this.gradingPrompt, this.similarityPrompt, this.outDir, compileTimeout, this.testTimeout);
+            return new Assignment(this.testerPath, this.baseCode, this.aiCodeDir, this.gradingPrompt, this.similarityPrompt, this.aiLikenessPrompt, this.outDir, compileTimeout, this.testTimeout);
         }
 
         public Assignment withTestTimeout(Duration testTimeout) {
-            return new Assignment(this.testerPath, this.baseCode, this.aiCodeDir, this.gradingPrompt, this.similarityPrompt, this.outDir, this.compileTimeout, testTimeout);
+            return new Assignment(this.testerPath, this.baseCode, this.aiCodeDir, this.gradingPrompt, this.similarityPrompt, this.aiLikenessPrompt, this.outDir, this.compileTimeout, testTimeout);
         }
     }
 
@@ -76,16 +97,18 @@ public record Settings(Settings.User user, Settings.Assignment assignment, Setti
         }
     }
 
-
-    public Settings withUser(User user) {
-        return new Settings(user, this.assignment, this.eval);
-    }
-    
-    public Settings withAssignment(Assignment assignment) {
-        return new Settings(this.user, assignment, this.eval);
-    }
-
-    public Settings withEval(Eval eval) {
-        return new Settings(this.user, this.assignment, eval);
+    public record Model(String modelId, String region, Integer maxTokens, Double temperature) {
+        public Model withModelId(String modelId) {
+            return new Model(modelId, this.region, this.maxTokens, this.temperature);
+        }
+        public Model withRegion(String region) {
+            return new Model(this.modelId, region, this.maxTokens, this.temperature);
+        }
+        public Model withMaxTokens(Integer maxTokens) {
+            return new Model(this.modelId, this.region, maxTokens, this.temperature);
+        }
+        public Model withTemperature(Double temperature) {
+            return new Model(this.modelId, this.region, this.maxTokens, temperature);
+        }
     }
 }

@@ -1,11 +1,9 @@
 package com.finalProject;
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -15,7 +13,6 @@ import java.util.UUID;
 import com.finalProject.Reporting.CsvWriter;
 
 import javafx.application.Application;
-import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -23,7 +20,6 @@ import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
@@ -36,6 +32,7 @@ public class Gui extends Application {
     private final AssignmentRegistry assignmentRegistry = new AssignmentRegistry();
     private Settings.User userSettings;
     private Settings.Eval evalSettings;
+    private Settings.Model modelSettings;
     private Map<UUID, AssignmentRegistry.Entry> assignmentMap;
     private BorderPane root = new BorderPane();
     private EditAssignmentPane editAssignmentPane;
@@ -44,6 +41,7 @@ public class Gui extends Application {
     public Gui() {
         userSettings = settingsStore.getUserSettings();
         evalSettings = settingsStore.getEvalSettings();
+        modelSettings = settingsStore.getModelSettings();
         assignmentMap = assignmentRegistry.load();
     }
     
@@ -81,12 +79,14 @@ public class Gui extends Application {
 
     private void showSettings() {
         // Open the settings dialog and update the settings if changed
-        SettingsDialog dialog = new SettingsDialog(userSettings, evalSettings);
+        SettingsDialog dialog = new SettingsDialog(userSettings, evalSettings, modelSettings);
         dialog.showAndWait().ifPresent(result -> {
             userSettings = result.user();
             evalSettings = result.eval();
+            modelSettings = result.model();
             settingsStore.saveUserSettings(userSettings);
             settingsStore.saveEvalSettings(evalSettings);
+            settingsStore.saveModelSettings(modelSettings);
         });
     }
 
@@ -176,6 +176,7 @@ public class Gui extends Application {
         private TextField aiCodeDirField = new TextField();
         private TextArea gradingPromptField = new TextArea();
         private TextArea similarityPromptField = new TextArea();
+        private TextArea aiLikenessPromptField = new TextArea();
         private TextField outDirField = new TextField();
         private Spinner<Integer> compileTimeoutField = new Spinner<>(1, 3600, 20);
         private Spinner<Integer> testTimeoutField = new Spinner<>(1, 3600, 40);
@@ -194,14 +195,23 @@ public class Gui extends Application {
                 baseCodeField.setText(settings.baseCode());
                 aiCodeDirField.setText(settings.aiCodeDir());
                 similarityPromptField.setText(settings.similarityPrompt());
+                aiLikenessPromptField.setText(settings.aiLikenessPrompt());
                 outDirField.setText(settings.outDir());
                 gradingPromptField.setText(settings.gradingPrompt());
                 compileTimeoutField.getValueFactory().setValue((int) settings.compileTimeout().getSeconds());
                 testTimeoutField.getValueFactory().setValue((int) settings.testTimeout().getSeconds());
+            } else {
+                var defaults = settingsStore.defaultAssignmentSettings(Path.of(userSettings.rootAssignmentDir()));
+                similarityPromptField.setText(defaults.similarityPrompt());
+                aiLikenessPromptField.setText(defaults.aiLikenessPrompt());
+                gradingPromptField.setText(defaults.gradingPrompt());
+                compileTimeoutField.getValueFactory().setValue((int) defaults.compileTimeout().getSeconds());
+                testTimeoutField.getValueFactory().setValue((int) defaults.testTimeout().getSeconds());
             }
 
             gradingPromptField.setWrapText(true);
             similarityPromptField.setWrapText(true);
+            aiLikenessPromptField.setWrapText(true);
             compileTimeoutField.setEditable(true);
             testTimeoutField.setEditable(true);
 
@@ -290,7 +300,7 @@ public class Gui extends Application {
                     var testerPath = selectedDirectory.toPath().resolve("Tester.java");
                     testerField.setText(testerPath.toFile().exists() ? testerPath.toString() : "");
 
-                    var baseCodePath = selectedDirectory.toPath().resolve("BaseCode.java");
+                    var baseCodePath = selectedDirectory.toPath().resolve("Provided.java");
                     baseCodeField.setText(baseCodePath.toFile().exists() ? baseCodePath.toString() : "");
 
                     var aiCodeDirPath = selectedDirectory.toPath().resolve("AiSubmissions");
@@ -337,6 +347,7 @@ public class Gui extends Application {
             grid.addRow(7, new Label("Test Timeout"), testTimeoutField);
             grid.addRow(8, new Label("Similarity Prompt"), similarityPromptField);
             grid.addRow(9, new Label("AI Grading Prompt"), gradingPromptField);
+            grid.addRow(10, new Label("AI Likeness Prompt"), aiLikenessPromptField);
             grid.addRow(10, saveButton, cancelButton);
         }
 
@@ -353,6 +364,7 @@ public class Gui extends Application {
                     aiCodeDirField.getText(), 
                     gradingPromptField.getText(),
                     similarityPromptField.getText(),
+                    aiLikenessPromptField.getText(),
                     outDirField.getText(), 
                     Duration.ofSeconds(compileTimeoutField.getValue()), 
                     Duration.ofSeconds(testTimeoutField.getValue()));
@@ -468,7 +480,7 @@ public class Gui extends Application {
             Task<Map<String, Evaluator.EvalResult>> task = new Task<>() {
                 @Override
                 protected Map<String, Evaluator.EvalResult> call() {
-                    try(Evaluator evaluator = new Evaluator(new Settings(userSettings, settings, evalSettings))) {
+                    try(Evaluator evaluator = new Evaluator(new Settings(userSettings, settings, evalSettings, modelSettings))) {
                         return evaluator.evaluate(submissionDirField.getText()).join();
                     }
                 }
@@ -555,7 +567,7 @@ public class Gui extends Application {
         }
     }
 
-    private record SettingsDraft(Settings.User user, Settings.Eval eval) {}
+    private record SettingsDraft(Settings.User user, Settings.Eval eval, Settings.Model model) {}
 
     private class SettingsDialog extends Dialog<SettingsDraft> {
         private final TextField junitPathField;
@@ -568,8 +580,12 @@ public class Gui extends Application {
         private final CheckBox remotePlagDetect;
         private final CheckBox testRun; //boolean localAiDetect, boolean remoteAiDetect, boolean localPlagDetect, boolean remotePlagDetect, boolean testRun
         private final CheckBox remoteAiScore;
+        private final TextField modelNameField;
+        private final TextField regionField;
+        private final Spinner<Integer> maxTokensSpinner;
+        private final Spinner<Double> temperatureSpinner;
 
-        public SettingsDialog(Settings.User userSettings, Settings.Eval evalSettings) {
+        public SettingsDialog(Settings.User userSettings, Settings.Eval evalSettings, Settings.Model modelSettings) {
             this.junitPathField = new TextField(userSettings.junitJar());
             this.javaDirField = new TextField(userSettings.javaDir());
             this.rootAssignmentDirField = new TextField(userSettings.rootAssignmentDir());
@@ -588,11 +604,17 @@ public class Gui extends Application {
             this.testRun.setSelected(evalSettings.testRun());
             this.remoteAiScore = new CheckBox();
             this.remoteAiScore.setSelected(evalSettings.remoteAiScore());
+            this.modelNameField = new TextField(modelSettings.modelId());
+            this.regionField = new TextField(modelSettings.region());
+            this.maxTokensSpinner = new Spinner<>(0, 32768, modelSettings.maxTokens());
+            this.maxTokensSpinner.setEditable(true);
+            this.temperatureSpinner = new Spinner<>(0.0, 1.0, modelSettings.temperature());
+            this.temperatureSpinner.setEditable(true);
 
             setResizable(true);
             setTitle("Settings");
             var pane = new DialogPane();
-            pane.setContent(new TabPane(getUserTab(), getEvalTab()));
+            pane.setContent(new TabPane(getUserTab(), getEvalTab(), getModelTab()));
             pane.setMinWidth(800);
             setDialogPane(pane);
             
@@ -601,7 +623,9 @@ public class Gui extends Application {
             setResultConverter(button -> button == save 
                 ? new SettingsDraft(
                     new Settings.User(javaDirField.getText(), junitPathField.getText(), rootAssignmentDirField.getText(), maxThreadsSpinner.getValue()), 
-                    new Settings.Eval(localAiDetect.isSelected(), remoteAiDetect.isSelected(), localPlagDetect.isSelected(), remotePlagDetect.isSelected(), testRun.isSelected(), remoteAiScore.isSelected())) 
+                    new Settings.Eval(localAiDetect.isSelected(), remoteAiDetect.isSelected(), localPlagDetect.isSelected(), remotePlagDetect.isSelected(), testRun.isSelected(), remoteAiScore.isSelected()),
+                    new Settings.Model(modelNameField.getText(), regionField.getText(), maxTokensSpinner.getValue(), temperatureSpinner.getValue())
+                ) 
                 : null);
         }
 
@@ -682,6 +706,19 @@ public class Gui extends Application {
             grid.addRow(2, new Label("Local Plagiarism Detection"), localPlagDetect);
             grid.addRow(3, new Label("Remote Plagiarism Detection"), remotePlagDetect);
             grid.addRow(4, new Label("Test Run"), testRun);
+            tab.setContent(grid);
+            return tab;
+        }
+
+        private Tab getModelTab() {
+            var tab = new Tab("Model");
+            tab.setClosable(false);
+
+            var grid = getGrid();
+            grid.addRow(0, new Label("Model Name"), modelNameField);
+            grid.addRow(1, new Label("Region"), regionField);
+            grid.addRow(2, new Label("Max Tokens"), maxTokensSpinner);
+            grid.addRow(3, new Label("Temperature"), temperatureSpinner);
             tab.setContent(grid);
             return tab;
         }

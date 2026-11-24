@@ -18,7 +18,7 @@ public class EvalCommand implements Runnable {
     @Override
     public void run() {
         SettingsStore store = new SettingsStore();
-        var settings = new Settings(store.getUserSettings(), store.getAssignmentSettings(assignmentDir), store.getEvalSettings());
+        var settings = new Settings(store.getUserSettings(), store.getAssignmentSettings(assignmentDir), store.getEvalSettings(), store.getModelSettings());
 
         try(Evaluator evaluator = new Evaluator(settings);
             CsvWriter csv = new CsvWriter(settings.assignment())) {

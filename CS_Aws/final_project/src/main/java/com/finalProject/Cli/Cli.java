@@ -4,7 +4,7 @@ import com.finalProject.Gui;
 import javafx.application.Application;
 import picocli.CommandLine.Command;
 
-@Command(name = "auto-grader", mixinStandardHelpOptions = true, subcommands = {EvalCommand.class, SettingCommand.class})
+@Command(name = "auto-grader", mixinStandardHelpOptions = true, subcommands = {EvalCommand.class, SettingCommand.class, TestCommand.class})
 public class Cli implements Runnable {
     @Override
     public void run() {

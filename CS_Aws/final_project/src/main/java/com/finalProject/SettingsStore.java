@@ -11,6 +11,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class SettingsStore {
     private final ObjectMapper mapper;
+
     public SettingsStore() {
         this.mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
@@ -64,6 +65,22 @@ public class SettingsStore {
     public void saveEvalSettings(Settings.Eval settings) {
         Path evalSettingsPath = getSaveRootPath().resolve("evalSettings.json");
         saveSettings(settings, evalSettingsPath);
+    }
+
+    public Settings.Model getModelSettings() {
+        Path modelSettingsPath = getSaveRootPath().resolve("modelSettings.json");
+        if(modelSettingsPath.toFile().exists()) {
+            return loadSettings(modelSettingsPath, Settings.Model.class);
+        }
+
+        var settings = defaultModelSettings();
+        saveSettings(settings, modelSettingsPath);
+        return settings;
+    }
+
+    public void saveModelSettings(Settings.Model settings) {
+        Path modelSettingsPath = getSaveRootPath().resolve("modelSettings.json");
+        saveSettings(settings, modelSettingsPath);
     }
 
     private <T> T loadSettings(Path settingsPath, Class<T> clazz) {
@@ -122,13 +139,14 @@ public class SettingsStore {
         );
     }
 
-    private Settings.Assignment defaultAssignmentSettings(Path assignmentPath) {
+    public Settings.Assignment defaultAssignmentSettings(Path assignmentPath) {
         return new Settings.Assignment(
             assignmentPath.resolve("Tester.java").toString(),
             assignmentPath.resolve("Provided.java").toString(),
             assignmentPath.resolve("AiSubmissions").toString(),
-            null, // grading prompt
-            null, // similarity prompt
+            defaultScorePrompt,
+            defaultSimilarityPrompt,
+            defaultAiLikenessPrompt,
             assignmentPath.resolve("Results").toString(),
             Duration.ofSeconds(10), // compile timeout
             Duration.ofSeconds(20) // test timeout
@@ -146,6 +164,15 @@ public class SettingsStore {
         );
     }
 
+    private Settings.Model defaultModelSettings() {
+        return new Settings.Model(
+            "us.amazon.nova-micro-v1:0",
+            "us-east-2",
+            8192,
+            0.7
+        );
+    }
+
     private Path getSaveRootPath() {
         String localAppData = System.getenv("LOCALAPPDATA");
         if(localAppData == null || localAppData.isBlank()) {
@@ -153,4 +180,98 @@ public class SettingsStore {
         }
         return Path.of(localAppData, "drandall-auto-grader");
     }
+
+    private final String defaultSimilarityPrompt = """
+        You are performing preliminary source-code similarity triage.
+        Do not infer plagiarism or infer intent.
+
+        The optional P section contains instructor-provided code.
+        Use it as a baseline for structure and shared boilerplate.
+        Similarities to the P section should not be considered similarities between student submissions.
+
+        Compare each submission with every other submission.
+        For each submission report its most similar *other* submission and the similarity score for that pair.
+        Evaluate substantive implementation details, including unusual matching logic, structure, ordering, and bugs.
+        Discount similarities explained by the provided code, assignment requirements, standard algorithms, formatting, comments and identifier choices.
+
+        Use a heuristic score from 0.00 to 1.00:
+        - 0.00 means no notable shared implementation beyond expected similarities from the provided code. If no provided code exists, it accounts for task constraints and common solutions.
+        - 1.00 means nearly identical substantive implementation beyond expected similarities from the provided code.
+        The score is not a calibrated probability, proof of misconduct, or comparable across different assignments or batches.
+        Be conservative where the assignment strongly constraints the solution.
+
+        Each submission should appear once in the output, paired with its most similar other submission.
+
+        INPUT
+        P) <provided code, if any>
+        1) <submission 1>
+        2) <submission 2>
+        ...
+        N) <submission N>
+
+        OUTPUT
+        Return only valid JSON, with one entry per submission:
+        [{
+            "submission": 1,
+            "score": 0.00,
+            "mostSimilar": 2,
+            "evidence": "Brief description of the similarities"
+        }]
+    """;
+
+    private final String defaultScorePrompt = """
+        You are performing scoring of source-code implementations.
+        Evaluate the quality, correctness, and completeness of each submission.
+        Score from 0.00 to 100.00 where 0 represents the lowest quality and 100 represents the highest quality.
+        The rubric should be weighted:
+        - Correctness: 70%
+        - Completeness: 20%
+        - Clarity: 10%
+        - Total Score = 0.7 * Correctness + 0.2 * Completeness + 0.1 * Clarity, rounded to 2 decimal places. Total score should never exceed 100.00
+        In this case, correctness includes adherence to the assignment requirements, proper implementation of algorithms and data structures.
+        Completeness refers to handling all edge case scenarios like null checks bounds checking and error handling.
+        Clarity is the readability and maintainability of the code, including style guides, code organization, and expressiveness of the code.
+        Grade against only the specified requirements, and don't consider any provided boilerplate as part of the evaluation.
+
+        Each submission should appear once in the output.
+
+        INPUT
+        P) <provided code or assignment specifications>
+        1) <submission 1>
+        2) <submission 2>
+        ...
+        N) <submission N>
+
+        OUTPUT
+        Return only valid JSON, with one entry per submission:
+        [{
+            "submission": 1,
+            "totalScore": 0.00,
+            "correctness": 0.00,
+            "completeness": 0.00,
+            "clarity": 0.00,
+            "comments": "Optional comments helpful to a human reviewer"
+        }]
+    """;
+
+    private final String defaultAiLikenessPrompt = """
+        You are evaluating the likelihood that a given source-code submission was generated by an AI.
+        Consider factors such as coding style, structure, and patterns that are typical of AI-generated code.
+        Provide a score from 0.00 to 1.00 where 0.00 represents highly unlikely to be AI-generated and 1.00 represents highly likely.
+
+        INPUT
+        P) <provided code or assignment specifications>
+        1) <submission 1>
+        2) <submission 2>
+        ...
+        N) <submission N>
+
+        OUTPUT
+        Return only valid JSON, with one entry per submission:
+        [{
+            "submission": 1,
+            "aiLikenessScore": 0.00,
+            "comments": "Optional comments helpful to a human reviewer"
+        }]
+    """;
 }
