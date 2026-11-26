@@ -9,7 +9,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import com.finalProject.Settings;
+import com.finalProject.Settings.Settings;
 
 public class SettingsDialog extends Dialog<SettingsDialog.SettingsDraft> {
     public record SettingsDraft(Settings.User user, Settings.Eval eval, Settings.Model model) {}

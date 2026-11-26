@@ -16,9 +16,9 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import com.finalProject.Evaluator;
-import com.finalProject.Settings;
 import com.finalProject.Reporting.CommentWriter;
 import com.finalProject.Reporting.CsvWriter;
+import com.finalProject.Settings.Settings;
 
 public class EvalAssignmentPane extends BorderPane {
     private final Gui.AssignmentRow assignment;

@@ -1,4 +1,4 @@
-package com.finalProject;
+package com.finalProject.Settings;
 
 import java.time.Duration;
 

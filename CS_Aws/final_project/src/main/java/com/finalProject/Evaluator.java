@@ -20,6 +20,7 @@ import com.finalProject.AiDetect.RemoteAiDetect;
 import com.finalProject.CodeQuality.RemoteScore;
 import com.finalProject.PlagDetect.LocalPlagDetect;
 import com.finalProject.PlagDetect.LocalPlagDetect.SimilarityReport;
+import com.finalProject.Settings.Settings;
 import com.finalProject.PlagDetect.RemotePlagDetect;
 import com.finalProject.Testing.TestResultParser;
 import com.finalProject.Testing.TestRunner;

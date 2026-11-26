@@ -11,7 +11,7 @@ import software.amazon.awssdk.regions.Region;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.finalProject.Evaluator;
-import com.finalProject.Settings;
+import com.finalProject.Settings.Settings;
 import com.finalProject.Utils.BedrockResponseUtils;
 import com.finalProject.Utils.SubmissionBuilder;
 

@@ -1,7 +1,7 @@
 package com.finalProject.Cli;
 import java.nio.file.Path;
 
-import com.finalProject.SettingsStore;
+import com.finalProject.Settings.SettingsStore;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;

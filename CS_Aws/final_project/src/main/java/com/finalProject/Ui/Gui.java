@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import com.finalProject.AssignmentRegistry;
-import com.finalProject.Settings;
-import com.finalProject.SettingsStore;
+
+import com.finalProject.Settings.AssignmentRegistry;
+import com.finalProject.Settings.Settings;
+import com.finalProject.Settings.SettingsStore;
+
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.*;

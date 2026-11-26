@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Set;
 
-import com.finalProject.Settings;
+import com.finalProject.Settings.Settings;
 
 import de.jplag.JPlag;
 import de.jplag.JPlagResult;

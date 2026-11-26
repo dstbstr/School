@@ -4,9 +4,9 @@ import picocli.CommandLine.Option;
 import java.nio.file.Path;
 
 import com.finalProject.Evaluator;
-import com.finalProject.Settings;
-import com.finalProject.SettingsStore;
 import com.finalProject.Reporting.CsvWriter;
+import com.finalProject.Settings.Settings;
+import com.finalProject.Settings.SettingsStore;
 
 @Command(name = "eval")
 public class EvalCommand implements Runnable {

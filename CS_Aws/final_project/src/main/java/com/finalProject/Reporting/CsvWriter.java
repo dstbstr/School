@@ -4,7 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
 import com.finalProject.Evaluator.EvalRow;
-import com.finalProject.Settings;
+import com.finalProject.Settings.Settings;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

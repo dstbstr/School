@@ -1,5 +1,5 @@
 package com.finalProject.Cli;
-import com.finalProject.SettingsStore;
+import com.finalProject.Settings.SettingsStore;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;

@@ -4,7 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import com.finalProject.Evaluator;
-import com.finalProject.Settings;
+import com.finalProject.Settings.Settings;
 
 public final class CommentWriter {
     private final Settings.Assignment settings;

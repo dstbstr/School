@@ -2,9 +2,10 @@ package com.finalProject.Cli;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
-import com.finalProject.SettingsStore;
 import java.nio.file.Path;
 import java.time.Duration;
+
+import com.finalProject.Settings.SettingsStore;
 
 @Command(name = "assignment")
 public class AssignmentSettingCommand implements Runnable {

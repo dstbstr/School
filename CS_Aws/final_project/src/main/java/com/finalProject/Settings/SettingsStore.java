@@ -1,4 +1,4 @@
-package com.finalProject;
+package com.finalProject.Settings;
 
 import java.io.IOException;
 import java.nio.file.Files;

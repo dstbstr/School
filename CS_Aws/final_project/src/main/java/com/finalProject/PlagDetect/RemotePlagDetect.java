@@ -10,8 +10,8 @@ import java.util.concurrent.CompletableFuture;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.finalProject.Evaluator;
-import com.finalProject.Settings;
 import com.finalProject.PlagDetect.LocalPlagDetect.SimilarityReport;
+import com.finalProject.Settings.Settings;
 import com.finalProject.Utils.BedrockResponseUtils;
 import com.finalProject.Utils.SubmissionBuilder;
 import com.finalProject.Utils.SubmissionGrouper;

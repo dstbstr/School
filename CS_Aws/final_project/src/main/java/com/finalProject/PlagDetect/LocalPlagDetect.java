@@ -1,9 +1,10 @@
 package com.finalProject.PlagDetect;
-import com.finalProject.Settings;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import com.finalProject.Settings.Settings;
 
 import de.jplag.*;
 import de.jplag.exceptions.ExitException;

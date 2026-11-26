@@ -1,4 +1,4 @@
-package com.finalProject;
+package com.finalProject.Settings;
 import java.nio.file.Path;
 import java.nio.file.Files;
 import java.util.Map;
