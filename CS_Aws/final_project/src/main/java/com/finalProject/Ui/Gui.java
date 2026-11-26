@@ -23,7 +23,6 @@ public class Gui extends Application {
     private Settings.Model modelSettings;
     private Map<UUID, AssignmentRegistry.Entry> assignmentMap;
     private BorderPane root = new BorderPane();
-    private EditAssignmentPane editAssignmentPane;
 
     public Gui() {
         userSettings = settingsStore.getUserSettings();
@@ -65,7 +64,7 @@ public class Gui extends Application {
 
     private void showEditView(AssignmentRow assignment) {
         var assignmentSettings = settingsStore.getAssignmentSettings(assignment.entry().path());
-        editAssignmentPane = new EditAssignmentPane(
+        var editAssignmentPane = new EditAssignmentPane(
             assignment, 
             new Settings(userSettings, assignmentSettings, evalSettings, modelSettings), 
             this::showListView, 
@@ -76,7 +75,7 @@ public class Gui extends Application {
 
     private void showCreateView() {
         var assignmentSettings = settingsStore.defaultAssignmentSettings(Path.of(userSettings.rootAssignmentDir()));
-        editAssignmentPane = new EditAssignmentPane(
+        var editAssignmentPane = new EditAssignmentPane(
             null, 
             new Settings(userSettings, assignmentSettings, evalSettings, modelSettings), 
             this::showListView, 

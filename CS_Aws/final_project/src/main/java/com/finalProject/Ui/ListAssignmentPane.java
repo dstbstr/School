@@ -2,6 +2,7 @@ package com.finalProject.Ui;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import java.util.List;
+import java.util.Comparator;
 import java.util.function.Consumer;
 
 import javafx.scene.control.Alert;
@@ -38,10 +39,12 @@ public class ListAssignmentPane extends BorderPane {
         Button addButton = new Button("New");
         addButton.setOnAction(e -> onShowCreateView.run());
         grid.add(addButton, 0, 0);
-
-        assignmentList.sort((a, b) -> a.entry().name().compareTo(b.entry().name()));
+        var sortedAssignmentList = assignmentList.stream()
+            .sorted(Comparator.comparing(a -> a.entry().name()))
+            .toList();
+            
         int rowIndex = 1;
-        for (var row : assignmentList) {
+        for (var row : sortedAssignmentList) {
             Label nameLabel = new Label(row.entry().name());
             Button evalButton = new Button("Eval");
             evalButton.setTooltip(new Tooltip("Evaluate assignment"));

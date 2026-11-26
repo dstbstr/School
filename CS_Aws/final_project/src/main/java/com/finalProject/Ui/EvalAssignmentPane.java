@@ -42,11 +42,6 @@ public class EvalAssignmentPane extends BorderPane {
         errorLabel.setWrapText(true);
         errorLabel.getStyleClass().add("error-banner");
 
-        if(errorMessage != null && !errorMessage.isBlank()) {
-            errorLabel.setText("Error: " + errorMessage);
-            setTop(errorLabel);
-        }
-
         setCenter(setupGrid());
     }
 
