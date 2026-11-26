@@ -9,7 +9,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.awt.Desktop;
 
+import com.finalProject.Reporting.CommentWriter;
 import com.finalProject.Reporting.CsvWriter;
 
 import javafx.application.Application;
@@ -37,7 +39,6 @@ public class Gui extends Application {
     private BorderPane root = new BorderPane();
     private EditAssignmentPane editAssignmentPane;
 
-
     public Gui() {
         userSettings = settingsStore.getUserSettings();
         evalSettings = settingsStore.getEvalSettings();
@@ -53,7 +54,7 @@ public class Gui extends Application {
 
         showListView();
         
-        Scene scene = new Scene(root, 800, 600);
+        Scene scene = new Scene(root, 1000, 800);
         scene.getStylesheets().add(getClass().getResource("/gui.css").toExternalForm());
 
         primaryStage.setScene(scene);
@@ -90,18 +91,25 @@ public class Gui extends Application {
         });
     }
 
+    private void showAbout() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("About");
+        alert.setHeaderText("Auto Grader");
+        alert.setContentText("Version 1.0\nDeveloped by Dustin Randall 2026");
+        alert.showAndWait();
+    }
+
     private MenuBar createMenu() {
         MenuBar menuBar = new MenuBar();
 
         Menu fileMenu = new Menu("File");
-        MenuItem openItem = new MenuItem("Open...");
         MenuItem settingsItem = new MenuItem("Settings");
         settingsItem.setOnAction(e -> showSettings());
-        MenuItem exitItem = new MenuItem("Exit");
-        fileMenu.getItems().addAll(openItem, settingsItem, exitItem);
+        fileMenu.getItems().addAll(settingsItem);
        
         Menu helpMenu = new Menu("Help");
         MenuItem aboutItem = new MenuItem("About");
+        aboutItem.setOnAction(e -> showAbout());
         helpMenu.getItems().add(aboutItem);
     
         menuBar.getMenus().addAll(fileMenu, helpMenu);
@@ -328,6 +336,7 @@ public class Gui extends Application {
             compileTimeoutField.valueProperty().addListener((_, __, ___) -> dirty = true);
             testTimeoutField.valueProperty().addListener((_, __, ___) -> dirty = true);
             similarityPromptField.textProperty().addListener((_, __, ___) -> dirty = true);
+            aiLikenessPromptField.textProperty().addListener((_, __, ___) -> dirty = true);
             gradingPromptField.textProperty().addListener((_, __, ___) -> dirty = true);
 
             Button saveButton = new Button("Save");
@@ -346,9 +355,9 @@ public class Gui extends Application {
             grid.addRow(6, new Label("Compile Timeout"), compileTimeoutField);
             grid.addRow(7, new Label("Test Timeout"), testTimeoutField);
             grid.addRow(8, new Label("Similarity Prompt"), similarityPromptField);
-            grid.addRow(9, new Label("AI Grading Prompt"), gradingPromptField);
-            grid.addRow(10, new Label("AI Likeness Prompt"), aiLikenessPromptField);
-            grid.addRow(10, saveButton, cancelButton);
+            grid.addRow(9, new Label("AI Likeness Prompt"), aiLikenessPromptField);
+            grid.addRow(10, new Label("AI Grading Prompt"), gradingPromptField);
+            grid.addRow(11, saveButton, cancelButton);
         }
 
         private void onSave() {
@@ -409,9 +418,19 @@ public class Gui extends Application {
         private final Button backButton = new Button("Back");
         private final ProgressIndicator progress = new ProgressIndicator();
 
+        private final Label errorLabel = new Label();
+        private String errorMessage;
+
         public EvalAssignmentPane(AssignmentRow assignment) {
             this.assignment = assignment;
             this.settings = settingsStore.getAssignmentSettings(assignment.entry().path());
+            errorLabel.setWrapText(true);
+            errorLabel.getStyleClass().add("error-banner");
+
+            if(errorMessage != null && !errorMessage.isBlank()) {
+                errorLabel.setText("Error: " + errorMessage);
+                setTop(errorLabel);
+            }
 
             setCenter(setupGrid());
         }
@@ -431,10 +450,16 @@ public class Gui extends Application {
             });
 
             submitButton.setOnAction(e -> {
+                errorMessage = null;
+                setTop(null);
+
                 var errors = getValidationErrors();
                 if(errors.isPresent()) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR, errors.get(), ButtonType.OK);
-                    alert.showAndWait();
+                    errorMessage = errors.get();
+                    // Alert alert = new Alert(Alert.AlertType.ERROR, errors.get(), ButtonType.OK);
+                    // alert.showAndWait();
+                    errorLabel.setText("Error: " + errorMessage);
+                    setTop(errorLabel);
                     return;
                 }
 
@@ -464,11 +489,14 @@ public class Gui extends Application {
             if(evalSettings.testRun() && (settings.testerPath() == null || settings.testerPath().isEmpty() || !Path.of(settings.testerPath()).toFile().exists())) {
                 return Optional.of("Test Run requires Tester path");
             }
-            if((evalSettings.remoteAiDetect() || evalSettings.remotePlagDetect()) && (settings.similarityPrompt() == null || settings.similarityPrompt().isEmpty())) {
+            if((evalSettings.remotePlagDetect()) && (settings.similarityPrompt() == null || settings.similarityPrompt().isEmpty())) {
                 return Optional.of("Remote AI Detect requires Similarity Prompt");
             }
             if(evalSettings.remoteAiScore() && (settings.gradingPrompt() == null || settings.gradingPrompt().isEmpty())) {
                 return Optional.of("Remote AI Score requires Grading Prompt");
+            }
+            if(evalSettings.remoteAiDetect() && (settings.aiLikenessPrompt() == null || settings.aiLikenessPrompt().isEmpty())) {
+                return Optional.of("Remote AI Detect requires AI Likeness Prompt");
             }
             if((evalSettings.localAiDetect() || evalSettings.remoteAiDetect()) && (settings.aiCodeDir() == null || settings.aiCodeDir().isEmpty() || !Path.of(settings.aiCodeDir()).toFile().exists())) {
                 return Optional.of("AI Detection requires AI Code Directory");
@@ -477,9 +505,9 @@ public class Gui extends Application {
         }
 
         private void runEvaluation() {
-            Task<Map<String, Evaluator.EvalResult>> task = new Task<>() {
+            Task<Evaluator.EvalResult> task = new Task<>() {
                 @Override
-                protected Map<String, Evaluator.EvalResult> call() {
+                protected Evaluator.EvalResult call() {
                     try(Evaluator evaluator = new Evaluator(new Settings(userSettings, settings, evalSettings, modelSettings))) {
                         return evaluator.evaluate(submissionDirField.getText()).join();
                     }
@@ -507,15 +535,20 @@ public class Gui extends Application {
             worker.start();
         }
 
-        private record ResultRow(String submission, Evaluator.EvalResult result) {}
+        private record ResultRow(String submission, Evaluator.EvalRow result) {}
 
-        private void showResults(Map<String, Evaluator.EvalResult> results) {
+        private void showResults(Evaluator.EvalResult results) {
+            CommentWriter commentWriter = new CommentWriter(settings);
+            commentWriter.writeComments(results);
+            
+            var usage = results.tokenUsage();
+            var tokenLabel = new Label(String.format(Locale.ROOT, "Token Usage: %,d input + %,d output = %,d total", usage.input(), usage.output(), usage.input() + usage.output()));
             Button exportCsvButton = new Button("Export Csv");
             Button backButton = new Button("Back");
 
             exportCsvButton.setOnAction(e -> {
-                try(var csv = new CsvWriter(settings)) {
-                    for(var entry : results.entrySet()) {
+                try(var csv = new CsvWriter(settings, results.runId())) {
+                    for(var entry : results.results().entrySet()) {
                         csv.writeResult(entry.getKey(), entry.getValue());
                     }
                 } catch(Exception ex) {
@@ -534,7 +567,8 @@ public class Gui extends Application {
             TableColumn<ResultRow, String> localPlagScore = new TableColumn<>("Local Plag Score");
             TableColumn<ResultRow, String> remotePlagScore = new TableColumn<>("Remote Plag Score");
             TableColumn<ResultRow, String> testRunScore = new TableColumn<>("Test Run Score");
-            TableColumn<ResultRow, String> errors = new TableColumn<>("Errors");
+            TableColumn<ResultRow, String> remoteScore = new TableColumn<>("Remote Score");
+            TableColumn<ResultRow, Void> actions = new TableColumn<>("Actions");
 
             submission.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().submission()));
             localAiScore.setCellValueFactory(cell -> new ReadOnlyStringWrapper(formatScore(cell.getValue().result().localAiScore())));
@@ -542,17 +576,52 @@ public class Gui extends Application {
             localPlagScore.setCellValueFactory(cell -> new ReadOnlyStringWrapper(formatScore(cell.getValue().result().localPlagScore())));
             remotePlagScore.setCellValueFactory(cell -> new ReadOnlyStringWrapper(formatScore(cell.getValue().result().remotePlagScore())));
             testRunScore.setCellValueFactory(cell -> new ReadOnlyStringWrapper(formatScore(cell.getValue().result().testRunScore())));
-            errors.setCellValueFactory(cell -> new ReadOnlyStringWrapper(String.join(" ", cell.getValue().result().errors())));
+            remoteScore.setCellValueFactory(cell -> new ReadOnlyStringWrapper(formatScore(cell.getValue().result().remoteQualityScore())));
+            actions.setCellFactory(column -> new TableCell<>() {
+                private final Button viewButton = new Button("View comments");
+
+                {
+                    viewButton.setOnAction(event -> {
+                        ResultRow row = getTableView().getItems().get(getIndex());
+                        Path file = commentWriter.getCommentFilePath(results.runId(), row.submission());
+
+                        if(Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
+                            try {
+                                Desktop.getDesktop().open(file.toFile());
+                            } catch(Exception ex) {
+                                Alert alert = new Alert(Alert.AlertType.ERROR);
+                                alert.setTitle("Error");
+                                alert.setHeaderText(null);
+                                alert.setContentText("Failed to open the file: " + file.toAbsolutePath());
+                                alert.showAndWait();
+                            }
+                        } else {
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                            alert.setTitle("Information");
+                            alert.setHeaderText(null);
+                            alert.setContentText("Cannot open the file automatically. Please open it manually: " + file.toAbsolutePath());
+                            alert.showAndWait();
+                            // consider showing on the GUI instead
+                        }
+                    });
+                }
+
+                @Override 
+                protected void updateItem(Void item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setGraphic(empty ? null : viewButton);
+                }                
+            });
             
-            table.getColumns().addAll(List.of(submission, localAiScore, remoteAiScore, localPlagScore, remotePlagScore, testRunScore, errors));
+            table.getColumns().addAll(List.of(submission, localAiScore, remoteAiScore, localPlagScore, remotePlagScore, testRunScore, remoteScore, actions));
             ObservableList<ResultRow> data = FXCollections.observableArrayList();
-            for (var entry : results.entrySet()) {
+            for (var entry : results.results().entrySet()) {
                 var result = entry.getValue();
                 data.add(new ResultRow(entry.getKey(),result));
             }
             table.setItems(data);
 
-            HBox actionsBox = new HBox(10, exportCsvButton, backButton);
+            HBox actionsBox = new HBox(10, exportCsvButton, backButton, tokenLabel);
             setTop(actionsBox);
             setCenter(table);
         }
@@ -562,8 +631,15 @@ public class Gui extends Application {
         }
         
         private void showError(Throwable exception) {
-            var errorLabel = new Label("Error: " + exception.getMessage());
-            setCenter(errorLabel);
+            StringBuilder sb = new StringBuilder();
+            sb.append(exception.getMessage());
+            while(exception.getCause() != null) {
+                exception = exception.getCause();
+                sb.append("\nCaused by: ").append(exception.getMessage());
+            }
+            errorMessage = sb.toString();
+            errorLabel.setText("Error: " + sb.toString());
+            setTop(errorLabel);
         }
     }
 
@@ -584,6 +660,7 @@ public class Gui extends Application {
         private final TextField regionField;
         private final Spinner<Integer> maxTokensSpinner;
         private final Spinner<Double> temperatureSpinner;
+        private final Spinner<Double> plagThresholdSpinner;
 
         public SettingsDialog(Settings.User userSettings, Settings.Eval evalSettings, Settings.Model modelSettings) {
             this.junitPathField = new TextField(userSettings.junitJar());
@@ -610,6 +687,8 @@ public class Gui extends Application {
             this.maxTokensSpinner.setEditable(true);
             this.temperatureSpinner = new Spinner<>(0.0, 1.0, modelSettings.temperature());
             this.temperatureSpinner.setEditable(true);
+            this.plagThresholdSpinner = new Spinner<>(0.0, 1.0, modelSettings.plagThreshold());
+            this.plagThresholdSpinner.setEditable(true);
 
             setResizable(true);
             setTitle("Settings");
@@ -624,7 +703,7 @@ public class Gui extends Application {
                 ? new SettingsDraft(
                     new Settings.User(javaDirField.getText(), junitPathField.getText(), rootAssignmentDirField.getText(), maxThreadsSpinner.getValue()), 
                     new Settings.Eval(localAiDetect.isSelected(), remoteAiDetect.isSelected(), localPlagDetect.isSelected(), remotePlagDetect.isSelected(), testRun.isSelected(), remoteAiScore.isSelected()),
-                    new Settings.Model(modelNameField.getText(), regionField.getText(), maxTokensSpinner.getValue(), temperatureSpinner.getValue())
+                    new Settings.Model(modelNameField.getText(), regionField.getText(), maxTokensSpinner.getValue(), temperatureSpinner.getValue().floatValue(), plagThresholdSpinner.getValue())
                 ) 
                 : null);
         }
@@ -706,6 +785,7 @@ public class Gui extends Application {
             grid.addRow(2, new Label("Local Plagiarism Detection"), localPlagDetect);
             grid.addRow(3, new Label("Remote Plagiarism Detection"), remotePlagDetect);
             grid.addRow(4, new Label("Test Run"), testRun);
+            grid.addRow(5, new Label("Remote AI Scoring"), remoteAiScore);
             tab.setContent(grid);
             return tab;
         }
@@ -719,6 +799,7 @@ public class Gui extends Application {
             grid.addRow(1, new Label("Region"), regionField);
             grid.addRow(2, new Label("Max Tokens"), maxTokensSpinner);
             grid.addRow(3, new Label("Temperature"), temperatureSpinner);
+            grid.addRow(4, new Label("Plagiarism Threshold"), plagThresholdSpinner);
             tab.setContent(grid);
             return tab;
         }

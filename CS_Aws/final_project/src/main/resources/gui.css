@@ -29,3 +29,16 @@
     background-color: #b71c1c;
     -fx-background-color: #b71c1c;
 }
+
+.error-banner {
+    background-color: #b71c1c;
+    -fx-background-color: #b71c1c;
+
+    -fx-text-fill: white;
+
+    font-weight: bold;
+    -fx-font-weight: bold;
+
+    padding: 10 12;
+    -fx-padding: 10 12;
+}

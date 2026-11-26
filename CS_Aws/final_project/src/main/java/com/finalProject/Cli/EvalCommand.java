@@ -21,9 +21,9 @@ public class EvalCommand implements Runnable {
         var settings = new Settings(store.getUserSettings(), store.getAssignmentSettings(assignmentDir), store.getEvalSettings(), store.getModelSettings());
 
         try(Evaluator evaluator = new Evaluator(settings);
-            CsvWriter csv = new CsvWriter(settings.assignment())) {
+            CsvWriter csv = new CsvWriter(settings.assignment(), CsvWriter.GEN_ID)) {
             var results = evaluator.evaluate(submissionDir.toString()).join();
-            results.forEach((submission, result) -> {
+            results.results().forEach((submission, result) -> {
                 csv.writeResult(submission, result);
             });
         } catch (Exception e) {

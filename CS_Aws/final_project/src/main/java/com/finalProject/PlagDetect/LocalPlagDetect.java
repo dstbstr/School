@@ -17,8 +17,6 @@ public class LocalPlagDetect {
     private JPlagOptions jplagOptions;
 
     public LocalPlagDetect(Settings.Assignment assignmentSettings, String submissionDir) {
-        //&$javaHome/java -jar Z:\Bin\jplag-6.3.0-jar-with-dependencies.jar -bc ./Provided.java --normalize --overwrite .\Submissions\F25Hw1\
-
         JavaLanguage language = new JavaLanguage();
         
         Set<File> newDir = Set.of(new File(submissionDir));
@@ -49,7 +47,7 @@ public class LocalPlagDetect {
                 report.highestScores().merge(rhs, candidateRhs, (current, next) -> next.score() > current.score() ? next : current);                
             });
         } catch (ExitException e) {
-            // error handling here
+            throw new RuntimeException(e);
         }
         return report;
     }

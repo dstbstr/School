@@ -97,18 +97,21 @@ public record Settings(Settings.User user, Settings.Assignment assignment, Setti
         }
     }
 
-    public record Model(String modelId, String region, Integer maxTokens, Double temperature) {
+    public record Model(String modelId, String region, Integer maxTokens, Float temperature, Double plagThreshold) {
         public Model withModelId(String modelId) {
-            return new Model(modelId, this.region, this.maxTokens, this.temperature);
+            return new Model(modelId, this.region, this.maxTokens, this.temperature, this.plagThreshold);
         }
         public Model withRegion(String region) {
-            return new Model(this.modelId, region, this.maxTokens, this.temperature);
+            return new Model(this.modelId, region, this.maxTokens, this.temperature, this.plagThreshold);
         }
         public Model withMaxTokens(Integer maxTokens) {
-            return new Model(this.modelId, this.region, maxTokens, this.temperature);
+            return new Model(this.modelId, this.region, maxTokens, this.temperature, this.plagThreshold);
         }
-        public Model withTemperature(Double temperature) {
-            return new Model(this.modelId, this.region, this.maxTokens, temperature);
+        public Model withTemperature(Float temperature) {
+            return new Model(this.modelId, this.region, this.maxTokens, temperature, this.plagThreshold);
+        }
+        public Model withPlagThreshold(Double plagThreshold) {
+            return new Model(this.modelId, this.region, this.maxTokens, this.temperature, plagThreshold);
         }
     }
 }

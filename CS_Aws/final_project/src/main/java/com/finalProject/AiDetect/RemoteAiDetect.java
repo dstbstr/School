@@ -1,66 +1,40 @@
 package com.finalProject.AiDetect;
 
-import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.stream.Stream;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.finalProject.Evaluator;
 import com.finalProject.Settings;
-import com.finalProject.AiDetect.LocalAiDetect.AiMatch;
-import com.finalProject.AiDetect.LocalAiDetect.AiReport;
+import com.finalProject.Utils.BedrockResponseUtils;
+import com.finalProject.Utils.SubmissionBuilder;
 
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeClient;
+import software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeAsyncClient;
 import software.amazon.awssdk.services.bedrockruntime.model.ContentBlock;
 import software.amazon.awssdk.services.bedrockruntime.model.ConversationRole;
 import software.amazon.awssdk.services.bedrockruntime.model.ConverseRequest;
+import software.amazon.awssdk.services.bedrockruntime.model.InferenceConfiguration;
 import software.amazon.awssdk.services.bedrockruntime.model.Message;
 
 public class RemoteAiDetect implements AutoCloseable {
-    private record RemoteAiResponse(int submission, double score, int mostSimilar, String evidence) {}
-    private enum SourceKind { STUDENT, AI };
-    private record NumberedSource(int id, SourceKind kind, String name, String code) {}
+    public record RemoteAiResponse(int submission, double aiLikenessScore, String comments) {}
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Settings.Model modelSettings;
     private final Settings.Assignment assignmentSettings;
-    private final String submissionDir;
 
-    private final BedrockRuntimeClient client;
-/*
-        Message message = Message.builder()
-            .role(ConversationRole.USER)
-            .content(ContentBlock.fromText(prompt))
-            .build();
+    private final BedrockRuntimeAsyncClient client;
 
-        try (BedrockRuntimeClient client = BedrockRuntimeClient.builder()
-            .region(Region.US_EAST_2)
-            .credentialsProvider(DefaultCredentialsProvider.builder().build())
-            .build()) {
-            ConverseResponse response = client.converse(ConverseRequest.builder()
-                //.modelId("us.openai.gpt-5.4")
-                .modelId("us.amazon.nova-micro-v1:0")
-                .messages(message)
-                .build());
-
-            System.out.println("Response: " + response);
-        }
- */
-
-    public RemoteAiDetect(Settings.Assignment assignmentSettings, Settings.Model modelSettings, String submissionDir) {
+    public RemoteAiDetect(Settings.Assignment assignmentSettings, Settings.Model modelSettings) {
         this.modelSettings = modelSettings;
         this.assignmentSettings = assignmentSettings;
-        this.submissionDir = submissionDir;
-        this.client = BedrockRuntimeClient.builder()
+        this.client = BedrockRuntimeAsyncClient.builder()
             .region(Region.of(modelSettings.region()))
             .credentialsProvider(DefaultCredentialsProvider.builder().build())
             .build();
@@ -73,8 +47,24 @@ public class RemoteAiDetect implements AutoCloseable {
         }
     }
 
-    public AiReport DetectAi() {
-        var sources = buildSourceMap();
+    /*
+        INPUT
+        P) <provided code or assignment specifications>
+        1) <submission 1>
+        2) <submission 2>
+        ...
+        N) <submission N>
+
+        OUTPUT
+        Return only valid JSON, with one entry per submission:
+        [{
+            "submission": 1,
+            "aiLikenessScore": 0.00,
+            "comments": "Optional comments helpful to a human reviewer"
+        }]
+ */
+    public CompletableFuture<Evaluator.RemoteResult<Map<String, RemoteAiResponse>>> DetectAi(String submissionDir) {
+        var sources = SubmissionBuilder.buildNumberedSources(Path.of(submissionDir));
 
         String prompt = buildPrompt(sources);
         Message message = Message.builder()
@@ -82,74 +72,43 @@ public class RemoteAiDetect implements AutoCloseable {
             .content(ContentBlock.fromText(prompt))
             .build();
 
-        var response = client.converse(ConverseRequest.builder()
+        var task = client.converse(ConverseRequest.builder()
             .modelId(modelSettings.modelId())
             .messages(message)
+            .inferenceConfig(InferenceConfiguration.builder()
+                .maxTokens(modelSettings.maxTokens())
+                .temperature(modelSettings.temperature())
+                .build()
+            )
             .build()
         );
 
-        var responses = parseResponse(response.output().message().content().getFirst().text());
+        return task.thenApply(response -> {
+            var responseText = response.output().message().content().getFirst().text();
+            BedrockResponseUtils.logResponseDetails(response, modelSettings.modelId(), responseText);
+            var responses = parseResponse(responseText);
 
-        HashMap<String, AiMatch> highestScores = new HashMap<>();
-        for(var item : responses) {
-            var student = sources.get(item.submission());
-            var match = sources.get(item.mostSimilar());
-            if(student == null || match == null || student.kind() != SourceKind.STUDENT || match.kind() != SourceKind.AI) continue;
+            Map<String, RemoteAiResponse> highestScores = new HashMap<>();
+            for(var item : responses) {
+                var student = sources.get(item.submission());
+                highestScores.put(student.name(), item);
+            }
 
-            highestScores.put(student.name(), new AiMatch(item.score(), match.name()));
-        }
-
-        return new AiReport(highestScores);
+            return new Evaluator.RemoteResult<>(highestScores, new Evaluator.TokenUsage(response.usage().inputTokens(), response.usage().outputTokens()));
+        });
     }
 
-    private HashMap<Integer, NumberedSource> buildSourceMap() {
-        HashMap<Integer, NumberedSource> sources = new HashMap<>();
-
-        try(Stream<Path> aiPath = Files.walk(Path.of(assignmentSettings.aiCodeDir()))) {
-            aiPath.filter(Files::isRegularFile)
-                  .forEach(path -> {
-                      try {
-                        sources.put(sources.size() + 1, new NumberedSource(sources.size() + 1, SourceKind.AI, path.getParent().getFileName().toString(), Files.readString(path)));
-                      } catch (IOException e) {
-                          throw new RuntimeException("Failed to read AI code file", e);
-                      }
-                  });
-        } catch(IOException e) {
-            throw new RuntimeException("Failed to read AI code directory", e);
-        }
-
-        try(Stream<Path> paths = Files.walk(Path.of(submissionDir))) {
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     // Process each file here
-                     try {
-                        sources.put(sources.size() + 1, new NumberedSource(sources.size() + 1, SourceKind.STUDENT, path.getParent().getFileName().toString(), Files.readString(path)));
-                     } catch (IOException e) {
-                         throw new RuntimeException("Failed to read submission file", e);
-                     }
-                 });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return sources;
-    }
-
-    private String buildPrompt(HashMap<Integer, NumberedSource> sources) {
+    private String buildPrompt(HashMap<Integer, SubmissionBuilder.NumberedSource> sources) {
         StringBuilder sb = new StringBuilder();
-        sb.append(assignmentSettings.similarityPrompt());
+        sb.append(assignmentSettings.aiLikenessPrompt());
         sb.append("\n");
 
         Path baseCodePath = Path.of(assignmentSettings.baseCode());
         if(baseCodePath != null && Files.exists(baseCodePath)) {
-            try {
-                sb.append("P) ").append(Files.readString(baseCodePath)).append("\n");
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to read base code file", e);
-            }
+            sb.append("P) ").append(SubmissionBuilder.buildSubmission(baseCodePath)).append("\n");
         }
 
-        List<NumberedSource> allEntries = sources.values().stream().sorted((lhs, rhs) -> Integer.compare(lhs.id(), rhs.id())).toList();
+        List<SubmissionBuilder.NumberedSource> allEntries = sources.values().stream().sorted((lhs, rhs) -> Integer.compare(lhs.id(), rhs.id())).toList();
         for(var submission : allEntries) {
             sb.append(submission.id()).append(") ").append(submission.code()).append("\n");
         }
@@ -157,11 +116,6 @@ public class RemoteAiDetect implements AutoCloseable {
     }
 
     List<RemoteAiResponse> parseResponse(String response) {
-        try {
-            return Arrays.asList(objectMapper.readValue(response, RemoteAiResponse[].class));
-        } catch(Exception e ) {
-            throw new RuntimeException(e);
-        }
+        return BedrockResponseUtils.parseJsonArray(objectMapper, response, RemoteAiResponse[].class);
     }
-
 }

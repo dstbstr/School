@@ -3,7 +3,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
-import com.finalProject.Evaluator.EvalResult;
+import com.finalProject.Evaluator.EvalRow;
 import com.finalProject.Settings;
 
 import java.nio.file.Files;
@@ -14,14 +14,18 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class CsvWriter implements AutoCloseable {
+    public static final String GEN_ID = null;
+
     private final BufferedWriter writer;
     private boolean headerWritten = false;
 
-    public CsvWriter(Settings.Assignment settings) throws IOException {
-        String timestamp = DateTimeFormatter.ofPattern("MMdd_HHmmss").format(LocalDateTime.now());
+    public CsvWriter(Settings.Assignment settings, String runId) throws IOException {
+        if(runId == null || runId.isEmpty()) {
+            runId = DateTimeFormatter.ofPattern("MMdd_HHmmss").format(LocalDateTime.now());
+        }
         Path outDir = Path.of(settings.outDir());
         Files.createDirectories(outDir);
-        Path csvPath = outDir.resolve("report-" + timestamp + ".csv");
+        Path csvPath = outDir.resolve("report-" + runId + ".csv");
         writer = Files.newBufferedWriter(csvPath, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
     }
 
@@ -32,7 +36,7 @@ public class CsvWriter implements AutoCloseable {
         }
     }
 
-    public synchronized void writeResult(String submission, EvalResult result) {
+    public synchronized void writeResult(String submission, EvalRow result) {
         writeHeader(result);
         try {
             writer.write(quoteCsv(submission));
@@ -58,7 +62,7 @@ public class CsvWriter implements AutoCloseable {
         }
     }
 
-    private void writeHeader(EvalResult result) {
+    private void writeHeader(EvalRow result) {
         if(!headerWritten) {
             try {
                 writer.write("Submission");
