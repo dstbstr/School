@@ -16,8 +16,6 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 public class Gui extends Application {
-    public record AssignmentRow(UUID id, AssignmentRegistry.Entry entry) {}
-
     private final SettingsStore settingsStore = new SettingsStore();
     private final AssignmentRegistry assignmentRegistry = new AssignmentRegistry();
     private Settings.User userSettings;
@@ -51,9 +49,9 @@ public class Gui extends Application {
     }
 
     private void showListView() {
-        List<Gui.AssignmentRow> rows = new ArrayList<>();
+        List<AssignmentRow> rows = new ArrayList<>();
         for (Map.Entry<UUID, AssignmentRegistry.Entry> entry : assignmentMap.entrySet()) {
-            var row = new Gui.AssignmentRow(entry.getKey(), entry.getValue());
+            var row = new AssignmentRow(entry.getKey(), entry.getValue());
             rows.add(row);
         }
         
@@ -65,7 +63,7 @@ public class Gui extends Application {
             this::deleteAssignment));
     }
 
-    private void showEditView(Gui.AssignmentRow assignment) {
+    private void showEditView(AssignmentRow assignment) {
         var assignmentSettings = settingsStore.getAssignmentSettings(assignment.entry().path());
         editAssignmentPane = new EditAssignmentPane(
             assignment, 
@@ -87,7 +85,7 @@ public class Gui extends Application {
         root.setCenter(editAssignmentPane);
     }
 
-    private void showEvalView(Gui.AssignmentRow assignment) {
+    private void showEvalView(AssignmentRow assignment) {
         var assignmentSettings = settingsStore.getAssignmentSettings(assignment.entry().path());
         var evalAssignmentPane = new EvalAssignmentPane(
             assignment, 
@@ -111,7 +109,7 @@ public class Gui extends Application {
         });
     }
 
-    private void deleteAssignment(Gui.AssignmentRow assignment) {
+    private void deleteAssignment(AssignmentRow assignment) {
         assignmentRegistry.deleteEntry(assignment.id());
         assignmentRegistry.save();
         assignmentMap = assignmentRegistry.get();

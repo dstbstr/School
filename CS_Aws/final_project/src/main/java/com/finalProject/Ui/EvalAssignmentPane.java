@@ -21,10 +21,10 @@ import com.finalProject.Reporting.CsvWriter;
 import com.finalProject.Settings.Settings;
 
 public class EvalAssignmentPane extends BorderPane {
-    private final Gui.AssignmentRow assignment;
+    private final AssignmentRow assignment;
     private final Settings settings;
     private final Runnable onBackToList;
-    private final Consumer<Gui.AssignmentRow> onBackToEval;
+    private final Consumer<AssignmentRow> onBackToEval;
     
     private final TextField submissionDirField = new TextField();
     private final Button submitButton = new Button("Submit");
@@ -34,7 +34,7 @@ public class EvalAssignmentPane extends BorderPane {
     private final Label errorLabel = new Label();
     private String errorMessage;
 
-    public EvalAssignmentPane(Gui.AssignmentRow assignment, Settings settings, Runnable onBackToList, Consumer<Gui.AssignmentRow> onBackToEval) {
+    public EvalAssignmentPane(AssignmentRow assignment, Settings settings, Runnable onBackToList, Consumer<AssignmentRow> onBackToEval) {
         this.assignment = assignment;
         this.settings = settings;
         this.onBackToList = onBackToList;

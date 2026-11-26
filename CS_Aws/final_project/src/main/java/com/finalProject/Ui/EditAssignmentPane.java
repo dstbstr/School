@@ -8,7 +8,6 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 import com.finalProject.Settings.Settings;
-import com.finalProject.Ui.Gui.AssignmentRow;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;

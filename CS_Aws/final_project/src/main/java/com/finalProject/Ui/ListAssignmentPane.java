@@ -16,13 +16,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 
 public class ListAssignmentPane extends BorderPane {
-    private final Consumer<Gui.AssignmentRow> onShowEditView;
+    private final Consumer<AssignmentRow> onShowEditView;
     private final Runnable onShowCreateView;
-    private final Consumer<Gui.AssignmentRow> onShowEvalView;
-    private final Consumer<Gui.AssignmentRow> onDelete;
-    private final List<Gui.AssignmentRow> assignmentList;
+    private final Consumer<AssignmentRow> onShowEvalView;
+    private final Consumer<AssignmentRow> onDelete;
+    private final List<AssignmentRow> assignmentList;
     
-    public ListAssignmentPane(List<Gui.AssignmentRow> assignmentList, Consumer<Gui.AssignmentRow> onShowEditView, Runnable onShowCreateView, Consumer<Gui.AssignmentRow> onShowEvalView, Consumer<Gui.AssignmentRow> onDelete) {
+    public ListAssignmentPane(List<AssignmentRow> assignmentList, Consumer<AssignmentRow> onShowEditView, Runnable onShowCreateView, Consumer<AssignmentRow> onShowEvalView, Consumer<AssignmentRow> onDelete) {
         this.onShowEditView = onShowEditView;
         this.onShowCreateView = onShowCreateView;
         this.onShowEvalView = onShowEvalView;
