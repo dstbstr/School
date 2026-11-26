@@ -1,5 +1,5 @@
 package com.finalProject.Cli;
-import com.finalProject.Gui;
+import com.finalProject.Ui.Gui;
 
 import javafx.application.Application;
 import picocli.CommandLine.Command;
