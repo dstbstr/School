@@ -85,9 +85,11 @@ public class RemoteScore implements AutoCloseable {
 
     private String buildPrompt(HashMap<Integer, SubmissionBuilder.NumberedSource> sources) {
         var sb = new StringBuilder(assignmentSettings.gradingPrompt());
-        Path baseCodePath = Path.of(assignmentSettings.baseCode());
-        if(baseCodePath != null && Files.exists(baseCodePath)) {
-            sb.append("P) ").append(SubmissionBuilder.buildSubmission(baseCodePath)).append("\n");
+        if(assignmentSettings.baseCode() != null && !assignmentSettings.baseCode().isBlank()) {
+            Path baseCodePath = Path.of(assignmentSettings.baseCode());
+            if(Files.exists(baseCodePath)) {
+                sb.append("P) ").append(SubmissionBuilder.buildSubmission(baseCodePath)).append("\n");
+            }
         }
 
         var allEntries = sources.values().stream().sorted((lhs, rhs) -> Integer.compare(lhs.id(), rhs.id())).toList();

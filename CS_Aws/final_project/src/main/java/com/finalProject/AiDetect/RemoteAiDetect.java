@@ -103,9 +103,11 @@ public class RemoteAiDetect implements AutoCloseable {
         sb.append(assignmentSettings.aiLikenessPrompt());
         sb.append("\n");
 
-        Path baseCodePath = Path.of(assignmentSettings.baseCode());
-        if(baseCodePath != null && Files.exists(baseCodePath)) {
-            sb.append("P) ").append(SubmissionBuilder.buildSubmission(baseCodePath)).append("\n");
+        if(assignmentSettings.baseCode() != null && !assignmentSettings.baseCode().isBlank()) {
+            Path baseCodePath = Path.of(assignmentSettings.baseCode());
+            if(Files.exists(baseCodePath)) {
+                sb.append("P) ").append(SubmissionBuilder.buildSubmission(baseCodePath)).append("\n");
+            }
         }
 
         List<SubmissionBuilder.NumberedSource> allEntries = sources.values().stream().sorted((lhs, rhs) -> Integer.compare(lhs.id(), rhs.id())).toList();

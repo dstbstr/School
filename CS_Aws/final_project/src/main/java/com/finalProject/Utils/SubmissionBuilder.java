@@ -65,7 +65,7 @@ public class SubmissionBuilder {
             sb.append(FLAG).append(relativePath).append(FLAG).append("\n");
             sb.append(Files.readString(file)).append("\n");
         } catch (Exception e) {
-            throw new RuntimeException("Failed to read file content", e);
+            throw new RuntimeException("Failed to read file content: " + file, e);
         }
     }
 }

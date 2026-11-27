@@ -203,7 +203,7 @@ public class SettingsStore {
         The score is not a calibrated probability, proof of misconduct, or comparable across different assignments or batches.
         Be conservative where the assignment strongly constraints the solution.
 
-        Each submission should appear once in the output, paired with its most similar other submission.
+        Each submission should appear once in the output, paired with its most similar other submission. If the score is 0.00, choose another valid submission id, do not send a null or 0.
 
         INPUT
         P) <provided code, if any>

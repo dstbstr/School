@@ -1,5 +1,6 @@
 package com.finalProject.PlagDetect;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -26,13 +27,14 @@ import software.amazon.awssdk.services.bedrockruntime.model.InferenceConfigurati
 import software.amazon.awssdk.services.bedrockruntime.model.Message;
 
 public class RemotePlagDetect implements AutoCloseable {
-    public record RemoteAiResponse(int submission, double score, int mostSimilar, String evidence) {}
+    public record RemoteAiResponse(int submission, double score, Integer mostSimilar, String evidence) {}
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Settings.Model modelSettings;
     private final Settings.Assignment assignmentSettings;
 
     private final BedrockRuntimeAsyncClient client;
+    private final Logger logger = LoggerFactory.getLogger(RemotePlagDetect.class);
 
     public RemotePlagDetect(Settings.Assignment assignmentSettings, Settings.Model modelSettings) {
         this.modelSettings = modelSettings;
@@ -86,9 +88,18 @@ public class RemotePlagDetect implements AutoCloseable {
                 var result = new HashMap<String, RemoteAiResponse>(); 
                 for(var item : items) {
                     var student = sources.get(item.submission());
-                    var match = sources.get(item.mostSimilar());
-                    if(student == null || match == null) {
-                        throw new RuntimeException("Failed to find student or match in sources: " + item.submission() + " or " + item.mostSimilar());
+                    if(student == null) {
+                        logger.warn("Unknown studen submission" + item.submission + ". Skipping");
+                        continue;
+                    }
+                    if(item.mostSimilar() != null) {
+                        var match = sources.get(item.mostSimilar());
+                        if(match == null) {
+                            logger.warn("Unknown match submission" + item.mostSimilar());
+                        }
+                        if(match == student) {
+                            logger.warn("Match submission is the same as the student submission: " + item.submission());
+                        }
                     }
                     result.put(student.name(), item);
                 }
