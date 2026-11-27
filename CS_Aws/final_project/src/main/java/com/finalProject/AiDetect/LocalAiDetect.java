@@ -26,7 +26,7 @@ public class LocalAiDetect {
         Set<File> oldDir = Set.of(new File(submissionDir));
         jplagOptions = new JPlagOptions(language, newDir, oldDir)
             .withNormalize(true);
-        if(settings.baseCode() != null) {
+        if(settings.baseCode() != null && !settings.baseCode().isBlank()) {
             File baseCode = new File(settings.baseCode());
             jplagOptions = jplagOptions.withBaseCodeSubmissionDirectory(baseCode);
         }

@@ -240,7 +240,11 @@ public class Evaluator implements AutoCloseable {
                         String submission = path.getFileName().toString();
                         if(result.testResult().isPresent()) {
                             var score = result.testResult().orElseThrow().getScore();
-                            return new TestOutcome(submission, EvalRow.empty().withTestRunScore(Optional.of(score)), result.error().orElse(""));
+                            var comments = result.testResult().orElseThrow().failedTestNames();
+                            if(result.error().isPresent()) {
+                                comments.add(result.error().orElse(""));
+                            }
+                            return new TestOutcome(submission, EvalRow.empty().withTestRunScore(Optional.of(score)), String.join("\n", comments));
                         } else {
                             return new TestOutcome(submission, EvalRow.empty(), result.error().orElse("Unknown test-run error"));
                         }

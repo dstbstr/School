@@ -55,7 +55,6 @@ public class CsvWriter implements AutoCloseable {
             if(result.testRunScore().isPresent()) {
                 writer.write("," + formatDouble(result.testRunScore().get()));
             }
-            writer.write("," + (result.errors() != null ? quoteCsv(String.join(" ", result.errors())) : ""));
             writer.newLine();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -81,7 +80,6 @@ public class CsvWriter implements AutoCloseable {
                 if(result.testRunScore().isPresent()) {
                     writer.write(",Test Run Score");
                 }
-                writer.write(",Errors");
                 writer.newLine();
                 headerWritten = true;
             } catch (IOException e) {

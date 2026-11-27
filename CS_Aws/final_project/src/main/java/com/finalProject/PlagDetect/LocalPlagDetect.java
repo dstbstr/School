@@ -25,7 +25,7 @@ public class LocalPlagDetect {
         jplagOptions = new JPlagOptions(language, newDir, oldDir)
             .withNormalize(true);
             
-        if(assignmentSettings.baseCode() != null) {
+        if(assignmentSettings.baseCode() != null && !assignmentSettings.baseCode().isBlank()) {
             File baseCode = new File(assignmentSettings.baseCode());
             jplagOptions = jplagOptions.withBaseCodeSubmissionDirectory(baseCode);
         }
