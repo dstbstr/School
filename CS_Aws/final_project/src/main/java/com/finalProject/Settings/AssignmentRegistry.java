@@ -24,13 +24,13 @@ public class AssignmentRegistry {
 
     public UUID addEntry(String name, Path path) {
         UUID id = UUID.randomUUID();
-        entryMap.put(id, new Entry(name, path));
+        entryMap.put(id, new Entry(name, path.toAbsolutePath().normalize()));
         return id;
     }
 
     public void updateEntry(UUID id, String name, Path path) {
         if (entryMap.containsKey(id)) {
-            entryMap.put(id, new Entry(name, path));
+            entryMap.put(id, new Entry(name, path.toAbsolutePath().normalize()));
         } else {
             throw new IllegalArgumentException("No entry found with id: " + id);
         }
@@ -61,6 +61,16 @@ public class AssignmentRegistry {
             return Optional.empty();
         }
         return Optional.of(entryMap.get(id));
+    }
+
+    public Optional<UUID> tryFindAssignmentByPath(Path path) {
+        var toFind = path.toAbsolutePath().normalize();
+        for (var entry : entryMap.entrySet()) {
+            if (entry.getValue().path().equals(toFind)) {
+                return Optional.of(entry.getKey());
+            }
+        }
+        return Optional.empty();
     }
 
     public Map<UUID, Entry> load() {

@@ -23,9 +23,9 @@ public class CsvWriter implements AutoCloseable {
         if(runId == null || runId.isEmpty()) {
             runId = DateTimeFormatter.ofPattern("MMdd_HHmmss").format(LocalDateTime.now());
         }
-        Path outDir = Path.of(settings.outDir());
+        Path outDir = Path.of(settings.outDir(), runId);
         Files.createDirectories(outDir);
-        Path csvPath = outDir.resolve("report-" + runId + ".csv");
+        Path csvPath = outDir.resolve("report.csv");
         writer = Files.newBufferedWriter(csvPath, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
     }
 

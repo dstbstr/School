@@ -83,10 +83,11 @@ public class EvalAssignmentPane extends BorderPane {
         progress.setVisible(false);
         progress.setManaged(false);
 
-        HBox actions = new HBox(10, submitButton, progress, backButton);
+        HBox actions = new HBox(10, submitButton, backButton);
+        VBox container = new VBox(actions, progress);
 
         grid.addRow(0, new Label("Submission Directory:"), submissionDirField, browseSubButton);
-        grid.addRow(1, actions);
+        grid.addRow(1, container);
         
         GridPane.setHgrow(submissionDirField, Priority.ALWAYS);
         return grid;
@@ -125,16 +126,19 @@ public class EvalAssignmentPane extends BorderPane {
         };
 
         submitButton.setDisable(true);
+        backButton.setDisable(true);
         progress.setVisible(true);
         progress.setManaged(true);
         task.setOnSucceeded(e -> {
             submitButton.setDisable(false);
+            backButton.setDisable(false);
             progress.setVisible(false);
             progress.setManaged(false);
             showResults(task.getValue());
         });
         task.setOnFailed(event -> {
             submitButton.setDisable(false);
+            backButton.setDisable(false);
             progress.setVisible(false);
             progress.setManaged(false);
             showError(task.getException());

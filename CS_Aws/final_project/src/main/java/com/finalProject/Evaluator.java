@@ -3,12 +3,13 @@ package com.finalProject;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
@@ -98,7 +99,7 @@ public class Evaluator implements AutoCloseable {
     }
 
     public CompletableFuture<EvalResult> evaluate(String submissionDir) {
-        var runId = UUID.randomUUID().toString();
+        var runId = Path.of(submissionDir).getFileName() + "_" + DateTimeFormatter.ofPattern("MMdd_HHmmss").format(LocalDateTime.now());
         var tasks = new ArrayList<CompletableFuture<EvalPart>>();
         
         if(settings.eval().localPlagDetect()) {

@@ -5,6 +5,7 @@ import java.nio.file.Path;
 
 import com.finalProject.Evaluator;
 import com.finalProject.Reporting.CsvWriter;
+import com.finalProject.Settings.AssignmentRegistry;
 import com.finalProject.Settings.Settings;
 import com.finalProject.Settings.SettingsStore;
 
@@ -17,8 +18,14 @@ public class EvalCommand implements Runnable {
 
     @Override
     public void run() {
+        var registry = new AssignmentRegistry();
+        registry.load();
+        
+        var assignmentId = registry.tryFindAssignmentByPath(assignmentDir);
+        if(assignmentId.isEmpty()) throw new IllegalArgumentException("Assignment not found in registry: " + assignmentDir);
+        var id = assignmentId.get();
         SettingsStore store = new SettingsStore();
-        var settings = new Settings(store.getUserSettings(), store.getAssignmentSettings(assignmentDir), store.getEvalSettings(), store.getModelSettings());
+        var settings = new Settings(store.getUserSettings(), store.getAssignmentSettings(assignmentDir, id), store.getEvalSettings(), store.getModelSettings());
 
         try(Evaluator evaluator = new Evaluator(settings);
             CsvWriter csv = new CsvWriter(settings.assignment(), CsvWriter.GEN_ID)) {

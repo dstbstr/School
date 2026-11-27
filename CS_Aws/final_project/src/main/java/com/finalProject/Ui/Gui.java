@@ -63,7 +63,7 @@ public class Gui extends Application {
     }
 
     private void showEditView(AssignmentRow assignment) {
-        var assignmentSettings = settingsStore.getAssignmentSettings(assignment.entry().path());
+        var assignmentSettings = settingsStore.getAssignmentSettings(assignment.entry().path(), assignment.id());
         var editAssignmentPane = new EditAssignmentPane(
             assignment, 
             new Settings(userSettings, assignmentSettings, evalSettings, modelSettings), 
@@ -85,7 +85,7 @@ public class Gui extends Application {
     }
 
     private void showEvalView(AssignmentRow assignment) {
-        var assignmentSettings = settingsStore.getAssignmentSettings(assignment.entry().path());
+        var assignmentSettings = settingsStore.getAssignmentSettings(assignment.entry().path(), assignment.id());
         var evalAssignmentPane = new EvalAssignmentPane(
             assignment, 
             new Settings(userSettings, assignmentSettings, evalSettings, modelSettings), 
@@ -124,11 +124,12 @@ public class Gui extends Application {
     }
 
     private void onSaveAssignment(EditAssignmentPane.AssignmentDraft draft) {
-        settingsStore.saveAssignmentSettings(draft.settings(), draft.path());
         if(draft.existingId().isEmpty()) {
-            assignmentRegistry.addEntry(draft.name(), draft.path());
+            var id = assignmentRegistry.addEntry(draft.name(), draft.path());
+            settingsStore.saveAssignmentSettings(draft.settings(), draft.path(), id);
         } else {
             assignmentRegistry.updateEntry(draft.existingId().get(), draft.name(), draft.path());
+            settingsStore.saveAssignmentSettings(draft.settings(), draft.path(), draft.existingId().get());
         }
         assignmentRegistry.save();
         assignmentMap = assignmentRegistry.get();

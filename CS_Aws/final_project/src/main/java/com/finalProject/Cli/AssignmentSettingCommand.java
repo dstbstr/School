@@ -5,6 +5,7 @@ import picocli.CommandLine.Option;
 import java.nio.file.Path;
 import java.time.Duration;
 
+import com.finalProject.Settings.AssignmentRegistry;
 import com.finalProject.Settings.SettingsStore;
 
 @Command(name = "assignment")
@@ -23,8 +24,15 @@ public class AssignmentSettingCommand implements Runnable {
         var assignmentFile = assignmentPath.toFile();
         if(!(assignmentFile.exists() && assignmentFile.isDirectory())) throw new IllegalArgumentException("Assignment path is not a valid directory: " + assignmentPath);
 
+        var registry = new AssignmentRegistry();
+        registry.load();
+        
+        var assignmentId = registry.tryFindAssignmentByPath(assignmentPath); 
+        if(assignmentId.isEmpty()) throw new IllegalArgumentException("Assignment not found in registry: " + assignmentPath);
+        var id = assignmentId.get();
+        
         var store = new SettingsStore();
-        var settings = store.getAssignmentSettings(assignmentPath);
+        var settings = store.getAssignmentSettings(assignmentPath, id);
 
         switch(setting) {
             case "testerpath":
@@ -52,6 +60,6 @@ public class AssignmentSettingCommand implements Runnable {
                 throw new IllegalArgumentException("Unknown assignment setting: " + setting);
         }
 
-        store.saveAssignmentSettings(settings, assignmentPath);
+        store.saveAssignmentSettings(settings, assignmentPath, id);
     }
 }

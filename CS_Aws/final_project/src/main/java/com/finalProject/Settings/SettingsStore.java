@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -35,20 +36,43 @@ public class SettingsStore {
         saveSettings(settings, userSettingsPath);
     }
 
-    public Settings.Assignment getAssignmentSettings(Path assignmentPath) {
-        Path settingsDir = assignmentPath.resolve("settings.json");
-        if(settingsDir.toFile().exists()) {
-            return loadSettings(settingsDir, Settings.Assignment.class);
-        }
+    public Settings.Assignment getAssignmentSettings(Path assignmentDir, UUID assignmentId) {
+        Path assignmentPath = getSaveRootPath().resolve("assignments").resolve(assignmentId.toString() + ".json");
+        var defaults = defaultAssignmentSettings(assignmentDir);
+        if(assignmentPath.toFile().exists()) {
+            var saved = loadSettings(assignmentPath, Settings.Assignment.class);
+            return new Settings.Assignment(
+                saved.testerPath() != null ? saved.testerPath() : defaults.testerPath(),
+                saved.baseCode() != null ? saved.baseCode() : defaults.baseCode(),
+                saved.aiCodeDir() != null ? saved.aiCodeDir() : defaults.aiCodeDir(),
+                saved.gradingPrompt() != null ? saved.gradingPrompt() : defaults.gradingPrompt(),
+                saved.similarityPrompt() != null ? saved.similarityPrompt() : defaults.similarityPrompt(),
+                saved.aiLikenessPrompt() != null ? saved.aiLikenessPrompt() : defaults.aiLikenessPrompt(),
+                saved.outDir() != null ? saved.outDir() : defaults.outDir(),
+                saved.compileTimeout() != null ? saved.compileTimeout() : defaults.compileTimeout(),
+                saved.testTimeout() != null ? saved.testTimeout() : defaults.testTimeout()
+            );
+        } 
 
-        var settings = defaultAssignmentSettings(assignmentPath);
-        saveSettings(settings, settingsDir);
-        return settings;
+        return defaults;
     }
 
-    public void saveAssignmentSettings(Settings.Assignment settings, Path assignmentPath) {
-        Path settingsDir = assignmentPath.resolve("settings.json");
-        saveSettings(settings, settingsDir);
+    public void saveAssignmentSettings(Settings.Assignment settings, Path assignmentDir, UUID assignmentId) {
+        Path assignmentPath = getSaveRootPath().resolve("assignments").resolve(assignmentId.toString() + ".json");
+        var defaults = defaultAssignmentSettings(assignmentDir);
+        settings = new Settings.Assignment(
+            defaults.testerPath().equals(settings.testerPath()) ? null : settings.testerPath(),
+            defaults.baseCode().equals(settings.baseCode()) ? null : settings.baseCode(),
+            defaults.aiCodeDir().equals(settings.aiCodeDir()) ? null : settings.aiCodeDir(),
+            defaults.gradingPrompt().equals(settings.gradingPrompt()) ? null : settings.gradingPrompt(),
+            defaults.similarityPrompt().equals(settings.similarityPrompt()) ? null : settings.similarityPrompt(),
+            defaults.aiLikenessPrompt().equals(settings.aiLikenessPrompt()) ? null : settings.aiLikenessPrompt(),
+            defaults.outDir().equals(settings.outDir()) ? null : settings.outDir(),
+            defaults.compileTimeout().equals(settings.compileTimeout()) ? null : settings.compileTimeout(),
+            defaults.testTimeout().equals(settings.testTimeout()) ? null : settings.testTimeout()
+        );
+
+        saveSettings(settings, assignmentPath);
     }
 
     public Settings.Eval getEvalSettings() {
